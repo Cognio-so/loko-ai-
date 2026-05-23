@@ -16,7 +16,9 @@ import {
   Layout,
   Code2,
   Settings2,
-  Boxes
+  Boxes,
+  Plus,
+  RefreshCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
