@@ -49,6 +49,7 @@ import {
 import { useGeneratorStore } from "@/lib/store";
 import { clearProjectPendingPrompt, readProjectPendingPrompt } from "@/lib/builder-session";
 import { cn } from "@/lib/utils";
+import FileExplorer from "./FileExplorer";
 
 type ChatRole = "user" | "assistant";
 
@@ -1910,32 +1911,38 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
             </div>
           </aside>
 
+          {/* File Explorer Sidebar (VS Code style) */}
+          <AnimatePresence>
+            {view === "code" && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 260, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden border-r border-white/5"
+              >
+                <FileExplorer
+                  files={generatedFiles}
+                  activeFile={activeFilePath}
+                  onFileSelect={openFile}
+                  className="h-full w-[260px]"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Preview / Code Panel */}
           <section className="flex min-w-0 flex-1 flex-col overflow-hidden">
             {/* Code toolbar */}
             {view === "code" && (
               <div className="flex shrink-0 items-center justify-between border-b border-white/5 bg-slate-950/60 px-4 py-2">
                 <p className="text-sm font-bold text-white">{projectLabel}</p>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-white/10">
-                      <FileText className="h-3.5 w-3.5" />
-                      {activePath?.split("/").pop() ?? "Select file"}
-                      <ChevronDown className="h-3 w-3" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 border-white/10 bg-slate-900">
-                    {filesForEditor.map((f) => (
-                      <DropdownMenuItem
-                        key={f.path}
-                        onSelect={() => openFile(f.path)}
-                        className="text-slate-300 focus:bg-white/10 focus:text-white"
-                      >
-                        {f.path}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-slate-400 transition">
+                    <FileText className="h-3.5 w-3.5 text-indigo-400" />
+                    {activePath || "No file selected"}
+                  </div>
+                </div>
               </div>
             )}
 
