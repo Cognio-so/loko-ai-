@@ -738,7 +738,7 @@ export default function Features() {
 
   const testimonialsTsx = `import React from 'react'
 const items = [
-  { quote: '"This completely transformed how our team works. We\'re shipping 3x faster and the quality has never been better."', name: 'Sarah Johnson', role: 'CTO at TechCorp', initials: 'SJ' },
+  { quote: '"This completely transformed how our team works. We\\'re shipping 3x faster and the quality has never been better."', name: 'Sarah Johnson', role: 'CTO at TechCorp', initials: 'SJ' },
   { quote: '"Absolutely incredible product. The design system alone saved us months of work. I recommend it to everyone."', name: 'Marcus Chen', role: 'Founder at Launchpad', initials: 'MC' },
   { quote: '"We switched from three different tools to this one platform. Best decision we ever made for our startup."', name: 'Priya Sharma', role: 'Product Lead at Scale', initials: 'PS' },
 ]
