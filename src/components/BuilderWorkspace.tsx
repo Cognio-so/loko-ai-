@@ -2078,7 +2078,7 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
                         /* E2B live sandbox — primary preview */
                         <iframe
                           key={`sandbox-${sandboxUrl}-${refreshKey}`}
-                          src={sandboxUrl}
+                          src={sandboxUrl ?? undefined}
                           className="h-full w-full border-0"
                           title="Live Vite preview"
                           allow="cross-origin-isolated"
