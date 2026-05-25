@@ -38,42 +38,42 @@ const QUICK_PROMPTS = [
   {
     icon: "🚀",
     label: "SaaS Landing",
-    prompt: "Create a modern SaaS product landing page with hero, features, pricing, and testimonials. Dark theme with purple/indigo accents.",
+    prompt: "Design a premium SaaS website for a project management tool with a polished dashboard mockup, pricing comparison, integrations, proof, and strong CTA flow.",
   },
   {
     icon: "🛍️",
     label: "E-commerce",
-    prompt: "Build a premium e-commerce landing page for a luxury fashion brand. Clean white design with bold typography and product showcase.",
+    prompt: "Create a modern e-commerce website for an online fashion store with product grid, cart mini-view, category filters, hover image swaps, and customer reviews.",
   },
   {
     icon: "🤖",
-    label: "AI Product",
-    prompt: "Design a cutting-edge AI startup landing page with animated visuals, feature highlights, and a waitlist signup. Dark futuristic theme.",
+    label: "Image Concept",
+    prompt: "Create a premium image concept board for a coffee brand poster with hero artwork, 3 visual variations, prompt notes, and a polished art presentation.",
   },
   {
     icon: "💼",
     label: "Agency",
-    prompt: "Create a creative digital agency website with portfolio showcase, services, team section, and contact form. Bold modern design.",
+    prompt: "Build a creative agency portfolio website with full-screen hero, work grid, team cards, services, and a premium dark visual identity.",
   },
   {
-    icon: "💰",
-    label: "Fintech",
-    prompt: "Build a fintech/crypto platform landing page with trust signals, features, security highlights, and app download CTA.",
+    icon: "📚",
+    label: "Education",
+    prompt: "Build an online learning platform with course previews, instructor profiles, category filters, testimonials, and premium pricing tiers.",
   },
   {
-    icon: "🏋️",
-    label: "Fitness App",
-    prompt: "Design a fitness and wellness app landing page with before/after showcase, features, pricing, and testimonials. Energetic green theme.",
+    icon: "🏢",
+    label: "Real Estate",
+    prompt: "Create a real estate property portal with featured listings, advanced filters, neighborhood cards, agents, and a premium slate-and-green palette.",
   },
 ];
 
 const PLACEHOLDER_PROMPTS = [
-  "Create a stunning SaaS landing page with dark theme and purple accents...",
-  "Build a luxury e-commerce page with bold typography...",
-  "Design a modern AI startup page with animated gradients...",
-  "Create a creative agency portfolio with case studies...",
-  "Build a fintech platform page with trust signals...",
-  "Design a wellness brand page with calming aesthetics...",
+  "Create a modern e-commerce website with filters, reviews, and rich product cards...",
+  "Build a premium dashboard for sales analytics and team activity...",
+  "Design a restaurant website with menu tabs, chef story, and reservations...",
+  "Create an image concept board for a poster, logo, or campaign visual...",
+  "Build an editorial text page or brochure with premium typography...",
+  "Design a creative agency portfolio with case studies and bold art direction...",
 ];
 
 function PreviewCard({ html, title }: { html: string | null; title: string }) {

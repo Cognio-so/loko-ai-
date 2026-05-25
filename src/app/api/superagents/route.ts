@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { getAIResponse } from "@/lib/ai";
 import { getErrorMessage } from "@/lib/api";
+import { buildIntentInstructions, detectGenerationIntent } from "@/lib/generationIntent";
 import { getLocalGeneratedProject } from "@/lib/localGeneratedProject";
 
 const GENERATION_TIMEOUT_MS = 90000;
@@ -347,9 +348,11 @@ function pickDesignParadigm(prompt: string): DesignParadigm {
 function buildGenerateSystemPrompt(designDocs: string, userPrompt: string): string {
   const paradigm = pickDesignParadigm(userPrompt);
   const paradigmSpec = PARADIGM_SPECS[paradigm];
+  const intent = detectGenerationIntent(userPrompt);
+  const intentInstructions = buildIntentInstructions(userPrompt);
 
-  return `You are DesignAI — the world's most advanced landing page generator.
-You create STUNNING, pixel-perfect landing pages that look GENUINELY UNIQUE — not like every other AI-generated site.
+  return `You are DesignAI — LokoAI's premium generation engine for websites, web apps, editorial pages, and image-led creative showcases.
+You create STUNNING, pixel-perfect outputs that look GENUINELY UNIQUE — not like every other AI-generated site.
 
 ## ⚠️ MANDATORY DESIGN PARADIGM — IMPLEMENT EXACTLY AS SPECIFIED
 You have been assigned a specific design style. Implement it precisely and consistently across ALL sections.
@@ -357,6 +360,13 @@ Do NOT default to generic dark glassmorphism or indigo colors unless the paradig
 Do NOT mix paradigms. Do NOT ignore these instructions.
 
 ${paradigmSpec}
+
+## REQUEST INTENT
+- Surface: ${intent.surface}
+- Category: ${intent.category}
+- Direction: ${intent.styleDirection}
+
+${intentInstructions}
 
 ## TECHNICAL REFERENCE
 ${designDocs}
@@ -384,10 +394,11 @@ ${designDocs}
     { "path": "src/components/Footer.tsx",       "content": "..." }
   ],
   "workflowLogs": [
+    { "agent": "Intent Router",     "action": "Detected the requested output type and mapped the right structure" },
     { "agent": "Design Architect",  "action": "Assigned paradigm and established visual identity" },
-    { "agent": "Layout Engineer",   "action": "Implemented paradigm-specific layout and grid" },
+    { "agent": "Layout Engineer",   "action": "Implemented a category-appropriate layout and information hierarchy" },
     { "agent": "Visual Designer",   "action": "Applied exact colors, typography, and motion from spec" },
-    { "agent": "QA Engineer",       "action": "Verified paradigm consistency across all 10 sections" }
+    { "agent": "QA Engineer",       "action": "Verified output quality and prompt alignment" }
   ]
 }
 
@@ -397,6 +408,10 @@ ${designDocs}
 - React components MUST use inline styles only (style={{ ... }}) — no Tailwind, no CSS imports
 - vite.config.ts MUST include server: { host:'0.0.0.0', port:5173, allowedHosts:true, cors:true, strictPort:true, hmr:{ clientPort:443, protocol:'wss' } }
 - ALL content must be SPECIFIC to the product/service described — NO generic placeholder copy
+- Never use filler headlines like "The Future Of..." unless the prompt explicitly asks for that phrasing
+- If the request is image-centric, previewHtml must be a premium asset board or creative showcase — not a generic business landing page
+- If the request is text-centric, previewHtml must be editorial/copy-led with readable hierarchy
+- If the request is app/dashboard-centric, previewHtml must show a product UI or dashboard canvas
 - Pricing tier names must be creative and product-appropriate (NOT "Free/Pro/Enterprise")
 - Testimonials must include SPECIFIC metrics: "Saved us 12 hours/week", "Grew revenue 3× in 90 days"
 - The previewHtml and React components must implement the SAME design paradigm consistently`;
@@ -598,7 +613,7 @@ ${isAddingNewPage ? `
 
     } else {
       systemPrompt = buildGenerateSystemPrompt(effectiveDesignDocs, prompt);
-      userMessage = `Create a stunning, complete landing page for: ${prompt}
+      userMessage = `Create a premium, complete generated experience for: ${prompt}
 
 FOLLOW THE MANDATORY DESIGN PARADIGM in the system prompt — every section must use the exact colors, card style, button style, and typography specified. Do NOT revert to a generic dark theme.
 
@@ -612,8 +627,12 @@ CONTENT REQUIREMENTS (all must be specific to "${prompt}"):
 - Testimonials: 3 with specific outcomes + real numbers ("Reduced churn by 28%")
 - FAQ: 4 questions real customers would actually ask about this type of product
 - CTA section: urgency-driven copy specific to the product's value proposition
+- Never collapse every prompt into the same startup/SaaS page formula
+- If the prompt is image-focused, build a premium visual asset showcase with inline SVG/illustration and variation blocks
+- If the prompt is dashboard/app-focused, show a real application UI in previewHtml
+- If the prompt is editorial/text-focused, prioritize typography and long-form structure over generic cards
 
-Generate BOTH previewHtml AND the full Vite+React file structure (16 files total).`;
+Generate BOTH previewHtml AND the full Vite+React file structure.`;
     }
 
     // ── Call AI with timeout fallback ─────────────────────────────────────────

@@ -1727,16 +1727,16 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
                   </div>
                   <div>
                     <p className="font-bold text-white">Start designing</p>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Describe your perfect landing page below
-                    </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Describe your website, app, image, dashboard, or text page below
+                      </p>
                   </div>
                   <div className="mt-2 flex w-full flex-col gap-1.5">
-                    {[
-                      "Make the hero bolder with a gradient",
-                      "Add a dark glassmorphism theme",
-                      "Change colors to purple/violet",
-                    ].map((suggestion) => (
+                      {[
+                        "Build a premium fashion store with cart, filters, and reviews",
+                        "Create an app dashboard with analytics and team activity",
+                        "Design a poster-style image concept board for a coffee brand",
+                      ].map((suggestion) => (
                       <button
                         key={suggestion}
                         onClick={() => void handleSend(suggestion)}
