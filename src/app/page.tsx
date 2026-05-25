@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Sparkles, Check, Star, ArrowRight
+  Sparkles, Check, Star, ArrowRight, Play, Bot, Wand2, PanelsTopLeft
 } from "lucide-react";
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
@@ -327,6 +327,27 @@ const pricingPlans = [
   }
 ];
 
+const demoMoments = [
+  { label: "Prompt to website", value: "43 sec" },
+  { label: "AI sections rendered", value: "12 blocks" },
+  { label: "Live code ready", value: "React + Preview" },
+];
+
+const demoTimeline = [
+  {
+    title: "Client prompt received",
+    text: "LokoAI reads the brief and plans sections, colors, pages, and CTA flow.",
+  },
+  {
+    title: "Brand-ready UI generated",
+    text: "Hero, cards, motion, trust blocks, and premium button states appear instantly.",
+  },
+  {
+    title: "Code + preview synced",
+    text: "The client sees a working design preview while the codebase updates underneath.",
+  },
+];
+
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const router = useRouter();
@@ -363,6 +384,162 @@ export default function Home() {
             <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Multi-model routing</span>
             <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Pay-as-you-go</span>
             <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Cancel Anytime</span>
+          </div>
+        </motion.div>
+      </section>
+      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-6 sm:pb-24 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.65 }}
+          className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white/85 shadow-[0_24px_80px_rgba(14,165,233,0.08)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/75"
+        >
+          <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="border-b border-slate-200/70 p-6 dark:border-white/10 lg:border-b-0 lg:border-r">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-sky-700 dark:border-sky-400/20 dark:bg-sky-500/10 dark:text-sky-300">
+                <Play className="h-3.5 w-3.5" />
+                LokoAI Demo
+              </div>
+              <h2 className="mt-5 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                Show clients exactly how LokoAI builds websites live.
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 dark:text-gray-400 sm:text-base">
+                This demo card acts like a product walkthrough on your homepage. It makes the platform feel real,
+                active, and trusted before a visitor even clicks into the builder.
+              </p>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                {demoMoments.map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/[0.03]"
+                  >
+                    <p className="text-xl font-black tracking-tight text-slate-950 dark:text-white">{item.value}</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-gray-400">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 space-y-3">
+                {demoTimeline.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className="flex gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-white/10 dark:bg-white/[0.02]"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-500/10 text-xs font-black text-sky-600 dark:text-sky-300">
+                      0{index + 1}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">{step.title}</p>
+                      <p className="mt-1 text-xs leading-6 text-slate-500 dark:text-gray-400">{step.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.14),_transparent_32%),linear-gradient(180deg,_rgba(2,6,23,0.98),_rgba(15,23,42,0.96))] p-5 sm:p-6">
+              <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:26px_26px] opacity-20" />
+              <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/85 shadow-2xl">
+                <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <span className="h-3 w-3 rounded-full bg-rose-400" />
+                    <span className="h-3 w-3 rounded-full bg-amber-300" />
+                    <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-sky-200">
+                    Live Build Replay
+                  </div>
+                </div>
+
+                <div className="relative aspect-video overflow-hidden p-5 sm:p-6">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,_rgba(56,189,248,0.18),_transparent_28%),radial-gradient(circle_at_80%_15%,_rgba(129,140,248,0.18),_transparent_24%)]" />
+                  <motion.div
+                    animate={{ x: [0, 12, 0], y: [0, -8, 0] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                    className="relative z-10 ml-auto w-full max-w-[430px] rounded-[1.5rem] border border-white/10 bg-slate-900/85 p-4 shadow-[0_20px_60px_rgba(14,165,233,0.14)]"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-white">
+                        <Bot className="h-4 w-4 text-sky-400" />
+                        LokoAI Builder
+                      </div>
+                      <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                        recording
+                      </span>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Client Prompt</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-200">
+                        Build a premium coffee website with video, menu cards, reviews, and a bold order CTA.
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <motion.div
+                        animate={{ scale: [1, 1.03, 1] }}
+                        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                        className="rounded-2xl border border-sky-400/20 bg-sky-500/10 p-3"
+                      >
+                        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-sky-200">
+                          <Wand2 className="h-3.5 w-3.5" />
+                          Design AI
+                        </div>
+                        <div className="mt-3 space-y-2">
+                          <div className="h-2 rounded-full bg-sky-200/30" />
+                          <div className="h-2 w-4/5 rounded-full bg-sky-200/20" />
+                          <div className="h-16 rounded-2xl bg-[linear-gradient(135deg,rgba(56,189,248,0.3),rgba(96,165,250,0.08))]" />
+                        </div>
+                      </motion.div>
+                      <motion.div
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                        className="rounded-2xl border border-indigo-400/20 bg-indigo-500/10 p-3"
+                      >
+                        <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-200">
+                          <PanelsTopLeft className="h-3.5 w-3.5" />
+                          Preview Sync
+                        </div>
+                        <div className="mt-3 space-y-2">
+                          <div className="h-20 rounded-2xl bg-[linear-gradient(160deg,rgba(129,140,248,0.28),rgba(15,23,42,0.15))]" />
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="h-8 rounded-xl bg-white/10" />
+                            <div className="h-8 rounded-xl bg-white/10" />
+                            <div className="h-8 rounded-xl bg-white/10" />
+                          </div>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                      <div className="mb-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                        <span>Render Progress</span>
+                        <span className="text-sky-300">87%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-white/8">
+                        <motion.div
+                          animate={{ width: ["18%", "87%", "87%"] }}
+                          transition={{ duration: 4.5, repeat: Infinity, repeatDelay: 0.8, ease: "easeInOut" }}
+                          className="h-full rounded-full bg-[linear-gradient(90deg,#38bdf8,#60a5fa,#818cf8)]"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <div className="absolute bottom-5 left-5 z-20 flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/80 px-4 py-2.5 backdrop-blur">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-slate-950">
+                      <Play className="ml-0.5 h-4 w-4 fill-current" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">Watch LokoAI build in real time</p>
+                      <p className="text-[11px] text-slate-400">Animated demo card for client trust</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </motion.div>
       </section>
