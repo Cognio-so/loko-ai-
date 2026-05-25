@@ -617,8 +617,6 @@ Generate BOTH previewHtml AND the full Vite+React file structure (16 files total
     }
 
     // ── Call AI with timeout fallback ─────────────────────────────────────────
-    const modelName = process.env.OPENROUTER_MODEL || "";
-    const isFreeModel = modelName.toLowerCase().includes(":free");
     
     let content: string;
     try {

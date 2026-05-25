@@ -2,7 +2,7 @@ import { getGeminiResponse } from "@/lib/gemini";
 import { getOpenRouterResponse } from "@/lib/openrouter";
 import { getOpenRouterAgentResponse } from "@/lib/openrouterAgent";
 
-type AIProvider = "gemini" | "openrouter" | "openrouter_agent";
+type AIProvider = "gemini" | "openrouter" | "openrouter_agent" | "google";
 const AI_PROVIDER_TIMEOUT_MS = 90000;
 
 function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
@@ -21,7 +21,7 @@ function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
 function getAIProvider(): AIProvider {
   const provider = process.env.AI_PROVIDER?.toLowerCase();
 
-  if (provider === "gemini" || provider === "openrouter" || provider === "openrouter_agent") {
+  if (provider === "gemini" || provider === "openrouter" || provider === "openrouter_agent" || provider === "google") {
     return provider;
   }
 
@@ -31,7 +31,7 @@ function getAIProvider(): AIProvider {
     return "openrouter";
   }
 
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY) {
     return "gemini";
   }
 
@@ -83,4 +83,3 @@ export async function getAIResponse(
     throw error;
   }
 }
-
