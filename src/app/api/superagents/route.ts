@@ -377,6 +377,7 @@ RULE 1 — READ THE TYPE
 - Landing Page → marketing sections, pricing, CTA
 - Social App → feed, profile, messaging UI
 - Business Site → services, team, contact form
+- Android App → mobile-first screen flows, bottom nav/tab bar, onboarding, touch-friendly UI, app-style cards
 
 RULE 2 — NEVER REUSE THE SAME LAYOUT
 - Each project type MUST have a genuinely different layout structure
@@ -391,18 +392,39 @@ RULE 3 — MATCH DESIGN TO TYPE
 - Landing = sticky nav + scroll-driven marketing sections
 - Social App = app shell, feed, profile, messaging patterns
 - Business Site = services, team credibility, contact capture
+- Android App = stacked mobile screens or app-shell preview, bottom navigation, app bars, touch-size buttons, mobile-first spacing
 
 RULE 4 — TECH STACK BY TYPE
 - Simple site → HTML + CSS + Vanilla JS is acceptable
 - React app → React + Tailwind + React Router style architecture
 - Full-stack → Next.js + Tailwind + Supabase/Firebase style architecture
 - Dashboard → React + shadcn/ui + Recharts-style UI patterns
+- Android app concepts → generate a premium mobile app UI/prototype structure, screen flow, component hierarchy, and app-style interactions
 - In this LokoAI pipeline, still return the required previewHtml and starter file structure, but the code organization and UI must reflect the right project type
 
 RULE 5 — ALWAYS COMPLETE
 - Build ALL pages/sections explicitly mentioned in the prompt
 - Do not stop at the home page if the request clearly asks for more views or flows
 - If the request mentions checkout, profile, messages, reading view, or contact form, those surfaces must appear in the generated result
+- If the request mentions logo, icons, 3D visuals, hover effects, animations, forms, or extra pages, include them in the output instead of ignoring them
+
+## CLIENT PROMPT FULFILLMENT RULES
+- Respect everything the client explicitly asks for in the prompt: buttons, colors, pages, logo area, effects, cards, sections, forms, and visual style
+- If the prompt asks for premium buttons, make them premium
+- If the prompt asks for 3D visuals, create 3D-like depth using layered cards, gradients, shadows, transforms, perspective, and dimensional mockups
+- If the prompt asks for a logo, include a branded logo mark or monogram in the UI
+- If the prompt asks for multiple pages, represent those pages/views in the generated code and preview structure
+- Do not silently drop requested sections or features
+- Make every output feel premium, polished, and client-ready
+
+## PREMIUM DESIGN QUALITY RULES
+- Buttons must feel premium: strong hierarchy, hover/active states, correct spacing, and visually clear primary vs secondary actions
+- Color palettes must fit the project type and the prompt, not one default theme
+- Use meaningful motion: hover elevation, staggered reveals, subtle transforms, scroll energy, and polished state transitions
+- Add visual richness where appropriate: gradients, layered backgrounds, soft glows, texture, depth, glass, editorial contrast, or 3D-style framing
+- Layout must feel intentional and custom, not template-like
+- Typography must match the product type and visual direction
+- If the prompt requests “best”, “premium”, “3D”, or “modern”, increase visual craft accordingly
 
 ## TECHNICAL REFERENCE
 ${designDocs}
@@ -448,11 +470,13 @@ ${designDocs}
 - If the request is image-centric, previewHtml must be a premium asset board or creative showcase — not a generic business landing page
 - If the request is text-centric, previewHtml must be editorial/copy-led with readable hierarchy
 - If the request is app/dashboard-centric, previewHtml must show a product UI or dashboard canvas
+- If the request is Android-app-centric, previewHtml must show a mobile app-style UI or screen flow
 - If the request is portfolio-centric, include project showcase and skills/proof
 - If the request is ecommerce-centric, include product browsing and cart/purchase intent UI
 - If the request is blog-centric, include reading-oriented content structure
 - If the request is social-centric, include feed/profile/message patterns
 - If the request is business-site-centric, include services/team/contact
+- Include logo treatment, best-fit colors, polished buttons, and requested interaction effects when mentioned in the prompt
 - Pricing tier names must be creative and product-appropriate (NOT "Free/Pro/Enterprise")
 - Testimonials must include SPECIFIC metrics: "Saved us 12 hours/week", "Grew revenue 3× in 90 days"
 - The previewHtml and React components must implement the SAME design paradigm consistently`;

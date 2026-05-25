@@ -11,6 +11,7 @@ export type GenerationIntent = {
     | "real_estate"
     | "startup"
     | "dashboard"
+    | "android_app"
     | "blog"
     | "social"
     | "business"
@@ -115,6 +116,24 @@ export function detectGenerationIntent(prompt: string): GenerationIntent {
         accent2: "#4ade80",
         text: "#eef3ff",
         muted: "#8fa0bf",
+      },
+    };
+  }
+
+  if (/(android app|android application|apk app|mobile app ui|native app|play store app)/.test(lower)) {
+    return {
+      ...base,
+      surface: "webapp",
+      category: "android_app",
+      styleDirection: "Mobile-first product UI with Android-style flows, bottom navigation, app screens, onboarding, and polished touch-friendly interactions.",
+      sectionLabels: ["Onboarding", "Home Screen", "Feature Flow", "Profile"],
+      palette: {
+        bg: "#08111f",
+        surface: "#121c31",
+        accent: "#3b82f6",
+        accent2: "#22c55e",
+        text: "#f8fbff",
+        muted: "#9db0c9",
       },
     };
   }
