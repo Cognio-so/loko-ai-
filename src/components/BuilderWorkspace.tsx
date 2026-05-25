@@ -14,7 +14,7 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Editor from "@monaco-editor/react";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Group as PanelGroup, Panel as Panel, Separator as PanelResizeHandle } from "react-resizable-panels";
 import {
   ArrowLeft,
   ArrowUp,
@@ -1999,7 +1999,7 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
           </button>
 
           <div className="hidden min-h-0 flex-1 lg:flex">
-            <PanelGroup autoSaveId="builder-workspace-layout" direction="horizontal" className="min-h-0 flex-1">
+            <PanelGroup autoSaveId="builder-workspace-layout" orientation="horizontal" className="min-h-0 flex-1">
               <Panel defaultSize={22} minSize={18} maxSize={34} className="min-h-0">
                 <aside className="flex h-full min-w-0 flex-col border-r border-white/5 bg-slate-950/60 backdrop-blur-xl">
                   {chatSidebarContent}
