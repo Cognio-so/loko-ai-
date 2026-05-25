@@ -368,6 +368,42 @@ ${paradigmSpec}
 
 ${intentInstructions}
 
+## STRICT PROJECT-TYPE RULES
+RULE 1 — READ THE TYPE
+- Portfolio → dark theme, project cards, skills section
+- E-Commerce → product grid, cart, checkout flow
+- Dashboard → sidebar layout, charts, data tables
+- Blog → article layout, categories, reading view
+- Landing Page → marketing sections, pricing, CTA
+- Social App → feed, profile, messaging UI
+- Business Site → services, team, contact form
+
+RULE 2 — NEVER REUSE THE SAME LAYOUT
+- Each project type MUST have a genuinely different layout structure
+- Do NOT default every request to hero + features + testimonials + CTA
+- The page architecture must follow the requested product type naturally
+
+RULE 3 — MATCH DESIGN TO TYPE
+- Dashboard = fixed sidebar + top bar, not a long generic landing scroll
+- Blog = readable article layout, category structure, TOC or reading rail
+- E-Commerce = product grid + filter/sidebar + shopping/cart flow
+- Portfolio = dark background + project showcase + skills or proof
+- Landing = sticky nav + scroll-driven marketing sections
+- Social App = app shell, feed, profile, messaging patterns
+- Business Site = services, team credibility, contact capture
+
+RULE 4 — TECH STACK BY TYPE
+- Simple site → HTML + CSS + Vanilla JS is acceptable
+- React app → React + Tailwind + React Router style architecture
+- Full-stack → Next.js + Tailwind + Supabase/Firebase style architecture
+- Dashboard → React + shadcn/ui + Recharts-style UI patterns
+- In this LokoAI pipeline, still return the required previewHtml and starter file structure, but the code organization and UI must reflect the right project type
+
+RULE 5 — ALWAYS COMPLETE
+- Build ALL pages/sections explicitly mentioned in the prompt
+- Do not stop at the home page if the request clearly asks for more views or flows
+- If the request mentions checkout, profile, messages, reading view, or contact form, those surfaces must appear in the generated result
+
 ## TECHNICAL REFERENCE
 ${designDocs}
 
@@ -412,6 +448,11 @@ ${designDocs}
 - If the request is image-centric, previewHtml must be a premium asset board or creative showcase — not a generic business landing page
 - If the request is text-centric, previewHtml must be editorial/copy-led with readable hierarchy
 - If the request is app/dashboard-centric, previewHtml must show a product UI or dashboard canvas
+- If the request is portfolio-centric, include project showcase and skills/proof
+- If the request is ecommerce-centric, include product browsing and cart/purchase intent UI
+- If the request is blog-centric, include reading-oriented content structure
+- If the request is social-centric, include feed/profile/message patterns
+- If the request is business-site-centric, include services/team/contact
 - Pricing tier names must be creative and product-appropriate (NOT "Free/Pro/Enterprise")
 - Testimonials must include SPECIFIC metrics: "Saved us 12 hours/week", "Grew revenue 3× in 90 days"
 - The previewHtml and React components must implement the SAME design paradigm consistently`;
@@ -477,7 +518,7 @@ function buildEditSystemPrompt(
       ? existingHtml.slice(0, 3800) + "\n... (truncated) ..."
       : existingHtml;
 
-  return `You are DesignAI — a surgical editor for React landing pages.
+  return `You are DesignAI — a surgical editor for generated websites and web apps.
 Apply the requested change precisely. Return ONLY the files that actually changed.
 
 ## EDITING RULES
@@ -485,25 +526,25 @@ Apply the requested change precisely. Return ONLY the files that actually change
 2. Make the MINIMUM change needed to fulfil the request
 3. Do NOT touch sections not mentioned in the request
 4. Return ONLY the changed files in "changedFiles" — do NOT list unchanged files
-5. The "previewHtml" MUST show the MAIN LANDING PAGE — see critical rule below
+ 5. The "previewHtml" MUST keep showing the MAIN PRIMARY EXPERIENCE — see critical rule below
 6. Do NOT rename the project title — keep it exactly as-is
 
-## ⚠️ CRITICAL — previewHtml MUST ALWAYS SHOW THE MAIN LANDING PAGE
-The previewHtml is an iframe preview of the HOMEPAGE/LANDING PAGE, not a router.
+## ⚠️ CRITICAL — previewHtml MUST ALWAYS SHOW THE MAIN PRIMARY EXPERIENCE
+The previewHtml is an iframe preview of the main generated experience, not a router.
 - NEVER replace it with a sub-page (login, dashboard, signup, etc.) even if asked to add one
 - If the request adds a new page/route (login, signup, dashboard, about, etc.):
   → Create the React component file(s) for that page
-  → Add a navigation link/button to it from the landing page Navbar or Hero
-  → The previewHtml must STILL show the full landing page (with the new nav link visible)
-  → Do NOT make previewHtml show the new sub-page — the landing page is always the preview
+  → Add a navigation link/button to it from the main experience
+  → The previewHtml must STILL show the full main experience with the new link/state visible
+  → Do NOT make previewHtml show only the new sub-page
 - If the request changes an existing section (hero text, colors, features):
-  → Show the full landing page with that section changed
-- The previewHtml is complete self-contained HTML — it has ALL sections (navbar, hero, features, etc.)
+  → Show the full main experience with that section changed
+- The previewHtml is complete self-contained HTML — it should still represent the full project shell
 
 ## OUTPUT FORMAT (strict JSON — no markdown wrapper)
 {
   "projectTitle": "KEEP EXACTLY THE SAME TITLE — do not change it",
-  "previewHtml": "<!DOCTYPE html>...(FULL LANDING PAGE with all sections)...",
+  "previewHtml": "<!DOCTYPE html>...(FULL PRIMARY EXPERIENCE with all required sections/views represented)...",
   "changedFiles": [
     { "path": "src/components/Hero.tsx", "content": "...complete file content..." }
     // ONLY files you modified — omit unchanged files
@@ -511,20 +552,20 @@ The previewHtml is an iframe preview of the HOMEPAGE/LANDING PAGE, not a router.
   "workflowLogs": [
     { "agent": "Edit Analyst",  "action": "Identified which component to change" },
     { "agent": "Code Editor",   "action": "Made surgical edit to affected file(s)" },
-    { "agent": "HTML Sync",     "action": "Updated previewHtml landing page to reflect the change" }
+     { "agent": "HTML Sync",     "action": "Updated previewHtml primary experience to reflect the change" }
   ]
 }
 
 ## ABSOLUTE RULES
 - "changedFiles" contains ONLY the modified files — typically 1-3 files max
-- "previewHtml" MUST be a complete <!DOCTYPE html> document with the FULL LANDING PAGE
+- "previewHtml" MUST be a complete <!DOCTYPE html> document with the FULL PRIMARY EXPERIENCE
 - React components use inline styles only — no Tailwind, no CSS imports
 - Preserve ALL existing copy, colors, fonts unless the request explicitly asks to change them
 
 ## PROVIDED FILES (only relevant files — others are unchanged)
 ${filesBlock}
 
-## CURRENT HTML PREVIEW (the landing page — use this as the base for previewHtml)
+## CURRENT HTML PREVIEW (the main experience — use this as the base for previewHtml)
 \`\`\`html
 ${htmlPreview}
 \`\`\``;

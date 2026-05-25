@@ -11,6 +11,9 @@ export type GenerationIntent = {
     | "real_estate"
     | "startup"
     | "dashboard"
+    | "blog"
+    | "social"
+    | "business"
     | "image"
     | "text"
     | "general";
@@ -112,6 +115,60 @@ export function detectGenerationIntent(prompt: string): GenerationIntent {
         accent2: "#4ade80",
         text: "#eef3ff",
         muted: "#8fa0bf",
+      },
+    };
+  }
+
+  if (/(blog|article|news|magazine|publication|reading|post)/.test(lower)) {
+    return {
+      ...base,
+      surface: "website",
+      category: "blog",
+      styleDirection: "Editorial reading-first layout with article hierarchy, category navigation, and a calmer content-driven presentation.",
+      sectionLabels: ["Featured Story", "Categories", "Latest Articles", "Reading View"],
+      palette: {
+        bg: "#fcfbf8",
+        surface: "#ffffff",
+        accent: "#1d4ed8",
+        accent2: "#0f766e",
+        text: "#1f2937",
+        muted: "#6b7280",
+      },
+    };
+  }
+
+  if (/(social app|social network|community app|feed|profile|messaging|chat app)/.test(lower)) {
+    return {
+      ...base,
+      surface: "webapp",
+      category: "social",
+      styleDirection: "Feed-first product UI with profile surfaces, interaction states, and modern messaging/community patterns.",
+      sectionLabels: ["Feed", "Profile", "Messages", "Community"],
+      palette: {
+        bg: "#0b1020",
+        surface: "#151c32",
+        accent: "#7c8cff",
+        accent2: "#f472b6",
+        text: "#f8fbff",
+        muted: "#9aa8c7",
+      },
+    };
+  }
+
+  if (/(business site|company|corporate|services|consulting|team|contact form|local business)/.test(lower)) {
+    return {
+      ...base,
+      surface: "website",
+      category: "business",
+      styleDirection: "Trust-led company website design with services, team credibility, and clean contact conversion flow.",
+      sectionLabels: ["Services", "Why Us", "Team", "Contact"],
+      palette: {
+        bg: "#f5f7fb",
+        surface: "#ffffff",
+        accent: "#2563eb",
+        accent2: "#14b8a6",
+        text: "#1e293b",
+        muted: "#64748b",
       },
     };
   }
