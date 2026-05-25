@@ -32,10 +32,12 @@ const validateJsonTool = tool({
 export async function getOpenRouterAgentResponse(
   systemPrompt: string,
   userPrompt: string,
-  isJson: boolean = false
+  isJson: boolean = false,
+  useFreeModel: boolean = false
 ) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const { apiBaseUrl, model } = getOpenRouterConfig();
+  const { apiBaseUrl, model, freeModel } = getOpenRouterConfig();
+  const selectedModel = useFreeModel ? freeModel : model;
 
   if (!apiKey) {
     throw new Error("Missing OPENROUTER_API_KEY in environment variables.");
@@ -58,7 +60,7 @@ export async function getOpenRouterAgentResponse(
     .join("\n");
 
   const result = callModel(client, {
-    model,
+    model: selectedModel,
     input,
     tools: isJson ? ([validateJsonTool] as const) : ([] as const),
   });

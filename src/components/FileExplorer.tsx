@@ -234,28 +234,28 @@ export default function FileExplorer({ files, activeFile, onFileSelect, classNam
   }, [fileTree, searchQuery]);
 
   return (
-    <div className={cn("flex flex-col bg-slate-950/40 backdrop-blur-xl border-r border-white/5", className)}>
+    <div className={cn("flex flex-col bg-slate-950/95 border-r border-white/10", className)}>
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Explorer</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-300">Explorer</h2>
           <div className="flex items-center gap-1">
-            <button className="p-1 hover:bg-white/5 rounded text-slate-500 hover:text-slate-300 transition-colors">
+            <button className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
               <Plus className="h-3.5 w-3.5" />
             </button>
-            <button className="p-1 hover:bg-white/5 rounded text-slate-500 hover:text-slate-300 transition-colors">
+            <button className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors">
               <RefreshCcw className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
         
         <div className="relative group">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-400 transition-colors" />
           <input
             type="text"
             placeholder="Search code"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-white/5 bg-white/[0.03] py-2 pl-9 pr-3 text-xs text-white placeholder-slate-600 outline-none transition-all focus:bg-white/[0.05] focus:ring-1 focus:ring-indigo-500/50 shadow-inner"
+            className="w-full rounded-lg border border-white/10 bg-white/[0.05] py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 outline-none transition-all focus:bg-white/[0.08] focus:ring-1 focus:ring-indigo-500/50 shadow-inner"
           />
         </div>
       </div>

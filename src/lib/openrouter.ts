@@ -1,7 +1,7 @@
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 import { getLocalGeneratedProject } from "@/lib/localGeneratedProject";
 
-const MAX_RETRIES = 0;
+const MAX_RETRIES = 2;
 const RETRYABLE_STATUS_CODES = new Set([408, 409, 425, 429, 500, 502, 503, 504]);
 const REQUEST_TIMEOUT_MS = 90000;
 
@@ -358,10 +358,12 @@ async function requestOpenRouter(
 export async function getOpenRouterResponse(
   systemPrompt: string,
   userPrompt: string,
-  isJson: boolean = false
+  isJson: boolean = false,
+  useFreeModel: boolean = false
 ) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const { chatCompletionsUrl, model } = getOpenRouterConfig();
+  const { chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
+  const selectedModel = useFreeModel ? freeModel : model;
 
   // If key is missing, fall back to offline generation for JSON flows.
   if (!apiKey) {
@@ -370,11 +372,11 @@ export async function getOpenRouterResponse(
   }
 
   try {
-    const data = await requestOpenRouter(apiKey, chatCompletionsUrl, model, systemPrompt, userPrompt);
+    const data = await requestOpenRouter(apiKey, chatCompletionsUrl, selectedModel, systemPrompt, userPrompt);
     let text = data.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new Error(`OpenRouter returned no content with model "${model}".`);
+      throw new Error(`OpenRouter returned no content with model "${selectedModel}".`);
     }
 
     if (isJson) {

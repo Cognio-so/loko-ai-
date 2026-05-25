@@ -41,19 +41,20 @@ function getAIProvider(): AIProvider {
 export async function getAIResponse(
   systemPrompt: string,
   userPrompt: string,
-  isJson: boolean = false
+  isJson: boolean = false,
+  useFreeModel: boolean = false
 ) {
   const provider = getAIProvider();
 
   if (provider === "openrouter_agent") {
     try {
       return await withTimeout(
-        getOpenRouterAgentResponse(systemPrompt, userPrompt, isJson),
+        getOpenRouterAgentResponse(systemPrompt, userPrompt, isJson, useFreeModel),
         "OpenRouter agent"
       );
     } catch {
       return withTimeout(
-        getOpenRouterResponse(systemPrompt, userPrompt, isJson),
+        getOpenRouterResponse(systemPrompt, userPrompt, isJson, useFreeModel),
         "OpenRouter fallback"
       );
     }
@@ -61,7 +62,7 @@ export async function getAIResponse(
 
   if (provider === "openrouter") {
     return withTimeout(
-      getOpenRouterResponse(systemPrompt, userPrompt, isJson),
+      getOpenRouterResponse(systemPrompt, userPrompt, isJson, useFreeModel),
       "OpenRouter"
     );
   }
@@ -74,7 +75,7 @@ export async function getAIResponse(
   } catch (error) {
     if (isJson) {
       return withTimeout(
-        getOpenRouterResponse(systemPrompt, userPrompt, isJson),
+        getOpenRouterResponse(systemPrompt, userPrompt, isJson, useFreeModel),
         "OpenRouter fallback"
       );
     }
