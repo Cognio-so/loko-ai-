@@ -534,6 +534,28 @@ export async function POST(req: Request) {
     }
 
     const designDocs = getDesignSystemDocs();
+    const modelName = process.env.OPENROUTER_MODEL || "";
+    const isFreeModel = modelName.toLowerCase().includes(":free");
+
+    const liteDesignDocs = `
+## OUTPUT FORMAT
+Return strict JSON:
+{
+  "projectTitle": "String",
+  "previewHtml": "<!DOCTYPE html>...",
+  "files": [ { "path": "src/App.tsx", "content": "..." }, ... ],
+  "workflowLogs": [ { "agent": "String", "action": "String" } ]
+}
+
+## RULES
+- Use inline styles only: style={{ ... }}
+- All 10 sections must be in App.tsx: Navbar, Hero, Stats, Features, HowItWorks, Testimonials, Pricing, FAQ, CTASection, Footer.
+- previewHtml must be the full landing page.
+- vite.config.ts MUST include server: { host:'0.0.0.0', port:5173, allowedHosts:true, strictPort:true }.
+`;
+
+    const effectiveDesignDocs = isFreeModel ? liteDesignDocs : designDocs;
+
     const cleanExisting = Array.isArray(existingFiles)
       ? (existingFiles as Array<{ path: string; content: string }>).filter((f) => f.path !== "preview.html")
       : [];
@@ -548,7 +570,7 @@ export async function POST(req: Request) {
       const selectedFiles = selectFilesForEdit(prompt, cleanExisting);
 
       systemPrompt = buildEditSystemPrompt(
-        designDocs,
+        effectiveDesignDocs,
         selectedFiles,
         existingHtml as string
       );
@@ -563,6 +585,7 @@ Remember:
 - Keep all other sections, copy, colors, and styles exactly the same
 - Return ONLY the changed files in "changedFiles" (1–3 files max)
 - Do NOT change the projectTitle
+- Write COMPLETE code for any file you modify — no placeholders
 ${isAddingNewPage ? `
 ⚠️ ADDING A NEW PAGE/ROUTE:
 - Create the new page as a React component file (e.g. src/pages/Login.tsx)
@@ -574,10 +597,12 @@ ${isAddingNewPage ? `
 - Update previewHtml to reflect the changes — keep showing the full landing page`}`;
 
     } else {
-      systemPrompt = buildGenerateSystemPrompt(designDocs, prompt);
+      systemPrompt = buildGenerateSystemPrompt(effectiveDesignDocs, prompt);
       userMessage = `Create a stunning, complete landing page for: ${prompt}
 
 FOLLOW THE MANDATORY DESIGN PARADIGM in the system prompt — every section must use the exact colors, card style, button style, and typography specified. Do NOT revert to a generic dark theme.
+
+IMPORTANT: Write COMPLETE, high-quality code for every file. Do not use placeholders. Ensure all 10 sections are fully implemented with real content.
 
 CONTENT REQUIREMENTS (all must be specific to "${prompt}"):
 - Headline: clearly states what this product/service does and for whom
@@ -592,28 +617,60 @@ Generate BOTH previewHtml AND the full Vite+React file structure (16 files total
     }
 
     // ── Call AI with timeout fallback ─────────────────────────────────────────
+    const modelName = process.env.OPENROUTER_MODEL || "";
+    const isFreeModel = modelName.toLowerCase().includes(":free");
+    
     let content: string;
     try {
       content = await Promise.race([
         getAIResponse(systemPrompt, userMessage, true),
         new Promise<string>((resolve) =>
           setTimeout(
-            () => resolve(JSON.stringify(getLocalGeneratedProject(prompt))),
+            () => resolve("__TIMEOUT__"),
             GENERATION_TIMEOUT_MS
           )
         ),
       ]);
-    } catch {
-      content = JSON.stringify(getLocalGeneratedProject(prompt));
+    } catch (e) {
+      console.error("AI Error:", e);
+      content = "__ERROR__";
     }
 
-    if (!content) throw new Error("No content returned");
-
-    let parsed: ReturnType<typeof parseAIJson>;
-    try {
-      parsed = parseAIJson(content);
-    } catch {
-      parsed = getLocalGeneratedProject(prompt);
+    let isFallback = false;
+    if (content === "__TIMEOUT__" || content === "__ERROR__") {
+      isFallback = true;
+      if (isEdit) {
+        // Return existing files with a generic workflow log so user knows it failed
+        parsed = {
+          projectTitle: "Edit Failed (Timeout)",
+          previewHtml: existingHtml,
+          changedFiles: [],
+          workflowLogs: [
+            { agent: "System", action: "AI took too long or failed — no changes applied. Try again with a simpler request." }
+          ]
+        };
+      } else {
+        parsed = getLocalGeneratedProject(prompt);
+      }
+    } else {
+      try {
+        parsed = parseAIJson(content);
+      } catch (e) {
+        console.error("JSON Parse Error:", e);
+        isFallback = true;
+        if (isEdit) {
+          parsed = {
+            projectTitle: "Edit Failed (Invalid JSON)",
+            previewHtml: existingHtml,
+            changedFiles: [],
+            workflowLogs: [
+              { agent: "System", action: "AI returned invalid response — no changes applied." }
+            ]
+          };
+        } else {
+          parsed = getLocalGeneratedProject(prompt);
+        }
+      }
     }
 
     // ── Validate response ─────────────────────────────────────────────────────
@@ -692,6 +749,7 @@ Generate BOTH previewHtml AND the full Vite+React file structure (16 files total
         files: finalFiles,                      // full merged set for client
         changedFiles,                           // surgical set so client can do its own merge too
         previewHtml: finalHtml,
+        isFallback,
       });
     }
 
@@ -727,7 +785,7 @@ Generate BOTH previewHtml AND the full Vite+React file structure (16 files total
       }
     }
 
-    return NextResponse.json(parsed);
+    return NextResponse.json({ ...parsed, isFallback });
   } catch (error: unknown) {
     console.error("Generation Error:", error);
     return NextResponse.json(
