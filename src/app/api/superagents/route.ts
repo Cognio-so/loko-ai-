@@ -619,6 +619,7 @@ Generate BOTH previewHtml AND the full Vite+React file structure (16 files total
     // ── Call AI with timeout fallback ─────────────────────────────────────────
     
     let content: string;
+    let parsed: any;
     try {
       content = await Promise.race([
         getAIResponse(systemPrompt, userMessage, true),
