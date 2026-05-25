@@ -1998,235 +1998,37 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
             <MessageSquare className="h-4 w-4" />
           </button>
 
+          <div className="hidden min-h-0 flex-1 lg:flex">
+            <PanelGroup autoSaveId="builder-workspace-layout" direction="horizontal" className="min-h-0 flex-1">
+              <Panel defaultSize={22} minSize={18} maxSize={34} className="min-h-0">
+                <aside className="flex h-full min-w-0 flex-col border-r border-white/5 bg-slate-950/60 backdrop-blur-xl">
+                  {chatSidebarContent}
+                </aside>
+              </Panel>
+              <WorkspaceResizeHandle />
+              <Panel minSize={36} className="min-h-0">
+                <div className="flex h-full min-w-0 overflow-hidden">{workspaceMainContent}</div>
+              </Panel>
+            </PanelGroup>
+          </div>
+
           {/* Chat Sidebar */}
           <aside
             className={cn(
-              "flex w-[340px] shrink-0 flex-col border-r border-white/5 bg-slate-950/60 backdrop-blur-xl transition-all duration-300",
-              "lg:flex",
-              isSidebarOpen
-                ? "fixed inset-y-12 left-0 z-30 flex shadow-2xl lg:relative lg:inset-auto lg:shadow-none"
-                : "hidden lg:flex"
+              "fixed inset-y-12 left-0 z-30 flex w-[340px] max-w-[calc(100vw-3rem)] flex-col border-r border-white/5 bg-slate-950/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:hidden",
+              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}
           >
-            {/* Sidebar header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600/20 text-indigo-400">
-                  <Sparkles className="h-3.5 w-3.5" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-white">AI Chat</p>
-                  <p className="text-[10px] text-slate-500">Edit &amp; refine your design</p>
-                </div>
-              </div>
-              {messages.length > 0 && (
-                <button
-                  onClick={() => setMessages([])}
-                  className="rounded-md px-2 py-1 text-[10px] font-semibold text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Messages */}
-            <div
-              ref={taskPanelRef}
-              className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.1)_transparent]"
-            >
-              {messages.length === 0 && !isTaskPanelLive && !isGenerating ? (
-                <div className="flex h-full flex-col items-center justify-center gap-3 py-8 text-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-600/20 to-purple-600/20 ring-1 ring-white/5">
-                    <Wand2 className="h-7 w-7 text-indigo-400" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-white">Start designing</p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Describe your website, app, image, dashboard, or text page below
-                      </p>
-                  </div>
-                  <div className="mt-2 flex w-full flex-col gap-1.5">
-                      {[
-                        "Build a premium fashion store with cart, filters, and reviews",
-                        "Create an app dashboard with analytics and team activity",
-                        "Design a poster-style image concept board for a coffee brand",
-                      ].map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        onClick={() => void handleSend(suggestion)}
-                        className="rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-left text-xs text-slate-400 transition hover:border-indigo-500/30 hover:bg-indigo-500/10 hover:text-slate-200"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {messages.map((msg) => (
-                    <motion.div
-                      key={msg.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={cn(
-                        "flex",
-                        msg.role === "user" ? "justify-end" : "justify-start"
-                      )}
-                    >
-                      {msg.role === "user" ? (
-                        <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/20">
-                          {msg.content}
-                        </div>
-                      ) : (
-                        <div className="max-w-[90%] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-white/5 bg-white/[0.05] px-4 py-2.5 text-sm text-slate-300">
-                          {msg.content}
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-
-                  <AnimatePresence>
-                    {(generationTasks.length > 0 || isTaskPanelLive || isGenerating) && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]"
-                      >
-                        <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-                          <div>
-                            <p className="text-xs font-bold text-white">Generation Pipeline</p>
-                            <p className="text-[10px] text-slate-500">AI design agents at work</p>
-                          </div>
-                          <span
-                            className={cn(
-                              "rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest",
-                              isTaskPanelLive || isGenerating
-                                ? "border-indigo-400/25 bg-indigo-500/10 text-indigo-300"
-                                : "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
-                            )}
-                          >
-                            {isTaskPanelLive || isGenerating ? "Live" : "Done"}
-                          </span>
-                        </div>
-                        <div className="space-y-1 px-3 py-3">
-                          <AnimatePresence initial={false}>
-                            {generationTasks.map((task) => (
-                              <motion.div
-                                key={task.id}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                className={cn(
-                                  "flex gap-3 rounded-xl px-2.5 py-2",
-                                  task.status === "active" && "bg-indigo-500/10"
-                                )}
-                              >
-                                <div className="mt-0.5 shrink-0">
-                                  <TaskStatusIcon status={task.status} />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p
-                                    className={cn(
-                                      "truncate text-xs font-semibold",
-                                      task.status === "completed"
-                                        ? "text-slate-400"
-                                        : task.status === "active"
-                                          ? "text-indigo-200"
-                                          : "text-slate-600"
-                                    )}
-                                  >
-                                    {task.label}
-                                  </p>
-                                  <p className="mt-0.5 text-[10px] text-slate-600">{task.agent}</p>
-                                </div>
-                              </motion.div>
-                            ))}
-                          </AnimatePresence>
-                          {generationTasks.length === 0 && (
-                            <div className="flex items-center gap-3 px-2.5 py-2 text-xs text-slate-500">
-                              <TaskStatusIcon status="active" />
-                              Initializing AI agents...
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-            </div>
-
-            {/* Input composer */}
-            <div className="shrink-0 border-t border-white/5 p-3">
-              <div className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-3 focus-within:border-indigo-500/40">
-                <input ref={fileInputRef} type="file" multiple className="hidden" />
-                <textarea
-                  ref={textareaRef}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={isGenerating ? "Generating..." : "Describe changes or a new design..."}
-                  disabled={isGenerating}
-                  className="w-full resize-none bg-transparent py-1 text-sm text-white outline-none placeholder:text-slate-600 disabled:opacity-50"
-                  style={{ minHeight: 60, maxHeight: 160 }}
-                />
-                <div className="mt-2 flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
-                      title="Attach file"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={startVoiceInput}
-                      className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition",
-                        isListening ? "animate-pulse text-red-400" : "hover:bg-white/5 hover:text-slate-300"
-                      )}
-                      title="Voice input"
-                    >
-                      <Mic className="h-4 w-4" />
-                    </button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-white/5 hover:text-slate-300">
-                          {buildMode}
-                          <ChevronDown className="h-3 w-3" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className="w-32 border-white/10 bg-slate-900">
-                        {(["Landing", "App", "Dashboard"] as BuildMode[]).map((m) => (
-                          <DropdownMenuItem
-                            key={m}
-                            onSelect={() => setBuildMode(m)}
-                            className="text-slate-300 focus:bg-white/10 focus:text-white"
-                          >
-                            {m}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <button
-                    onClick={() => void handleSend()}
-                    disabled={isGenerating || !draft.trim()}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500 active:scale-95 disabled:opacity-40"
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ArrowUp className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
+            {chatSidebarContent}
           </aside>
 
-          {/* File Explorer Sidebar (VS Code style) */}
-          <AnimatePresence>
+          <div className="flex min-h-0 flex-1 overflow-hidden lg:hidden">
+            {workspaceMainContent}
+          </div>
+          {false && (
+          <div className="hidden">
+            {/* File Explorer Sidebar (VS Code style) */}
+            <AnimatePresence>
             {view === "code" && (
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
@@ -2327,6 +2129,8 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
               </AnimatePresence>
             </div>
           </section>
+          </div>
+          )}
         </div>
       </div>
 
