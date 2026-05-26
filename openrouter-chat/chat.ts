@@ -1,5 +1,8 @@
 import { OpenRouter } from "@openrouter/sdk";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import readline from "node:readline";
+import { fileURLToPath } from "node:url";
 
 // Swap this one string to change providers/models.
 // Verified examples:
@@ -14,8 +17,25 @@ type ChatMessage = {
   content: string;
 };
 
+function readApiKeyFromEnvFile(path: string): string | undefined {
+  if (!existsSync(path)) return undefined;
+
+  const line = readFileSync(path, "utf8")
+    .split(/\r?\n/)
+    .find((entry) => entry.trim().startsWith("OPENROUTER_API_KEY="));
+
+  return line
+    ?.replace(/^OPENROUTER_API_KEY=/, "")
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
 function requireApiKey(): string {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const appDir = dirname(fileURLToPath(import.meta.url));
+  const apiKey =
+    process.env.OPENROUTER_API_KEY ||
+    readApiKeyFromEnvFile(join(appDir, ".env.local")) ||
+    readApiKeyFromEnvFile(join(appDir, "..", ".env.local"));
 
   if (!apiKey) {
     console.error("Missing OPENROUTER_API_KEY.");
