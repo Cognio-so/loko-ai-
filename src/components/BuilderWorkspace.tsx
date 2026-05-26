@@ -14,7 +14,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Editor from "@monaco-editor/react";
-import { Group as PanelGroup, Panel as Panel, Separator as PanelResizeHandle } from "react-resizable-panels";
 import {
   ArrowLeft,
   ArrowUp,
@@ -27,7 +26,6 @@ import {
   FileText,
   Globe,
   Loader2,
-  MessageSquare,
   Mic,
   Monitor,
   Plus,
@@ -109,15 +107,6 @@ const GENERATION_TASK_BLUEPRINT: Array<Omit<GenerationTask, "status">> = [
 ];
 
 const EMPTY_MESSAGES: ChatMessage[] = [];
-
-function WorkspaceResizeHandle() {
-  return (
-    <PanelResizeHandle className="group relative hidden w-3 shrink-0 cursor-col-resize items-stretch bg-transparent outline-none transition-colors duration-200 hover:bg-indigo-500/5 focus-visible:bg-indigo-500/10 lg:flex">
-      <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-white/8 transition-colors duration-200 group-hover:bg-indigo-400/70 group-data-[resize-handle-state=drag]:bg-indigo-300" />
-      <div className="absolute left-1/2 top-1/2 h-14 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/0 transition-all duration-200 group-hover:bg-indigo-400/25 group-data-[resize-handle-state=drag]:h-20 group-data-[resize-handle-state=drag]:bg-indigo-300/35" />
-    </PanelResizeHandle>
-  );
-}
 
 // ── Live code typing component shown while generation is in progress ──────────
 const LIVE_CODE_FRAMES = [
@@ -1012,7 +1001,6 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [generationTasks, setGenerationTasks] = useState<GenerationTask[]>([]);
   const [isTaskPanelLive, setIsTaskPanelLive] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDark, setIsDark] = useState(true);
 
   // Sync theme with localStorage — builder has its own independent key, defaults dark
@@ -1987,42 +1975,11 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
 
         {/* Main layout */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          {/* Mobile sidebar toggle */}
-          <button
-            onClick={() => setIsSidebarOpen((v) => !v)}
-            className={cn(
-              "fixed bottom-20 left-4 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-900 shadow-xl transition lg:hidden",
-              isSidebarOpen ? "text-indigo-400" : "text-slate-400"
-            )}
-          >
-            <MessageSquare className="h-4 w-4" />
-          </button>
-
-          <div className="hidden min-h-0 flex-1 lg:flex">
-            <PanelGroup id="builder-workspace-layout" orientation="horizontal" className="min-h-0 flex-1">
-              <Panel defaultSize={22} minSize={18} maxSize={34} className="min-h-0">
-                <aside className="flex h-full min-w-0 flex-col border-r border-white/5 bg-slate-950/60 backdrop-blur-xl">
-                  {chatSidebarContent}
-                </aside>
-              </Panel>
-              <WorkspaceResizeHandle />
-              <Panel minSize={36} className="min-h-0">
-                <div className="flex h-full min-w-0 overflow-hidden">{workspaceMainContent}</div>
-              </Panel>
-            </PanelGroup>
-          </div>
-
-          {/* Chat Sidebar */}
-          <aside
-            className={cn(
-              "fixed inset-y-12 left-0 z-30 flex w-[340px] max-w-[calc(100vw-3rem)] flex-col border-r border-white/5 bg-slate-950/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 lg:hidden",
-              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-            )}
-          >
+          <aside className="relative z-20 flex h-full w-[360px] min-w-[320px] shrink-0 flex-col border-r border-white/5 bg-slate-950/95 shadow-2xl backdrop-blur-xl max-[900px]:w-[320px]">
             {chatSidebarContent}
           </aside>
 
-          <div className="flex min-h-0 flex-1 overflow-hidden lg:hidden">
+          <div className="relative z-0 flex h-full min-w-0 flex-1 overflow-hidden">
             {workspaceMainContent}
           </div>
           {false && (
