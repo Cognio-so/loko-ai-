@@ -54,6 +54,21 @@ const client = new OpenRouter({
   apiKey: requireApiKey(),
 });
 
+function printOpenRouterError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  console.error("\nOpenRouter request failed:");
+  console.error(message);
+
+  if (message.includes("User not found")) {
+    console.error("");
+    console.error("That usually means OPENROUTER_API_KEY is not a real active key.");
+    console.error("Create/copy a key at: https://openrouter.ai/settings/keys");
+    console.error("Then put it in ../.env.local as:");
+    console.error("OPENROUTER_API_KEY=sk-or-v1-your-real-key");
+  }
+}
+
 async function runSmokeTest() {
   const completion = await client.chat.send({
     chatRequest: {
@@ -147,8 +162,7 @@ async function runChatLoop() {
       const response = await streamAssistantReply(messages);
       messages.push({ role: "assistant", content: response });
     } catch (error) {
-      console.error("\nOpenRouter request failed:");
-      console.error(error instanceof Error ? error.message : error);
+      printOpenRouterError(error);
     }
 
     if (!isClosed) rl.prompt();
@@ -159,10 +173,15 @@ async function runChatLoop() {
 
 const command = process.argv[2];
 
-if (command === "--smoke") {
-  await runSmokeTest();
-} else if (command === "--stream-once") {
-  await runStreamingExample();
-} else {
-  await runChatLoop();
+try {
+  if (command === "--smoke") {
+    await runSmokeTest();
+  } else if (command === "--stream-once") {
+    await runStreamingExample();
+  } else {
+    await runChatLoop();
+  }
+} catch (error) {
+  printOpenRouterError(error);
+  process.exitCode = 1;
 }
