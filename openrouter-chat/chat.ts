@@ -99,6 +99,10 @@ async function runChatLoop() {
     input: process.stdin,
     output: process.stdout,
   });
+  let isClosed = false;
+  rl.on("close", () => {
+    isClosed = true;
+  });
 
   console.log(`Using model: ${MODEL}`);
   console.log('Type "exit" to quit.');
@@ -113,7 +117,7 @@ async function runChatLoop() {
     }
 
     if (!trimmed) {
-      rl.prompt();
+      if (!isClosed) rl.prompt();
       continue;
     }
 
@@ -127,10 +131,10 @@ async function runChatLoop() {
       console.error(error instanceof Error ? error.message : error);
     }
 
-    rl.prompt();
+    if (!isClosed) rl.prompt();
   }
 
-  rl.close();
+  if (!isClosed) rl.close();
 }
 
 const command = process.argv[2];
