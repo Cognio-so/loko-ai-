@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "tsx chat.ts",
     "chat": "tsx chat.ts",
     "smoke": "tsx chat.ts --smoke",
     "stream-once": "tsx chat.ts --stream-once"
