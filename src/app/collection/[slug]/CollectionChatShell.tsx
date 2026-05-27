@@ -10,6 +10,7 @@ import {
   History,
   Home,
   Library,
+  Lightbulb,
   Menu,
   MessageCircle,
   Notebook,
@@ -306,6 +307,24 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
               <div className="sticky bottom-0 mt-6 bg-[#fbfbfb] pb-8 pt-4">
                 <div className="flex items-end gap-4 rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60 ring-1 ring-slate-100">
+                  <div className="flex items-center gap-2 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => setPrompt(p => p + "\n")}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                      aria-label="Add content"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPrompt("Give me some creative ideas for this project...")}
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                      aria-label="Get ideas"
+                    >
+                      <Lightbulb className="h-5 w-5" />
+                    </button>
+                  </div>
                   <textarea
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
