@@ -66,28 +66,15 @@ function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssist
 }
 
 export default function CollectionChatShell({ slug }: { slug: string }) {
-  const assistant = getAssistant(slug);
+  const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
   const router = useRouter();
   const { user, signOut } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    { role: "assistant", content: assistant?.welcome ?? "This collection assistant is ready." },
+    { role: "assistant", content: assistant.welcome },
   ]);
-
-  if (!assistant) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center bg-slate-50 px-6 text-center text-slate-900">
-        <div>
-          <h1 className="text-2xl font-bold">Assistant not found</h1>
-          <Link href="/collection" className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white">
-            Back to Collection
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
