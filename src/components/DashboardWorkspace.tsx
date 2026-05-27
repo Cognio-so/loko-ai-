@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Bot,
   Compass,
-  Crown,
   FileText,
   FolderOpen,
   Grid3X3,
@@ -23,6 +22,7 @@ import {
   Settings,
   Sparkles,
   Trophy,
+  Trash2,
   Users,
   X,
   Zap,
@@ -81,9 +81,15 @@ export default function DashboardWorkspace() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
+  }, [user]);
+
+  const userAvatar = useMemo(() => {
+    return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
   }, [user]);
 
   const loadProjects = useCallback(() => {
@@ -148,6 +154,26 @@ export default function DashboardWorkspace() {
     }
   }
 
+  async function handleDeleteProject(projectId: string) {
+    if (deletingProjectId) return;
+    setDeletingProjectId(projectId);
+
+    const previousProjects = projects;
+    setProjects((current) => current.filter((project) => project.id !== projectId));
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+    } catch (error) {
+      console.warn("Failed to delete project:", error);
+      setProjects(previousProjects);
+    } finally {
+      setDeletingProjectId(null);
+    }
+  }
+
   const filteredProjects = searchQuery
     ? projects.filter((project) => {
         const target = `${project.title} ${project.prompt ?? ""}`.toLowerCase();
@@ -200,14 +226,44 @@ export default function DashboardWorkspace() {
 
             <button
               type="button"
+              onClick={() => setIsSearchOpen((open) => !open)}
               className="mb-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
             >
               <Search className="h-4 w-4" />
               Search chats
             </button>
 
+            {isSearchOpen && (
+              <div className="mb-2 px-1">
+                <div className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 shadow-sm">
+                  <Search className="h-4 w-4 text-slate-400" />
+                  <input
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Search recent chats"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <button
               type="button"
+              onClick={() => {
+                setPrompt("Untitled notebook: ");
+                textareaRef.current?.focus();
+              }}
               className="mb-4 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
             >
               <Notebook className="h-4 w-4" />
@@ -245,15 +301,36 @@ export default function DashboardWorkspace() {
               ) : filteredProjects.length > 0 ? (
                 <div className="space-y-1">
                   {filteredProjects.slice(0, 18).map((project) => (
-                    <button
+                    <div
                       key={project.id}
-                      type="button"
-                      onClick={() => setPrompt(project.prompt || project.title)}
-                      className="line-clamp-1 w-full rounded-full px-3 py-2 text-left text-sm text-slate-800 transition hover:bg-slate-100"
-                      title={project.prompt || project.title}
+                      className="group flex items-center gap-2 rounded-2xl px-3 py-2 transition hover:bg-slate-100"
                     >
-                      {project.title || project.prompt || "Untitled chat"}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrompt(project.prompt || project.title)}
+                        className="min-w-0 flex-1 text-left"
+                        title={project.prompt || project.title}
+                      >
+                        <span className="line-clamp-1 text-sm text-slate-900">
+                          {project.title || project.prompt || "Untitled chat"}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] text-slate-500">
+                          {getTimeAgo(project.updated_at || project.created_at)}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteProject(project.id)}
+                        className="rounded-full p-1.5 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                        aria-label={`Delete ${project.title || "chat"}`}
+                      >
+                        {deletingProjectId === project.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -278,14 +355,37 @@ export default function DashboardWorkspace() {
                 <Settings className="h-4 w-4" />
                 Settings
               </button>
-              <button
-                type="button"
-                onClick={() => void signOut()}
-                className="mt-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-red-50 hover:text-red-600"
-              >
-                <Bot className="h-4 w-4" />
-                Sign out
-              </button>
+              {user && (
+                <div className="mt-3 border-t border-slate-200 pt-3">
+                  <div className="rounded-3xl bg-slate-50 p-3">
+                    <div className="flex items-center gap-3">
+                      {userAvatar ? (
+                        <img
+                          src={userAvatar}
+                          alt={userName}
+                          className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200"
+                        />
+                      ) : (
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
+                          {userName.slice(0, 1).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-950">{userName}</p>
+                        <p className="truncate text-xs text-slate-500">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void signOut()}
+                    className="mt-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Bot className="h-4 w-4" />
+                    Sign out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -391,16 +491,16 @@ export default function DashboardWorkspace() {
 
               {savedMessage && <p className="mt-3 text-sm text-slate-500">{savedMessage}</p>}
 
-              <div className="mt-6 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="mt-5 flex w-full flex-wrap justify-center gap-2">
                 {promptIdeas.map((idea) => (
                   <button
                     key={idea}
                     type="button"
                     onClick={() => setPrompt(idea)}
-                    className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-left text-sm text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50"
+                    className="inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3.5 py-2 text-sm text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
                   >
-                    <MessageSquare className="mb-2 h-4 w-4 text-sky-500" />
-                    {idea}
+                    <MessageSquare className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+                    <span className="truncate">{idea}</span>
                   </button>
                 ))}
               </div>
