@@ -16,5 +16,5 @@ export default async function CollectionChatPage({ params }: Props) {
 
   if (!assistant) notFound();
 
-  return <CollectionChatShell slug={assistant.slug} />;
+  return <CollectionChatShell key={assistant.slug} slug={assistant.slug} />;
 }
