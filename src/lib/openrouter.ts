@@ -96,8 +96,8 @@ export function getOfflineGeneratedProject(userPrompt: string) {
             </div>
           </div>
           <div class="item">
-            <strong>Why offline?</strong>
-            <div class="muted" style="margin-top:8px">Your OpenRouter key is missing/invalid, so LokoAI is generating a starter template locally. Add a valid key later to enable AI generation.</div>
+            <strong>Offline Mode</strong>
+            <div class="muted" style="margin-top:8px">LokoAI is generating a starter template locally. Add an AI provider key to enable AI generation.</div>
           </div>
         </div>
       </div>
