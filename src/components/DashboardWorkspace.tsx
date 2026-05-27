@@ -86,6 +86,29 @@ const quickActions = [
   },
 ];
 
+const moreQuickActions = [
+  {
+    title: "Invoicing",
+    prompt:
+      'Create an app with a list of invoices. Each has: ID or number, client name, amount, due date, status (Draft, Sent, Paid, Overdue), and optional notes. Include a form to add or edit and a way to update status. Add a header and "New invoice" button. Works for sending and tracking invoices.',
+  },
+  {
+    title: "Income Log",
+    prompt:
+      'Create an app with a single list of transactions. Each has: date, description, amount, type (Income or Expense), and optional category. Include a form to add or edit and a summary (total income, total expenses, balance). Add a header and "Add transaction" button. Works for simple P&L or cash flow.',
+  },
+  {
+    title: "Tax Tracker",
+    prompt:
+      'Create an app with a list of transactions. Each has: date, description, amount, type (income/expense), and tax category. Include a form to add or edit and a summary by category or simple report view. Add a header and "Add transaction" button. Works for tax prep or categorized reporting.',
+  },
+  {
+    title: "Finance dashboard",
+    prompt:
+      'Create an app with a dashboard: summary cards (e.g. balance, income this month, expenses this month) and a list of recent transactions. Include a form to add transactions. Add a header and "Add" button. Works for overview and quick entry.',
+  },
+];
+
 function getTimeAgo(dateString: string): string {
   const date = new Date(dateString);
   const diff = Date.now() - date.getTime();
@@ -600,19 +623,52 @@ export default function DashboardWorkspace() {
 }
 
 function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+
   return (
-    <div className="mt-5 flex w-full flex-nowrap justify-center gap-3 overflow-x-auto pb-2">
-      {quickActions.map((item) => (
-        <button
-          key={item.title}
-          type="button"
-          onClick={() => setPrompt(item.prompt)}
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
-        >
-          <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
-          {item.title}
-        </button>
-      ))}
+    <div className="relative mt-5 flex w-full flex-nowrap justify-center gap-3 overflow-x-auto pb-2">
+      {[...quickActions, { title: "More", prompt: "" }].map((item) =>
+        item.title === "More" ? (
+          <div key={item.title} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsMoreOpen((open) => !open)}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+            >
+              <Plus className="h-4 w-4 shrink-0 text-slate-600" />
+              More
+            </button>
+            {isMoreOpen && (
+              <div className="absolute left-1/2 top-14 z-20 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_44px_rgba(15,23,42,0.18)]">
+                {moreQuickActions.map((moreItem) => (
+                  <button
+                    key={moreItem.title}
+                    type="button"
+                    onClick={() => {
+                      setPrompt(moreItem.prompt);
+                      setIsMoreOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-sky-800"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+                    {moreItem.title}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            key={item.title}
+            type="button"
+            onClick={() => setPrompt(item.prompt)}
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+          >
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+            {item.title}
+          </button>
+        )
+      )}
     </div>
   );
 }
