@@ -253,7 +253,7 @@ body {
 }
 
 .dark .rainbow-border-animate {
-  background: linear-gradient(#050505, #050505) padding-box,
+  background: linear-gradient(white, white) padding-box,
               linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent) border-box !important;
 }
 
