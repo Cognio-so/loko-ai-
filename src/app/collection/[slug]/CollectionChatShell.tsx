@@ -273,10 +273,6 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 <Menu className="h-5 w-5" />
               </button>
               <AssistantLogo assistant={assistant} size="sm" />
-              <div>
-                <h1 className="text-base font-bold text-slate-950">{assistant.name}</h1>
-                <p className="text-xs text-slate-500">{assistant.model}</p>
-              </div>
             </div>
             <Link
               href="/collection"
@@ -287,7 +283,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
           </header>
 
           <section className="flex flex-1 flex-col">
-            <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 sm:px-6">
+            <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6">
               <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                   <AssistantLogo assistant={assistant} size="lg" />
@@ -299,17 +295,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 </div>
               </div>
 
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 space-y-6">
                 {messages.map((message, index) => (
                   <div
                     key={`${message.role}-${index}`}
                     className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[78%] rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm ${
+                      className={`max-w-[85%] rounded-[2rem] px-6 py-4 text-base leading-relaxed shadow-md ${
                         message.role === "user"
                           ? "bg-slate-950 text-white"
-                          : "border border-slate-200 bg-white text-slate-700"
+                          : "border border-slate-200 bg-white text-slate-800"
                       }`}
                     >
                       {message.content}
@@ -318,8 +314,8 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 ))}
               </div>
 
-              <div className="sticky bottom-0 mt-6 bg-[#fbfbfb] pb-5 pt-3">
-                <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-white p-3 shadow-lg shadow-slate-200/70">
+              <div className="sticky bottom-0 mt-6 bg-[#fbfbfb] pb-8 pt-4">
+                <div className="flex items-end gap-4 rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60 ring-1 ring-slate-100">
                   <textarea
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
@@ -329,17 +325,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         sendMessage();
                       }
                     }}
-                    placeholder={`Message ${assistant.name}`}
+                    placeholder={`Message ${assistant.name}...`}
                     rows={1}
-                    className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    className="max-h-48 min-h-12 flex-1 resize-none bg-transparent px-4 py-3 text-base text-slate-900 outline-none placeholder:text-slate-400"
                   />
                   <button
                     type="button"
                     onClick={sendMessage}
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} text-white shadow-sm transition hover:scale-105`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} text-white shadow-lg transition-transform hover:scale-105 active:scale-95`}
                     aria-label="Send message"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-5 w-5" />
                   </button>
                 </div>
               </div>
