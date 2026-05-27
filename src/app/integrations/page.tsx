@@ -133,7 +133,7 @@ function IntegrationCard({ item, index }: { item: Integration; index: number }) 
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: index * 0.02, duration: 0.3 }}
       whileHover={{ y: -5 }}
-      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-2xl hover:shadow-sky-500/10 dark:border-white/10 dark:bg-[#0d0d0d]"
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[1.6rem] border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-2xl hover:shadow-sky-500/10 dark:border-white/10 dark:bg-[#0d0d0d] dark:hover:border-sky-500/30"
     >
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full opacity-10 blur-3xl transition-opacity duration-300 group-hover:opacity-20"
@@ -141,7 +141,7 @@ function IntegrationCard({ item, index }: { item: Integration; index: number }) 
       />
       <div className="mb-5 flex items-start justify-between">
         <div
-          className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lg shadow-slate-200/70 dark:border-white/10 dark:shadow-black/20"
+          className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-lg shadow-slate-200/70 dark:border-white/10 dark:bg-white/95 dark:shadow-black/20"
           style={{ boxShadow: `0 18px 35px ${item.color}18` }}
         >
           <IntegrationLogo item={item} />

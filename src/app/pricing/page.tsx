@@ -167,18 +167,18 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(0);
 
   return (
-    <div className="min-h-screen bg-[#fcfcfd] px-4 py-10 text-slate-950 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#fcfcfd] px-4 py-10 text-slate-950 dark:bg-[#050505] dark:text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="pointer-events-none absolute left-1/2 top-32 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute right-10 top-[22rem] h-64 w-64 rounded-full bg-cyan-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/2 top-32 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-200/40 dark:bg-sky-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute right-10 top-[22rem] h-64 w-64 rounded-full bg-cyan-100/60 dark:bg-cyan-500/10 blur-3xl" />
         <div className="mx-auto mb-10 max-w-2xl text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.35em] text-sky-500">
             Flexible Pricing
           </p>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-950 md:text-5xl">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white md:text-5xl">
             Plans that feel easy to start and strong enough to scale
           </h1>
-          <p className="mt-4 text-sm leading-6 text-slate-600">
+          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-gray-400">
             Clear monthly pricing for creators, builders, and teams who want to launch faster with LokoAI.
           </p>
         </div>
@@ -191,13 +191,13 @@ export default function PricingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08 }}
               whileHover={{ y: -4 }}
-              className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border bg-white/95 shadow-[0_14px_36px_rgba(148,163,184,0.14)] transition-all duration-300 ${
+              className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border bg-white/95 dark:bg-[#0d0d0d] shadow-[0_14px_36px_rgba(148,163,184,0.14)] transition-all duration-300 ${
                 plan.popular
-                  ? "border-sky-300 shadow-[0_18px_45px_rgba(14,165,233,0.16)]"
-                  : "border-slate-200/80 hover:border-sky-200 hover:shadow-[0_18px_45px_rgba(56,189,248,0.1)]"
+                  ? "border-sky-300 dark:border-sky-500/50 shadow-[0_18px_45px_rgba(14,165,233,0.16)]"
+                  : "border-slate-200/80 dark:border-white/10 hover:border-sky-200 dark:hover:border-sky-500/30 hover:shadow-[0_18px_45px_rgba(56,189,248,0.1)]"
               }`}
             >
-              <div className="pointer-events-none absolute inset-x-6 top-0 h-20 rounded-b-[1.5rem] bg-gradient-to-b from-sky-100/70 to-transparent opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="pointer-events-none absolute inset-x-6 top-0 h-20 rounded-b-[1.5rem] bg-gradient-to-b from-sky-100/70 dark:from-sky-500/10 to-transparent opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100" />
               {plan.popular && (
                 <div className="absolute inset-x-0 top-0 bg-gradient-to-r from-sky-400 to-cyan-300 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.24em] text-slate-950">
                   Most Popular
@@ -209,26 +209,26 @@ export default function PricingPage() {
                   <div
                     className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl border ${
                       plan.popular
-                        ? "border-sky-200 bg-sky-50 text-sky-500 shadow-[0_12px_30px_rgba(56,189,248,0.18)]"
-                        : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-sky-200 group-hover:bg-sky-50 group-hover:text-sky-500"
+                        ? "border-sky-200 bg-sky-50 dark:border-sky-500/20 dark:bg-sky-500/10 text-sky-500 shadow-[0_12px_30px_rgba(56,189,248,0.18)]"
+                        : "border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5 text-slate-500 group-hover:border-sky-200 group-hover:bg-sky-50 group-hover:text-sky-500 dark:group-hover:bg-sky-500/10"
                     }`}
                   >
                     <plan.icon className="h-5 w-5" />
                   </div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{plan.name}</h2>
-                  <p className="mt-2 text-sm text-slate-500">{plan.highlight}</p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">{plan.name}</h2>
+                  <p className="mt-2 text-sm text-slate-500 dark:text-gray-400">{plan.highlight}</p>
                 </div>
 
-                <div className="border-y border-slate-200/80 py-4">
+                <div className="border-y border-slate-200/80 dark:border-white/10 py-4">
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-semibold tracking-tight text-slate-950">${plan.price}</span>
+                    <span className="text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">${plan.price}</span>
                     <span className="pb-0.5 text-sm text-slate-400">/mo</span>
                   </div>
-                  <div className="mt-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-sky-50/80 p-3 shadow-inner shadow-white">
-                    <p className="text-xs font-semibold text-slate-900">
+                  <div className="mt-3 rounded-xl border border-slate-200 dark:border-white/5 bg-gradient-to-br from-slate-50 to-sky-50/80 dark:from-white/5 dark:to-white/[0.02] p-3 shadow-inner shadow-white dark:shadow-none">
+                    <p className="text-xs font-semibold text-slate-900 dark:text-gray-200">
                       {plan.credits} Monthly credits <span className="text-slate-400">/mo</span>
                     </p>
-                    <p className="mt-2 text-xs font-semibold text-slate-900">
+                    <p className="mt-2 text-xs font-semibold text-slate-900 dark:text-gray-200">
                       {plan.integCredits} Integration credits <span className="text-slate-400">/mo</span>
                     </p>
                   </div>
@@ -237,22 +237,22 @@ export default function PricingPage() {
                 <button
                   className={`mt-5 rounded-xl py-2.5 text-sm font-semibold transition ${
                     plan.popular
-                      ? "bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200 hover:from-sky-600 hover:to-cyan-500"
-                      : "border border-slate-300 bg-white text-slate-900 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600"
+                      ? "bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200 dark:shadow-none hover:from-sky-600 hover:to-cyan-500"
+                      : "border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white hover:border-sky-300 dark:hover:border-sky-500/30 hover:bg-sky-50 dark:hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-300"
                   }`}
                 >
                   {plan.cta}
                 </button>
 
-                <div className="mt-5 border-t border-slate-200/80 pt-4">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Highlights</p>
+                <div className="mt-5 border-t border-slate-200/80 dark:border-white/10 pt-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-gray-500">Highlights</p>
                   <div className="space-y-2.5">
                     {plan.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50">
-                          <Check className="h-3 w-3 text-emerald-600" />
+                        <div className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10">
+                          <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                         </div>
-                        <span className="text-xs leading-5 text-slate-700">{feature}</span>
+                        <span className="text-xs leading-5 text-slate-700 dark:text-gray-300">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -263,53 +263,53 @@ export default function PricingPage() {
         </div>
 
         <section className="mt-18 space-y-6">
-          <div className="grid gap-8 overflow-hidden rounded-[2rem] border border-sky-100 bg-white p-8 shadow-[0_24px_60px_rgba(56,189,248,0.12)] lg:grid-cols-[1.05fr_1.45fr] lg:p-10">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-sky-100/70 to-transparent" />
-            <div className="flex flex-col justify-between">
+          <div className="grid gap-8 overflow-hidden relative rounded-[2rem] border border-sky-100 dark:border-white/10 bg-white dark:bg-[#0d0d0d] p-8 shadow-[0_24px_60px_rgba(56,189,248,0.12)] lg:grid-cols-[1.05fr_1.45fr] lg:p-10">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-sky-100/70 dark:from-sky-500/5 to-transparent" />
+            <div className="flex flex-col justify-between relative z-10">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-sky-500">Enterprise</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">LokoAI for Enterprise</h2>
-                <p className="mt-4 max-w-md text-sm leading-7 text-slate-600">
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">LokoAI for Enterprise</h2>
+                <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 dark:text-gray-400">
                   Empower larger organizations to build solutions that fit their teams perfectly, safely, and at scale.
                 </p>
               </div>
-              <button className="mt-8 w-fit rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:from-sky-600 hover:to-cyan-500">
+              <button className="mt-8 w-fit rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-200 dark:shadow-none transition hover:from-sky-600 hover:to-cyan-500">
                 Contact Us
               </button>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2 relative z-10">
               {enterpriseFeatures.map((feature, index) => (
                 <motion.div
                   key={feature.title}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + index * 0.05 }}
-                  className="rounded-2xl border border-sky-100 bg-gradient-to-br from-white to-sky-50/80 p-5 shadow-[0_12px_30px_rgba(148,163,184,0.08)]"
+                  className="rounded-2xl border border-sky-100 dark:border-white/10 bg-gradient-to-br from-white to-sky-50/80 dark:from-white/5 dark:to-white/[0.02] p-5 shadow-[0_12px_30px_rgba(148,163,184,0.08)] dark:shadow-none"
                 >
                   <feature.icon className="h-5 w-5 text-sky-500" />
-                  <h3 className="mt-4 text-base font-semibold text-slate-950">{feature.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{feature.description}</p>
+                  <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">{feature.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-gray-400">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 rounded-[1.75rem] border border-sky-100 bg-gradient-to-r from-white via-sky-50 to-cyan-100 px-6 py-5 shadow-[0_18px_45px_rgba(56,189,248,0.12)] sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 rounded-[1.75rem] border border-sky-100 dark:border-white/10 bg-gradient-to-r from-white via-sky-50 to-cyan-100 dark:from-white/5 dark:via-sky-900/10 dark:to-cyan-900/10 px-6 py-5 shadow-[0_18px_45px_rgba(56,189,248,0.12)] sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-sky-500 shadow-[0_12px_30px_rgba(56,189,248,0.14)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white dark:bg-white/5 text-sky-500 shadow-[0_12px_30px_rgba(56,189,248,0.14)] dark:shadow-none">
                 <BadgeHelp className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-lg font-semibold tracking-tight text-slate-950 sm:text-xl">
+                <p className="text-lg font-semibold tracking-tight text-slate-950 dark:text-white sm:text-xl">
                   Student or teacher? Get up to 50% off Starter or Builder plan
                 </p>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm text-slate-600 dark:text-gray-400">
                   Verify your academic email to unlock discounted pricing.
                 </p>
               </div>
             </div>
-            <button className="flex h-12 w-12 items-center justify-center self-end rounded-full bg-sky-500 text-white shadow-lg shadow-sky-200 transition hover:bg-sky-600 sm:self-auto">
+            <button className="flex h-12 w-12 items-center justify-center self-end rounded-full bg-sky-500 text-white shadow-lg shadow-sky-200 dark:shadow-none transition hover:bg-sky-600 sm:self-auto">
               <ArrowRight className="h-6 w-6" />
             </button>
           </div>
@@ -318,9 +318,9 @@ export default function PricingPage() {
         <section className="mx-auto mt-18 max-w-6xl">
           <div className="mb-8">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-sky-500">Support</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Frequently Asked Questions</h2>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">Frequently Asked Questions</h2>
           </div>
-          <div className="divide-y divide-slate-200 rounded-[2rem] border border-sky-100 bg-white px-6 shadow-[0_18px_50px_rgba(56,189,248,0.08)]">
+          <div className="divide-y divide-slate-200 dark:divide-white/10 rounded-[2rem] border border-sky-100 dark:border-white/10 bg-white dark:bg-[#0d0d0d] px-6 shadow-[0_18px_50px_rgba(56,189,248,0.08)] dark:shadow-none">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
 
@@ -331,7 +331,7 @@ export default function PricingPage() {
                     onClick={() => setOpenFaq(isOpen ? -1 : index)}
                     className="flex w-full items-center justify-between gap-4 text-left"
                   >
-                    <span className="text-lg font-medium text-slate-950 sm:text-xl">{faq.question}</span>
+                    <span className="text-lg font-medium text-slate-950 dark:text-white sm:text-xl">{faq.question}</span>
                     <ChevronDown
                       className={`h-5 w-5 flex-shrink-0 text-sky-500 transition-transform ${
                         isOpen ? "rotate-180" : ""
@@ -340,7 +340,7 @@ export default function PricingPage() {
                   </button>
 
                   {isOpen && (
-                    <div className="mt-4 max-w-5xl space-y-3 pr-2 text-sm leading-7 text-slate-600">
+                    <div className="mt-4 max-w-5xl space-y-3 pr-2 text-sm leading-7 text-slate-600 dark:text-gray-400">
                       {faq.answer.map((paragraph) => (
                         <p key={paragraph}>{paragraph}</p>
                       ))}

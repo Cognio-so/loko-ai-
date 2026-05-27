@@ -113,89 +113,89 @@ const clientBrands = [
     name: "Deloitte.",
     font: "font-sans font-black tracking-tight",
     color: "text-[#86BC25]",
-    bg: "border-[#86BC25]/20 bg-gradient-to-br from-[#86BC25]/12 via-white to-[#86BC25]/[0.03] shadow-[0_14px_30px_rgba(134,188,37,0.10)]"
+    bg: "border-[#86BC25]/20 bg-gradient-to-br from-[#86BC25]/12 via-white to-[#86BC25]/[0.03] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(134,188,37,0.10)]"
   },
   {
     name: "zomato",
     font: "font-serif italic font-extrabold",
     color: "text-[#E23744]",
-    bg: "border-[#E23744]/20 bg-gradient-to-br from-[#E23744]/10 via-white to-[#E23744]/[0.03] shadow-[0_14px_30px_rgba(226,55,68,0.10)]"
+    bg: "border-[#E23744]/20 bg-gradient-to-br from-[#E23744]/10 via-white to-[#E23744]/[0.03] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(226,55,68,0.10)]"
   },
   {
     name: "BHASHINI",
     font: "font-sans font-bold tracking-widest",
     color: "text-[#0A2540] dark:text-[#7BA6FF]",
-    bg: "border-[#0A2540]/15 bg-gradient-to-br from-[#0A2540]/10 via-white to-[#4F8BFF]/[0.05] shadow-[0_14px_30px_rgba(10,37,64,0.09)]"
+    bg: "border-[#0A2540]/15 bg-gradient-to-br from-[#0A2540]/10 via-white to-[#4F8BFF]/[0.05] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(10,37,64,0.09)]"
   },
   {
     name: "OpenAI",
     font: "font-mono font-bold",
     color: "text-slate-700 dark:text-slate-100",
-    bg: "border-slate-300/60 bg-gradient-to-br from-slate-100 via-white to-slate-50 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
+    bg: "border-slate-300/60 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
   },
   {
     name: "Google Gemini",
     font: "font-sans font-extrabold tracking-tight",
     color: "text-sky-600 dark:text-sky-300",
-    bg: "border-sky-400/20 bg-gradient-to-br from-sky-500/10 via-white to-cyan-400/[0.06] shadow-[0_14px_30px_rgba(14,165,233,0.12)]"
+    bg: "border-sky-400/20 bg-gradient-to-br from-sky-500/10 via-white to-cyan-400/[0.06] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(14,165,233,0.12)]"
   },
   {
     name: "Anthropic",
     font: "font-serif font-bold",
     color: "text-[#B78A54] dark:text-[#E0B883]",
-    bg: "border-[#E0B883]/20 bg-gradient-to-br from-[#E0B883]/14 via-white to-[#E0B883]/[0.03] shadow-[0_14px_30px_rgba(224,184,131,0.10)]"
+    bg: "border-[#E0B883]/20 bg-gradient-to-br from-[#E0B883]/14 via-white to-[#E0B883]/[0.03] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(224,184,131,0.10)]"
   },
   {
     name: "Meta Llama",
     font: "font-sans font-bold",
     color: "text-blue-600 dark:text-blue-300",
-    bg: "border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-white to-indigo-400/[0.05] shadow-[0_14px_30px_rgba(37,99,235,0.11)]"
+    bg: "border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-white to-indigo-400/[0.05] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(37,99,235,0.11)]"
   },
   {
     name: "Cohere",
     font: "font-mono font-semibold",
     color: "text-[#3B593E] dark:text-[#8AD297]",
-    bg: "border-[#3B593E]/15 bg-gradient-to-br from-[#3B593E]/10 via-white to-[#6BB374]/[0.05] shadow-[0_14px_30px_rgba(59,89,62,0.10)]"
+    bg: "border-[#3B593E]/15 bg-gradient-to-br from-[#3B593E]/10 via-white to-[#6BB374]/[0.05] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(59,89,62,0.10)]"
   },
   {
     name: "Vercel",
     font: "font-sans font-black tracking-tighter",
     color: "text-slate-800 dark:text-white",
-    bg: "border-slate-300/60 bg-gradient-to-br from-slate-100 via-white to-slate-50 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
+    bg: "border-slate-300/60 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
   },
   {
     name: "Supabase",
     font: "font-sans font-bold",
     color: "text-[#24B47E] dark:text-[#52E0A1]",
-    bg: "border-[#3ECF8E]/20 bg-gradient-to-br from-[#3ECF8E]/12 via-white to-[#3ECF8E]/[0.03] shadow-[0_14px_30px_rgba(62,207,142,0.11)]"
+    bg: "border-[#3ECF8E]/20 bg-gradient-to-br from-[#3ECF8E]/12 via-white to-[#3ECF8E]/[0.03] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(62,207,142,0.11)]"
   },
   {
     name: "Pinecone",
     font: "font-sans font-extrabold",
     color: "text-amber-600 dark:text-amber-300",
-    bg: "border-amber-400/20 bg-gradient-to-br from-amber-400/12 via-white to-orange-300/[0.05] shadow-[0_14px_30px_rgba(245,158,11,0.11)]"
+    bg: "border-amber-400/20 bg-gradient-to-br from-amber-400/12 via-white to-orange-300/[0.05] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(245,158,11,0.11)]"
   },
   {
     name: "LangChain",
     font: "font-mono font-bold",
     color: "text-emerald-600 dark:text-emerald-300",
-    bg: "border-emerald-400/20 bg-gradient-to-br from-emerald-400/12 via-white to-teal-300/[0.05] shadow-[0_14px_30px_rgba(16,185,129,0.11)]"
+    bg: "border-emerald-400/20 bg-gradient-to-br from-emerald-400/12 via-white to-teal-300/[0.05] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(16,185,129,0.11)]"
   }
 ];
 
 const integrationTools = [
-  { name: "Gmail", icon: GmailIcon, card: "border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50 shadow-[0_10px_24px_rgba(234,67,53,0.12)]" },
-  { name: "Google Meet", icon: GoogleMeetIcon, card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-sky-50 shadow-[0_10px_24px_rgba(0,168,47,0.12)]" },
-  { name: "Calendly", icon: CalendlyIcon, card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 shadow-[0_10px_24px_rgba(0,107,255,0.12)]" },
-  { name: "YouTube", icon: YoutubeIcon, card: "border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-red-50 shadow-[0_10px_24px_rgba(255,0,0,0.12)]" },
-  { name: "LinkedIn", icon: LinkedinIcon, card: "border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-blue-50 shadow-[0_10px_24px_rgba(10,102,194,0.12)]" },
-  { name: "Twitter X", icon: TwitterIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900" },
-  { name: "WhatsApp", icon: WhatsappIcon, card: "border-green-200/70 bg-gradient-to-br from-green-50 via-white to-emerald-50 shadow-[0_10px_24px_rgba(37,211,102,0.12)]" },
-  { name: "Notion", icon: NotionIcon, card: "border-zinc-200/80 bg-gradient-to-br from-zinc-100 via-white to-zinc-50 shadow-[0_10px_24px_rgba(24,24,27,0.10)] text-zinc-900" },
-  { name: "Slack", icon: SlackIcon, card: "border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-cyan-50 shadow-[0_10px_24px_rgba(54,197,240,0.12)]" },
-  { name: "GitHub", icon: GithubIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900" },
-  { name: "HubSpot", icon: HubspotIcon, card: "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-amber-50 shadow-[0_10px_24px_rgba(255,122,89,0.12)]" },
-  { name: "Shopify", icon: ShopifyIcon, card: "border-lime-200/70 bg-gradient-to-br from-lime-50 via-white to-green-50 shadow-[0_10px_24px_rgba(149,191,71,0.12)]" }
+  { name: "Gmail", icon: GmailIcon, card: "border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50 dark:border-red-500/20 dark:from-red-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(234,67,53,0.12)] dark:text-white" },
+  { name: "Google Meet", icon: GoogleMeetIcon, card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-sky-50 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(0,168,47,0.12)] dark:text-white" },
+  { name: "Calendly", icon: CalendlyIcon, card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:border-blue-500/20 dark:from-blue-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(0,107,255,0.12)] dark:text-white" },
+  { name: "YouTube", icon: YoutubeIcon, card: "border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-red-50 dark:border-rose-500/20 dark:from-rose-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(255,0,0,0.12)] dark:text-white" },
+  { name: "LinkedIn", icon: LinkedinIcon, card: "border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:border-sky-500/20 dark:from-sky-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(10,102,194,0.12)] dark:text-white" },
+  { name: "Twitter X", icon: TwitterIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900 dark:text-white" },
+  { name: "WhatsApp", icon: WhatsappIcon, card: "border-green-200/70 bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:border-green-500/20 dark:from-green-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(37,211,102,0.12)] dark:text-white" },
+  { name: "Notion", icon: NotionIcon, card: "border-zinc-200/80 bg-gradient-to-br from-zinc-100 via-white to-zinc-50 dark:border-white/10 dark:from-zinc-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(24,24,27,0.10)] text-zinc-900 dark:text-white" },
+  { name: "Slack", icon: SlackIcon, card: "border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-cyan-50 dark:border-fuchsia-500/20 dark:from-fuchsia-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(54,197,240,0.12)] dark:text-white" },
+  { name: "GitHub", icon: GithubIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900 dark:text-white" },
+  { name: "HubSpot", icon: HubspotIcon, card: "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:border-orange-500/20 dark:from-orange-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(255,122,89,0.12)] dark:text-white" },
+  { name: "Shopify", icon: ShopifyIcon, card: "border-lime-200/70 bg-gradient-to-br from-lime-50 via-white to-green-50 dark:border-lime-500/20 dark:from-lime-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(149,191,71,0.12)] dark:text-white" }
 ];
 
 const testimonials = [
@@ -427,8 +427,8 @@ export default function Home() {
               <div className="w-12 h-2" />
             </div>
             <div className="grid grid-cols-4 gap-4 h-[380px] overflow-hidden relative justify-items-center px-2">
-              <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-slate-50 dark:from-[#0d1527] to-transparent z-10 pointer-events-none" />
-              <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-slate-50 dark:from-[#0d1527] to-transparent z-10 pointer-events-none" />
+              <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none" />
+              <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none" />
               <div className="flex flex-col gap-4 animate-marquee-vertical-up will-change-transform">
                 {integrationTools.slice(0, 3).map((tool, idx) => (
                   <div key={`c1-${idx}`} className={`pointer-events-none flex h-16 w-16 flex-shrink-0 select-none items-center justify-center rounded-2xl border backdrop-blur-sm ${tool.card}`}>
