@@ -1,4 +1,11 @@
-export const protectedRoutes: string[] = []; // No protected routes - everything is public
+export const protectedRoutes = [
+  "/workspace",
+  "/dashboard",
+  "/projects",
+  "/generate",
+  "/profile",
+  "/settings",
+];
 
 export function isSupabaseConfigured() {
   return Boolean(
@@ -15,6 +22,6 @@ export function getSupabaseConfig() {
   };
 }
 
-export function isProtectedPath(_pathname: string) {
-  return false; // Nothing is protected
+export function isProtectedPath(pathname: string) {
+  return protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }

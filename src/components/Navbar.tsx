@@ -215,6 +215,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
-    </nav>
+    </>
   );
 }
