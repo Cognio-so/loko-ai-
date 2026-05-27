@@ -142,9 +142,18 @@ export default function CollectionPage() {
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br ${assistant.accent} text-white shadow-sm`}
+                      className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} p-[2px] shadow-lg shadow-slate-200/70 transition group-hover:scale-105 dark:shadow-black/30`}
                     >
-                      <assistant.icon className="h-5 w-5" />
+                      <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[14px] bg-white text-slate-950 dark:bg-slate-950 dark:text-white">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${assistant.accent} opacity-15`} />
+                        <div className="absolute -right-3 -top-3 h-8 w-8 rounded-full bg-white/60 blur-sm dark:bg-white/20" />
+                        <assistant.icon className="relative h-6 w-6" />
+                      </div>
+                      <span
+                        className={`absolute -bottom-1.5 -right-1.5 rounded-md bg-gradient-to-br ${assistant.accent} px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide text-white shadow-sm ring-2 ring-white dark:ring-slate-900`}
+                      >
+                        {assistant.logoText}
+                      </span>
                     </div>
                     <h2 className="text-base font-bold leading-snug text-slate-950 dark:text-white">
                       {assistant.name}
