@@ -106,6 +106,33 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
     setPrompt("");
   }
 
+  function handleVoiceInput() {
+    type SpeechRecognitionConstructor = new () => {
+      lang: string;
+      interimResults: boolean;
+      start: () => void;
+      onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null;
+    };
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!Recognition) {
+      setPrompt((current) => current || "Voice input is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new Recognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript;
+      if (transcript) setPrompt((current) => `${current}${current ? " " : ""}${transcript}`);
+    };
+    recognition.start();
+  }
+
   return (
     <div className="min-h-dvh bg-white text-slate-900">
       <div className="flex min-h-dvh">
