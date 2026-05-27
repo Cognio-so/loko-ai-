@@ -239,19 +239,22 @@ body {
   animation: typewriter-cursor-blink 1s steps(2, start) infinite;
 }
 
-@keyframes rainbow-border {
-  0% { border-color: #ff0000; }
-  17% { border-color: #ff8800; }
-  34% { border-color: #ffff00; }
-  51% { border-color: #00ff00; }
-  68% { border-color: #0000ff; }
-  85% { border-color: #8800ff; }
-  100% { border-color: #ff0000; }
+@keyframes rainbow-slide {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 .rainbow-border-animate {
-  animation: rainbow-border 3s linear infinite;
-  border-width: 2px;
+  border: 2px solid transparent !important;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent) border-box !important;
+  background-size: 200% 100% !important;
+  animation: rainbow-slide 4s linear infinite !important;
+}
+
+.dark .rainbow-border-animate {
+  background: linear-gradient(#050505, #050505) padding-box,
+              linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent) border-box !important;
 }
 
 @keyframes typewriter-cursor-blink {
