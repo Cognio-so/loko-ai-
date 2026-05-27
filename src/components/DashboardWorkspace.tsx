@@ -63,12 +63,27 @@ const navItems = [
   { label: "Pricing", href: "/pricing", icon: Zap },
 ];
 
-const promptIdeas = [
-  "Create slides",
-  "Build website",
-  "Develop desktop app",
-  "Design",
-  "More",
+const quickActions = [
+  {
+    title: "Create slides",
+    prompt:
+      "Create modern professional presentation slides with beautiful layouts, animations, icons, editable content sections, and premium design.",
+  },
+  {
+    title: "Build website",
+    prompt:
+      "Create a modern responsive website with hero section, navbar, animations, services, pricing, contact form, and premium UI design.",
+  },
+  {
+    title: "Develop desktop app",
+    prompt:
+      "Create a modern desktop application with sidebar, dashboard, analytics cards, responsive layout, and clean professional UI.",
+  },
+  {
+    title: "Design",
+    prompt:
+      "Create a modern creative UI/UX design with beautiful typography, colors, animations, clean layout, and premium user experience.",
+  },
 ];
 
 function getTimeAgo(dateString: string): string {
@@ -587,15 +602,15 @@ export default function DashboardWorkspace() {
 function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   return (
     <div className="mt-5 flex w-full flex-nowrap justify-center gap-3 overflow-x-auto pb-2">
-      {promptIdeas.map((idea) => (
+      {quickActions.map((item) => (
         <button
-          key={idea}
+          key={item.title}
           type="button"
-          onClick={() => setPrompt(idea)}
-          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+          onClick={() => setPrompt(item.prompt)}
+          className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
         >
           <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
-          {idea}
+          {item.title}
         </button>
       ))}
     </div>

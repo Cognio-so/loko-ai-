@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     : normalizeMessages(body.messages);
 
   const chatId = existingProject?.id ?? crypto.randomUUID();
-  const title = existingProject?.title ?? userText.slice(0, 64) || "New chat";
+  const title = existingProject?.title ?? (userText.slice(0, 64) || "New chat");
   const messagesBeforeAi = [...previousMessages, userMessage];
 
   if (existingProject) {
