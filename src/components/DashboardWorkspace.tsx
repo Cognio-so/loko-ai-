@@ -420,41 +420,41 @@ export default function DashboardWorkspace() {
   const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
 
   return (
-    <div className="min-h-dvh bg-[#fbfbfb] text-slate-950">
+    <div className="min-h-dvh bg-white text-slate-900">
       <div className="flex min-h-dvh">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[286px] border-r border-slate-200 bg-white px-3 py-3 transition-transform lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 backdrop-blur-xl px-4 py-6 transition-transform lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex h-full flex-col">
-            <div className="mb-4 flex items-center justify-between px-1">
-              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2 rounded-full px-1 py-1 text-left">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-cyan-400 to-blue-500 text-white">
-                  <Sparkles className="h-4 w-4" />
+            <div className="mb-8 flex items-center justify-between px-2">
+              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
+                  <Sparkles className="h-5 w-5" />
                 </span>
-                <span className="text-xl font-semibold tracking-tight">LokoAI</span>
+                <span className="text-xl font-bold tracking-tight text-slate-900">LokoAI</span>
               </button>
-              <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close sidebar">
-                <X className="h-4 w-4" />
+              <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 lg:hidden" aria-label="Close sidebar">
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <button type="button" onClick={startNewChat} className="mb-2 flex h-9 w-full items-center gap-3 rounded-full bg-slate-100 px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-200">
-              <Plus className="h-4 w-4" />
+            <button type="button" onClick={startNewChat} className="group mb-2 flex h-11 w-full items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]">
+              <Plus className="h-4 w-4 text-slate-400 transition group-hover:text-slate-600" />
               New chat
             </button>
 
-            <button type="button" onClick={() => setIsSearchOpen((open) => !open)} className="mb-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100">
+            <button type="button" onClick={() => setIsSearchOpen((open) => !open)} className="mb-6 flex h-11 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900">
               <Search className="h-4 w-4" />
               Search chats
             </button>
 
             {isSearchOpen && (
-              <div className="mb-2 px-1">
-                <div className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 shadow-sm">
+              <div className="mb-4 px-1">
+                <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm ring-2 ring-sky-50">
                   <Search className="h-4 w-4 text-slate-400" />
-                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search recent chats" className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400" autoFocus />
+                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search chats..." className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400" autoFocus />
                   {searchQuery && (
                     <button type="button" onClick={() => setSearchQuery("")} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Clear search">
                       <X className="h-3.5 w-3.5" />
@@ -464,26 +464,21 @@ export default function DashboardWorkspace() {
               </div>
             )}
 
-            <button type="button" onClick={() => setPrompt("Untitled notebook: ")} className="mb-4 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100">
-              <Notebook className="h-4 w-4" />
-              Untitled notebook
-            </button>
-
-            <div className="mb-3 border-t border-slate-200 pt-3">
-              <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pages</p>
-              <div className="space-y-1">
+            <div className="mb-6 space-y-1 border-t border-slate-100 pt-6">
+              <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Navigation</p>
+              <div className="space-y-0.5">
                 {navItems.map((item) => (
                   <button
                     key={item.label}
                     type="button"
                     onClick={() => setActiveView(item.view)}
-                    className={`flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium transition ${
+                    className={`flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
                       activeView === item.view
-                        ? "bg-sky-50 text-sky-700"
-                        : "text-slate-700 hover:bg-slate-50 hover:text-sky-700"
+                        ? "bg-white text-sky-600 shadow-sm border border-slate-100"
+                        : "text-slate-500 hover:bg-white hover:text-slate-900"
                     }`}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className={`h-4 w-4 ${activeView === item.view ? "text-sky-500" : ""}`} />
                     {item.label}
                   </button>
                 ))}
@@ -491,61 +486,61 @@ export default function DashboardWorkspace() {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-1">
-              <div className="mb-2 flex items-center justify-between px-3 text-xs text-slate-500">
-                <span>Recent</span>
-                <History className="h-3.5 w-3.5" />
+              <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                <span>Recent History</span>
+                <History className="h-3.5 w-3.5 opacity-50" />
               </div>
               {isLoadingProjects ? (
                 <div className="space-y-2 px-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-5 animate-pulse rounded bg-slate-100" />
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <div key={index} className="h-8 animate-pulse rounded-lg bg-slate-100/50" />
                   ))}
                 </div>
               ) : filteredProjects.length > 0 ? (
                 <div className="space-y-1">
                   {filteredProjects.slice(0, 20).map((project) => (
-                    <div key={project.id} className={`group flex items-center gap-2 rounded-2xl px-3 py-2 transition hover:bg-slate-100 ${activeChatId === project.id ? "bg-sky-50" : ""}`}>
+                    <div key={project.id} className={`group relative flex items-center gap-2 rounded-xl px-3 py-2.5 transition hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-100 ${activeChatId === project.id ? "bg-white shadow-sm ring-1 ring-slate-100" : ""}`}>
                       <button type="button" onClick={() => openProject(project)} className="min-w-0 flex-1 text-left" title={project.prompt || project.title}>
-                        <span className="line-clamp-1 text-sm text-slate-900">{project.title || project.prompt || "Untitled chat"}</span>
-                        <span className="mt-0.5 block text-[11px] text-slate-500">{getTimeAgo(project.updated_at || project.created_at)}</span>
+                        <span className={`line-clamp-1 text-sm ${activeChatId === project.id ? "font-bold text-slate-900" : "text-slate-600"}`}>{project.title || project.prompt || "Untitled chat"}</span>
+                        <span className="mt-0.5 block text-[10px] font-bold text-slate-400">{getTimeAgo(project.updated_at || project.created_at)}</span>
                       </button>
-                      <button type="button" onClick={() => void handleDeleteProject(project.id)} className="rounded-full p-1.5 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" aria-label={`Delete ${project.title || "chat"}`}>
-                        {deletingProjectId === project.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                      <button type="button" onClick={() => void handleDeleteProject(project.id)} className="rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" aria-label={`Delete ${project.title || "chat"}`}>
+                        {deletingProjectId === project.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="px-3 py-2 text-sm text-slate-500">No recent chats yet.</p>
+                <p className="px-4 py-2 text-xs font-medium text-slate-400">No recent chats yet.</p>
               )}
             </div>
 
-            <div className="mt-3 border-t border-slate-200 pt-3">
-              <button type="button" onClick={() => router.push("/projects")} className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                <FolderOpen className="h-4 w-4" />
-                Projects
-              </button>
-              <button type="button" onClick={() => router.push("/settings")} className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
+            <div className="mt-6 space-y-3 border-t border-slate-100 pt-6">
+              <div className="flex flex-col gap-1">
+                <button type="button" onClick={() => router.push("/projects")} className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900">
+                  <FolderOpen className="h-4 w-4" />
+                  Projects
+                </button>
+                <button type="button" onClick={() => router.push("/settings")} className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </button>
+              </div>
               {user && (
-                <div className="mt-3 border-t border-slate-200 pt-3">
-                  <div className="rounded-3xl bg-slate-50 p-3">
-                    <div className="flex items-center gap-3">
-                      {userAvatar ? (
-                        <img src={userAvatar} alt={userName} className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{userName.slice(0, 1).toUpperCase()}</div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-950">{userName}</p>
-                        <p className="truncate text-xs text-slate-500">{user.email}</p>
-                      </div>
+                <div className="rounded-2xl bg-white border border-slate-100 p-3 shadow-sm ring-1 ring-slate-100">
+                  <div className="flex items-center gap-3">
+                    {userAvatar ? (
+                      <img src={userAvatar} alt={userName} className="h-10 w-10 shrink-0 rounded-xl object-cover shadow-sm ring-1 ring-slate-100" />
+                    ) : (
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                      <p className="truncate text-[11px] text-slate-400">{user.email}</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => void signOut()} className="mt-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-red-50 hover:text-red-600">
-                    <Bot className="h-4 w-4" />
+                  <button type="button" onClick={() => void signOut()} className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600">
+                    <Bot className="h-3.5 w-3.5" />
                     Sign out
                   </button>
                 </div>
@@ -554,25 +549,25 @@ export default function DashboardWorkspace() {
           </div>
         </aside>
 
-        {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/20 lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
+        {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 items-center justify-between px-4 sm:px-6">
-            <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Open sidebar">
+        <main className="flex min-w-0 flex-1 flex-col bg-white">
+          <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-50 bg-white/80 backdrop-blur-md px-4 sm:px-8">
+            <div className="flex items-center gap-4">
+              <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
               </button>
-              <button type="button" onClick={() => setActiveView("chat")} className="hidden rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:inline-flex" aria-label="Dashboard menu">
+              <button type="button" onClick={() => setActiveView("chat")} className="hidden rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:inline-flex" aria-label="Dashboard menu">
                 <Compass className="h-5 w-5" />
               </button>
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-10 items-center gap-2 rounded-full bg-sky-100 px-5 text-sm font-semibold text-sky-900 transition hover:bg-sky-200">
-                <Sparkles className="h-4 w-4" />
-                Upgrade
+              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-bold text-sky-600 transition hover:bg-sky-100">
+                <Sparkles className="h-3.5 w-3.5" />
+                Upgrade Pro
               </button>
-              <button type="button" onClick={() => router.push("/profile")} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white" aria-label="Profile">
+              <button type="button" onClick={() => router.push("/profile")} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800" aria-label="Profile">
                 {userName.slice(0, 1).toUpperCase()}
               </button>
             </div>
@@ -580,29 +575,36 @@ export default function DashboardWorkspace() {
 
           <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
             {activeView === "chat" ? (
-              <div className="flex flex-1 flex-col overflow-hidden px-4 pb-8 pt-4">
-                <div className="pointer-events-none absolute inset-x-[10%] top-[18%] h-[58%] rounded-full bg-[radial-gradient(circle,#fed7aa_0%,#bae6fd_50%,transparent_76%)] blur-[88px]" />
+              <div className="flex flex-1 flex-col overflow-hidden">
                 <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col">
                   {messages.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center">
-                      <h1 className="mb-9 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
-                        What&apos;s next, {isLoading ? "there" : userName}?
-                      </h1>
-                      <Composer
-                        prompt={prompt}
-                        setPrompt={setPrompt}
-                        textareaRef={textareaRef}
-                        onKeyDown={handleKeyDown}
-                        onSubmit={() => void handleSubmit()}
-                        onVoiceInput={handleVoiceInput}
-                        isSubmitting={isSubmitting}
-                      />
-                      <PromptChips setPrompt={setPrompt} />
+                    <div className="flex flex-1 flex-col items-center justify-center px-4">
+                      <div className="mb-10 text-center">
+                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 shadow-sm ring-1 ring-slate-100">
+                          <Sparkles className="h-8 w-8 text-sky-500" />
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                          How can I help you today, {userName}?
+                        </h1>
+                        <p className="mt-3 text-slate-500 font-medium">Build, design, or create anything with LokoAI.</p>
+                      </div>
+                      <div className="w-full max-w-2xl">
+                        <Composer
+                          prompt={prompt}
+                          setPrompt={setPrompt}
+                          textareaRef={textareaRef}
+                          onKeyDown={handleKeyDown}
+                          onSubmit={() => void handleSubmit()}
+                          onVoiceInput={handleVoiceInput}
+                          isSubmitting={isSubmitting}
+                        />
+                        <PromptChips setPrompt={setPrompt} />
+                      </div>
                     </div>
                   ) : (
                     <>
-                      <div className="min-h-0 flex-1 overflow-y-auto px-1 py-4">
-                        <div className="space-y-5">
+                      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-10 sm:px-6">
+                        <div className="space-y-12">
                           {messages.map((message) => (
                             <MessageBubble
                               key={message.id}
@@ -615,25 +617,30 @@ export default function DashboardWorkspace() {
                             />
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
-                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                            <div className="flex items-center gap-3 text-sm font-bold text-slate-400">
+                              <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
                               LokoAI is thinking...
                             </div>
                           )}
                           <div ref={messagesEndRef} />
                         </div>
                       </div>
-                      <div className="pt-3">
-                        <Composer
-                          prompt={prompt}
-                          setPrompt={setPrompt}
-                          textareaRef={textareaRef}
-                          onKeyDown={handleKeyDown}
-                          onSubmit={() => void handleSubmit()}
-                          onVoiceInput={handleVoiceInput}
-                          isSubmitting={isSubmitting}
-                        />
-                        <PromptChips setPrompt={setPrompt} />
+                      <div className="sticky bottom-0 bg-white/80 pb-10 pt-4 backdrop-blur-md px-4">
+                        <div className="mx-auto max-w-2xl">
+                          <Composer
+                            prompt={prompt}
+                            setPrompt={setPrompt}
+                            textareaRef={textareaRef}
+                            onKeyDown={handleKeyDown}
+                            onSubmit={() => void handleSubmit()}
+                            onVoiceInput={handleVoiceInput}
+                            isSubmitting={isSubmitting}
+                          />
+                          <PromptChips setPrompt={setPrompt} />
+                          <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                            AI may produce inaccurate information about people, places, or facts.
+                          </p>
+                        </div>
                       </div>
                     </>
                   )}
@@ -661,20 +668,21 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <div className="relative mt-5 flex w-full flex-nowrap justify-center gap-3 overflow-x-auto pb-2">
-      {[...quickActions, { title: "More", prompt: "" }].map((item) =>
-        item.title === "More" ? (
+    <div className="relative mt-6 flex w-full flex-nowrap justify-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
+      {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
+        item.title === "Explore More" ? (
           <div key={item.title} className="relative shrink-0">
             <button
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+              className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
             >
-              <Plus className="h-4 w-4 shrink-0 text-slate-600" />
-              More
+              <Plus className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              Explore More
             </button>
             {isMoreOpen && (
-              <div className="absolute left-1/2 top-14 z-20 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_44px_rgba(15,23,42,0.18)]">
+              <div className="absolute bottom-12 left-1/2 z-30 w-64 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                <div className="mb-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Templates</div>
                 {moreQuickActions.map((moreItem) => (
                   <button
                     key={moreItem.title}
@@ -683,9 +691,9 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
                       setPrompt(moreItem.prompt);
                       setIsMoreOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-sky-800"
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
                   >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-400" />
                     {moreItem.title}
                   </button>
                 ))}
@@ -697,9 +705,9 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
             key={item.title}
             type="button"
             onClick={() => setPrompt(item.prompt)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
           >
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
+            <Sparkles className="h-3 w-3 shrink-0 text-sky-400" />
             {item.title}
           </button>
         )
@@ -726,27 +734,25 @@ function Composer({
   isSubmitting: boolean;
 }) {
   return (
-    <div className="w-full overflow-hidden rounded-[1.25rem] bg-white shadow-[0_10px_26px_rgba(15,23,42,0.20)] ring-1 ring-slate-200">
-      <div className="px-5 pt-5">
+    <div className="relative flex flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50">
+      <div className="flex items-center gap-1 p-2">
+        <button type="button" onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600" aria-label="Add new line">
+          <Plus className="h-4 w-4" />
+        </button>
+        <button type="button" onClick={onVoiceInput} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600" aria-label="Voice input">
+          <Mic className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="px-4 pb-4 flex items-end gap-2">
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Assign a task or ask anything"
-          className="max-h-48 min-h-[76px] w-full resize-none bg-transparent text-base leading-7 text-slate-900 outline-none placeholder:text-slate-500"
+          placeholder="What do you want to build?"
+          className="max-h-48 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
         />
-      </div>
-      <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100" aria-label="Add new line">
-            <Plus className="h-5 w-5" />
-          </button>
-          <button type="button" onClick={onVoiceInput} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100" aria-label="Voice input">
-            <Mic className="h-5 w-5" />
-          </button>
-        </div>
-        <button type="button" onClick={onSubmit} disabled={!prompt.trim() || isSubmitting} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white transition hover:bg-sky-600 disabled:bg-slate-200 disabled:text-slate-400" aria-label="Send prompt">
+        <button type="button" onClick={onSubmit} disabled={!prompt.trim() || isSubmitting} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" aria-label="Send prompt">
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </button>
       </div>
@@ -772,38 +778,52 @@ function MessageBubble({
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
-      {!isUser && (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white">
-          <Sparkles className="h-4 w-4" />
-        </div>
-      )}
-      <div className={`max-w-[78%] ${isUser ? "items-end" : "items-start"}`}>
-        <div className={`rounded-3xl px-4 py-3 shadow-sm ${isUser ? "bg-slate-900 text-white" : "bg-white text-slate-900 ring-1 ring-slate-200"} ${message.isError ? "ring-red-200" : ""}`}>
-          <MarkdownContent content={message.content || (message.isStreaming ? "Typing..." : "")} />
-          {message.isStreaming && <span className="ml-1 inline-block h-2 w-2 animate-pulse rounded-full bg-sky-500" />}
-        </div>
-        <div className={`mt-1 flex items-center gap-2 text-[11px] text-slate-500 ${isUser ? "justify-end" : "justify-start"}`}>
-          <span>{formatTime(message.createdAt)}</span>
-          <button type="button" onClick={onCopy} className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-slate-100">
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          {!isUser && (
-            <button type="button" onClick={onRetry} className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-slate-100">
-              <RefreshCw className="h-3 w-3" />
-              Retry
-            </button>
+    <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+      <div className={`flex gap-4 max-w-[90%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+        {!isUser && (
+          <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-sky-200">
+            <Sparkles className="h-5 w-5" />
+          </div>
+        )}
+        
+        <div className="group relative">
+          {isUser && (
+            <div className="absolute -top-6 right-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
+              You
+            </div>
           )}
+          <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium" : "text-slate-700"} ${message.isError ? "text-red-500 font-medium" : ""}`}>
+            <div className={!isUser ? "prose prose-slate max-w-none text-slate-700" : ""}>
+              <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
+            </div>
+            {message.isStreaming && <span className="mt-2 inline-block h-1 w-8 animate-pulse rounded-full bg-sky-400" />}
+          </div>
+
+          <div className={`mt-2 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 ${isUser ? "justify-end" : "justify-start"}`}>
+            <span>{formatTime(message.createdAt)}</span>
+            <button type="button" onClick={onCopy} className="hover:text-slate-900 transition flex items-center gap-1">
+              {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            {!isUser && (
+              <button type="button" onClick={onRetry} className="hover:text-slate-900 transition flex items-center gap-1">
+                <RefreshCw className="h-3 w-3" />
+                Retry
+              </button>
+            )}
+          </div>
         </div>
+
+        {isUser && (
+          <div className="mt-1 shrink-0">
+            {userAvatar ? (
+              <img src={userAvatar} alt={userName} className="h-9 w-9 rounded-xl object-cover shadow-sm ring-1 ring-slate-100" />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
+            )}
+          </div>
+        )}
       </div>
-      {isUser && (
-        userAvatar ? (
-          <img src={userAvatar} alt={userName} className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
-        ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{userName.slice(0, 1).toUpperCase()}</div>
-        )
-      )}
     </div>
   );
 }

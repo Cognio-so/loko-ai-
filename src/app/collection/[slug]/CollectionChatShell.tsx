@@ -106,59 +106,59 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="min-h-dvh bg-[#fbfbfb] text-slate-950">
+    <div className="min-h-dvh bg-white text-slate-900">
       <div className="flex min-h-dvh">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[286px] border-r border-slate-200 bg-white px-3 py-3 transition-transform lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 backdrop-blur-xl px-4 py-6 transition-transform lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex h-full flex-col">
-            <div className="mb-4 flex items-center justify-between px-1">
+            <div className="mb-8 flex items-center justify-between px-2">
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="flex items-center gap-2 rounded-full px-1 py-1 text-left"
+                className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80"
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-cyan-400 to-blue-500 text-white">
-                  <Sparkles className="h-4 w-4" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
+                  <Sparkles className="h-5 w-5" />
                 </span>
-                <span className="text-xl font-semibold tracking-tight">LokoAI</span>
+                <span className="text-xl font-bold tracking-tight text-slate-900">LokoAI</span>
               </button>
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(false)}
-                className="rounded-full p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+                className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 lg:hidden"
                 aria-label="Close sidebar"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             <button
               type="button"
               onClick={startNewChat}
-              className="mb-2 flex h-9 w-full items-center gap-3 rounded-full bg-slate-100 px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+              className="group mb-2 flex h-11 w-full items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 text-slate-400 transition group-hover:text-slate-600" />
               New chat
             </button>
 
             <button
               type="button"
               onClick={() => setIsSearchOpen((open) => !open)}
-              className="mb-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+              className="mb-6 flex h-11 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900"
             >
               <Search className="h-4 w-4" />
               Search chats
             </button>
 
             {isSearchOpen && (
-              <div className="mb-2 px-1">
-                <div className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 shadow-sm">
+              <div className="mb-4 px-1">
+                <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm ring-2 ring-sky-50">
                   <Search className="h-4 w-4 text-slate-400" />
                   <input
-                    placeholder="Search collection chats"
+                    placeholder="Search messages..."
                     className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                     autoFocus
                   />
@@ -166,29 +166,20 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => setPrompt("Untitled notebook: ")}
-              className="mb-4 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100"
-            >
-              <Notebook className="h-4 w-4" />
-              Untitled notebook
-            </button>
-
-            <div className="mb-3 border-t border-slate-200 pt-3">
-              <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pages</p>
-              <div className="space-y-1">
+            <div className="mb-6 space-y-1 border-t border-slate-100 pt-6">
+              <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Navigation</p>
+              <div className="space-y-0.5">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium transition ${
+                    className={`flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
                       item.href === "/collection"
-                        ? "bg-sky-50 text-sky-700"
-                        : "text-slate-700 hover:bg-sky-50 hover:text-sky-700"
+                        ? "bg-white text-sky-600 shadow-sm border border-slate-100"
+                        : "text-slate-500 hover:bg-white hover:text-slate-900"
                     }`}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className={`h-4 w-4 ${item.href === "/collection" ? "text-sky-500" : ""}`} />
                     {item.label}
                   </Link>
                 ))}
@@ -196,56 +187,58 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-1">
-              <div className="mb-2 flex items-center justify-between px-3 text-xs text-slate-500">
-                <span>Recent</span>
-                <History className="h-3.5 w-3.5" />
+              <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                <span>Recent History</span>
+                <History className="h-3.5 w-3.5 opacity-50" />
               </div>
               <Link
                 href={`/collection/${assistant.slug}`}
-                className="flex items-center gap-3 rounded-2xl bg-slate-100 px-3 py-3 text-left"
+                className="flex items-center gap-3 rounded-xl bg-white border border-slate-100 px-3 py-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:border-slate-200 hover:shadow-md"
               >
                 <AssistantLogo assistant={assistant} size="sm" />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-slate-900">{assistant.name}</p>
-                  <p className="truncate text-xs text-slate-500">Collection chat</p>
+                  <p className="truncate text-sm font-bold text-slate-900">{assistant.name}</p>
+                  <p className="truncate text-[11px] text-slate-400">Currently active</p>
                 </div>
               </Link>
             </div>
 
-            <div className="mt-3 border-t border-slate-200 pt-3">
-              <button
-                type="button"
-                onClick={() => router.push("/projects")}
-                className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                <FolderOpen className="h-4 w-4" />
-                Projects
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push("/settings")}
-                className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-              >
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
+            <div className="mt-6 space-y-3 border-t border-slate-100 pt-6">
+              <div className="flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => router.push("/projects")}
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Projects
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/settings")}
+                  className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900"
+                >
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </button>
+              </div>
 
-              <div className="mt-3 rounded-3xl bg-slate-50 p-3">
+              <div className="rounded-2xl bg-white border border-slate-100 p-3 shadow-sm ring-1 ring-slate-100">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">
                     {userInitial}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
-                    <p className="truncate text-xs text-slate-500">{userEmail}</p>
+                    <p className="truncate text-[11px] text-slate-400">{userEmail}</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => void signOut()}
-                  className="mt-3 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-red-50 hover:text-red-600"
+                  className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
                 >
-                  <Bot className="h-4 w-4" />
+                  <Bot className="h-3.5 w-3.5" />
                   Sign out
                 </button>
               </div>
@@ -256,100 +249,125 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
         {isSidebarOpen && (
           <button
             type="button"
-            className="fixed inset-0 z-30 bg-slate-950/20 lg:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
             aria-label="Close sidebar overlay"
           />
         )}
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
-            <div className="flex items-center gap-3">
+        <main className="flex min-w-0 flex-1 flex-col bg-white">
+          <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 backdrop-blur-md px-4 sm:px-8">
+            <div className="flex items-center gap-4">
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen(true)}
-                className="rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:hidden"
+                className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <AssistantLogo assistant={assistant} size="sm" />
-              <h1 className="text-lg font-bold tracking-tight text-slate-950">{assistant.name}</h1>
+              <div className="flex items-center gap-3">
+                <AssistantLogo assistant={assistant} size="sm" />
+                <div>
+                  <h1 className="text-sm font-bold tracking-tight text-slate-900">{assistant.name}</h1>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-500">{assistant.model}</p>
+                </div>
+              </div>
             </div>
             <Link
               href="/collection"
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="rounded-full bg-slate-50 px-5 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
             >
-              All cards
+              All assistants
             </Link>
           </header>
 
-          <section className="flex flex-1 flex-col">
-            <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 sm:px-6">
-              <div className="flex-1 space-y-6">
+          <section className="flex flex-1 flex-col overflow-y-auto">
+            <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-12 sm:px-6 lg:px-8">
+              <div className="flex-1 space-y-10">
                 {messages.map((message, index) => (
                   <div
                     key={`${message.role}-${index}`}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                   >
-                    <div
-                      className={`max-w-[85%] rounded-[2rem] px-6 py-4 text-base leading-relaxed shadow-md ${
-                        message.role === "user"
-                          ? "bg-slate-950 text-white"
-                          : "border border-slate-200 bg-white text-slate-800"
-                      }`}
-                    >
-                      {message.content}
+                    <div className={`flex gap-4 max-w-[90%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                      {message.role === "assistant" && (
+                        <div className="mt-1 shrink-0">
+                          <AssistantLogo assistant={assistant} size="sm" />
+                        </div>
+                      )}
+                      
+                      <div
+                        className={`relative text-base leading-relaxed ${
+                          message.role === "user"
+                            ? "text-slate-900 font-medium"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {message.role === "user" && (
+                          <div className="absolute -top-6 right-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
+                            You
+                          </div>
+                        )}
+                        <div className={`${message.role === "assistant" ? "prose prose-slate max-w-none text-slate-700" : ""}`}>
+                          {message.content}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="sticky bottom-0 mt-6 bg-[#fbfbfb] pb-8 pt-4">
-                <div className="flex flex-col rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60 ring-1 ring-slate-100 rainbow-border-animate">
-                  <div className="flex items-center gap-2 pb-2 pl-2">
-                    <button
-                      type="button"
-                      onClick={() => setPrompt(p => p + "\n")}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
-                      aria-label="Add content"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPrompt("Give me some creative ideas for this project...")}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
-                      aria-label="Get ideas"
-                    >
-                      <Lightbulb className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex items-end gap-4">
-                    <textarea
-                      value={prompt}
-                      onChange={(event) => setPrompt(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Ask anything..."
-                      rows={1}
-                      className="max-h-60 min-h-[80px] flex-1 resize-none bg-transparent px-4 py-2 text-base text-slate-900 outline-none placeholder:text-slate-400"
-                    />
-                    <div className="pb-2">
+              <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
+                <div className="mx-auto max-w-2xl">
+                  <div className="relative flex flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50">
+                    <div className="flex items-center gap-1.5 p-2">
+                      <button
+                        type="button"
+                        onClick={() => setPrompt(p => p + "\n")}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                        aria-label="New line"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPrompt("Can you help me brainstorm some creative ideas?")}
+                        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
+                      >
+                        <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
+                        Get ideas
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-end gap-2 px-4 pb-4">
+                      <textarea
+                        value={prompt}
+                        onChange={(event) => setPrompt(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" && !event.shiftKey) {
+                            event.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder={`Message ${assistant.name}...`}
+                        rows={1}
+                        className="max-h-60 min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400"
+                      />
                       <button
                         type="button"
                         onClick={sendMessage}
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} text-white shadow-lg transition-transform hover:scale-105 active:scale-95`}
+                        disabled={!prompt.trim()}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-20 disabled:grayscale`}
                         aria-label="Send message"
                       >
-                        <Send className="h-5 w-5" />
+                        <Send className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
+                  <p className="mt-3 text-center text-[11px] font-medium text-slate-400">
+                    AI can make mistakes. Check important info.
+                  </p>
                 </div>
               </div>
             </div>

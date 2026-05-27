@@ -1552,17 +1552,25 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
                 key={msg.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}
+                className={cn("flex flex-col", msg.role === "user" ? "items-end" : "items-start")}
               >
-                {msg.role === "user" ? (
-                  <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/20">
+                <div className={cn("flex gap-3 max-w-[95%]", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
+                  {msg.role === "assistant" && (
+                    <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      "text-sm leading-relaxed transition-all",
+                      msg.role === "user"
+                        ? "text-slate-200 font-medium"
+                        : "text-slate-300"
+                    )}
+                  >
                     {msg.content}
                   </div>
-                ) : (
-                  <div className="max-w-[90%] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-white/5 bg-white/[0.05] px-4 py-2.5 text-sm text-slate-300">
-                    {msg.content}
-                  </div>
-                )}
+                </div>
               </motion.div>
             ))}
 
@@ -1634,24 +1642,24 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
         )}
       </div>
 
-      <div className="shrink-0 border-t border-white/5 p-3">
-        <div className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-3 focus-within:border-indigo-500/40">
+      <div className="shrink-0 border-t border-white/5 p-4">
+        <div className="relative rounded-2xl border border-white/10 bg-white/[0.03] px-4 pb-3 pt-4 transition-all focus-within:border-indigo-500/50 focus-within:ring-1 focus-within:ring-indigo-500/20">
           <input ref={fileInputRef} type="file" multiple className="hidden" />
           <textarea
             ref={textareaRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isGenerating ? "Generating..." : "Describe changes or a new design..."}
+            placeholder={isGenerating ? "Generating..." : "What do you want to build?"}
             disabled={isGenerating}
-            className="w-full resize-none bg-transparent py-1 text-sm text-white outline-none placeholder:text-slate-600 disabled:opacity-50"
+            className="w-full resize-none bg-transparent text-sm leading-relaxed text-slate-200 outline-none placeholder:text-slate-600 disabled:opacity-50"
             style={{ minHeight: 60, maxHeight: 160 }}
           />
-          <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-1">
+          <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-white/5 hover:text-slate-300"
                 title="Attach file"
               >
                 <Plus className="h-4 w-4" />
@@ -1659,26 +1667,27 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
               <button
                 onClick={startVoiceInput}
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 transition",
+                  "flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition",
                   isListening ? "animate-pulse text-red-400" : "hover:bg-white/5 hover:text-slate-300"
                 )}
                 title="Voice input"
               >
                 <Mic className="h-4 w-4" />
               </button>
+              <div className="h-4 w-px bg-white/10 mx-1" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-slate-500 transition hover:bg-white/5 hover:text-slate-300">
+                  <button className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 transition hover:bg-white/5 hover:text-slate-300">
                     {buildMode}
                     <ChevronDown className="h-3 w-3" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-32 border-white/10 bg-slate-900">
+                <DropdownMenuContent align="start" className="w-32 border-white/10 bg-slate-900 shadow-2xl">
                   {(["Landing", "App", "Dashboard"] as BuildMode[]).map((m) => (
                     <DropdownMenuItem
                       key={m}
                       onSelect={() => setBuildMode(m)}
-                      className="text-slate-300 focus:bg-white/10 focus:text-white"
+                      className="text-xs font-bold uppercase tracking-wider text-slate-400 focus:bg-white/10 focus:text-white"
                     >
                       {m}
                     </DropdownMenuItem>
@@ -1689,12 +1698,15 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
             <button
               onClick={() => void handleSend()}
               disabled={isGenerating || !draft.trim()}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 transition hover:bg-indigo-500 active:scale-95 disabled:opacity-40"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 transition-all hover:bg-indigo-500 active:scale-95 disabled:opacity-20 disabled:grayscale"
             >
               {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
             </button>
           </div>
         </div>
+        <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-widest text-slate-600">
+          LokoAI Design Engine v4.0
+        </p>
       </div>
     </>
   );

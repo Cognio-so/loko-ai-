@@ -257,6 +257,15 @@ body {
               linear-gradient(90deg, transparent, #38bdf8, #818cf8, #c084fc, transparent) border-box !important;
 }
 
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes typewriter-cursor-blink {
   0%,
   45% {
