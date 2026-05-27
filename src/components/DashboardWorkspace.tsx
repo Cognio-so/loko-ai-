@@ -60,14 +60,16 @@ type Project = {
   updated_at: string;
 };
 
+type View = "chat" | "home" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
+
 const navItems = [
-  { label: "Home", href: "/", icon: Home },
-  { label: "Integrations", href: "/integrations", icon: Grid3X3 },
-  { label: "Partners", href: "/partners", icon: Users },
-  { label: "Launchpad", href: "/launchpad", icon: Rocket },
-  { label: "Collection", href: "/collection", icon: FileText },
-  { label: "Affiliate", href: "/affiliate", icon: Trophy },
-  { label: "Pricing", href: "/pricing", icon: Zap },
+  { label: "Home", href: "/", icon: Home, view: "home" as View },
+  { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
+  { label: "Partners", href: "/partners", icon: Users, view: "partners" as View },
+  { label: "Launchpad", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
+  { label: "Collection", href: "/collection", icon: FileText, view: "collection" as View },
+  { label: "Affiliate", href: "/affiliate", icon: Trophy, view: "affiliate" as View },
+  { label: "Pricing", href: "/pricing", icon: Zap, view: "pricing" as View },
 ];
 
 const quickActions = [
@@ -195,6 +197,7 @@ export default function DashboardWorkspace() {
   const { user, isLoading, signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<View>("chat");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [prompt, setPrompt] = useState("");
@@ -251,6 +254,7 @@ export default function DashboardWorkspace() {
     setActiveChatId(null);
     setMessages([]);
     setPrompt("");
+    setActiveView("chat");
     setIsSidebarOpen(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
@@ -259,6 +263,7 @@ export default function DashboardWorkspace() {
     setActiveChatId(project.id);
     setMessages(normalizeMessages(project.chat_messages));
     setPrompt("");
+    setActiveView("chat");
     setIsSidebarOpen(false);
   }
 
@@ -468,7 +473,16 @@ export default function DashboardWorkspace() {
               <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pages</p>
               <div className="space-y-1">
                 {navItems.map((item) => (
-                  <button key={item.href} type="button" onClick={() => router.push(item.href)} className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-sky-700">
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => setActiveView(item.view)}
+                    className={`flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium transition ${
+                      activeView === item.view
+                        ? "bg-sky-50 text-sky-700"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-sky-700"
+                    }`}
+                  >
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </button>
@@ -548,13 +562,13 @@ export default function DashboardWorkspace() {
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
               </button>
-              <button type="button" onClick={() => router.push("/dashboard")} className="hidden rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:inline-flex" aria-label="Dashboard menu">
+              <button type="button" onClick={() => setActiveView("chat")} className="hidden rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:inline-flex" aria-label="Dashboard menu">
                 <Compass className="h-5 w-5" />
               </button>
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => router.push("/pricing")} className="inline-flex h-10 items-center gap-2 rounded-full bg-sky-100 px-5 text-sm font-semibold text-sky-900 transition hover:bg-sky-200">
+              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-10 items-center gap-2 rounded-full bg-sky-100 px-5 text-sm font-semibold text-sky-900 transition hover:bg-sky-200">
                 <Sparkles className="h-4 w-4" />
                 Upgrade
               </button>
@@ -564,64 +578,78 @@ export default function DashboardWorkspace() {
             </div>
           </header>
 
-          <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-8 pt-4">
-            <div className="pointer-events-none absolute inset-x-[10%] top-[18%] h-[58%] rounded-full bg-[radial-gradient(circle,#fed7aa_0%,#bae6fd_50%,transparent_76%)] blur-[88px]" />
-            <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col">
-              {messages.length === 0 ? (
-                <div className="flex flex-1 flex-col items-center justify-center">
-                  <h1 className="mb-9 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
-                    What&apos;s next, {isLoading ? "there" : userName}?
-                  </h1>
-                  <Composer
-                    prompt={prompt}
-                    setPrompt={setPrompt}
-                    textareaRef={textareaRef}
-                    onKeyDown={handleKeyDown}
-                    onSubmit={() => void handleSubmit()}
-                    onVoiceInput={handleVoiceInput}
-                    isSubmitting={isSubmitting}
-                  />
-                  <PromptChips setPrompt={setPrompt} />
-                </div>
-              ) : (
-                <>
-                  <div className="min-h-0 flex-1 overflow-y-auto px-1 py-4">
-                    <div className="space-y-5">
-                      {messages.map((message) => (
-                        <MessageBubble
-                          key={message.id}
-                          message={message}
-                          userAvatar={userAvatar}
-                          userName={userName}
-                          copied={copiedMessageId === message.id}
-                          onCopy={() => void handleCopyMessage(message)}
-                          onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
-                        />
-                      ))}
-                      {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          LokoAI is thinking...
-                        </div>
-                      )}
-                      <div ref={messagesEndRef} />
+          <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+            {activeView === "chat" ? (
+              <div className="flex flex-1 flex-col overflow-hidden px-4 pb-8 pt-4">
+                <div className="pointer-events-none absolute inset-x-[10%] top-[18%] h-[58%] rounded-full bg-[radial-gradient(circle,#fed7aa_0%,#bae6fd_50%,transparent_76%)] blur-[88px]" />
+                <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-1 flex-col items-center justify-center">
+                      <h1 className="mb-9 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
+                        What&apos;s next, {isLoading ? "there" : userName}?
+                      </h1>
+                      <Composer
+                        prompt={prompt}
+                        setPrompt={setPrompt}
+                        textareaRef={textareaRef}
+                        onKeyDown={handleKeyDown}
+                        onSubmit={() => void handleSubmit()}
+                        onVoiceInput={handleVoiceInput}
+                        isSubmitting={isSubmitting}
+                      />
+                      <PromptChips setPrompt={setPrompt} />
                     </div>
-                  </div>
-                  <div className="pt-3">
-                    <Composer
-                      prompt={prompt}
-                      setPrompt={setPrompt}
-                      textareaRef={textareaRef}
-                      onKeyDown={handleKeyDown}
-                      onSubmit={() => void handleSubmit()}
-                      onVoiceInput={handleVoiceInput}
-                      isSubmitting={isSubmitting}
-                    />
-                    <PromptChips setPrompt={setPrompt} />
-                  </div>
-                </>
-              )}
-            </div>
+                  ) : (
+                    <>
+                      <div className="min-h-0 flex-1 overflow-y-auto px-1 py-4">
+                        <div className="space-y-5">
+                          {messages.map((message) => (
+                            <MessageBubble
+                              key={message.id}
+                              message={message}
+                              userAvatar={userAvatar}
+                              userName={userName}
+                              copied={copiedMessageId === message.id}
+                              onCopy={() => void handleCopyMessage(message)}
+                              onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
+                            />
+                          ))}
+                          {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
+                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              LokoAI is thinking...
+                            </div>
+                          )}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      </div>
+                      <div className="pt-3">
+                        <Composer
+                          prompt={prompt}
+                          setPrompt={setPrompt}
+                          textareaRef={textareaRef}
+                          onKeyDown={handleKeyDown}
+                          onSubmit={() => void handleSubmit()}
+                          onVoiceInput={handleVoiceInput}
+                          isSubmitting={isSubmitting}
+                        />
+                        <PromptChips setPrompt={setPrompt} />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto">
+                {activeView === "home" && <LandingPage />}
+                {activeView === "integrations" && <IntegrationsPage />}
+                {activeView === "partners" && <PartnersPage />}
+                {activeView === "launchpad" && <LaunchpadPage />}
+                {activeView === "collection" && <CollectionPage />}
+                {activeView === "affiliate" && <AffiliatePage />}
+                {activeView === "pricing" && <PricingPage />}
+              </div>
+            )}
           </section>
         </main>
       </div>
