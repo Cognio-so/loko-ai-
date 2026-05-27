@@ -273,6 +273,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 <Menu className="h-5 w-5" />
               </button>
               <AssistantLogo assistant={assistant} size="sm" />
+              <h1 className="text-lg font-bold tracking-tight text-slate-950">{assistant.name}</h1>
             </div>
             <Link
               href="/collection"
@@ -284,17 +285,6 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
           <section className="flex flex-1 flex-col">
             <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6">
-              <div className="mb-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <AssistantLogo assistant={assistant} size="lg" />
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-500">Collection assistant</p>
-                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">{assistant.name}</h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{assistant.description}</p>
-                  </div>
-                </div>
-              </div>
-
               <div className="flex-1 space-y-6">
                 {messages.map((message, index) => (
                   <div
