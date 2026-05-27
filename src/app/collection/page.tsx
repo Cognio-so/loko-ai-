@@ -1,111 +1,10 @@
 import Link from "next/link";
 import {
-  Bot,
-  BrainCircuit,
   CalendarDays,
-  Camera,
-  Code2,
   MessageCircle,
-  Palette,
-  SearchCheck,
-  ShoppingBag,
   Sparkles,
-  Target,
-  WandSparkles,
 } from "lucide-react";
-
-const assistants = [
-  {
-    name: "Brief Buddy",
-    description: "Turns rough ideas into clear prompts, task notes, and ready-to-send instructions.",
-    date: "23/12/2025",
-    model: "Gemini 2.5 Flash",
-    accent: "from-sky-500 to-cyan-400",
-    logoText: "BB",
-    icon: Bot,
-  },
-  {
-    name: "Daily Druid",
-    description: "A calm workflow helper for quick planning, reminders, and everyday decisions.",
-    date: "30/12/2025",
-    model: "GLM 4.7",
-    accent: "from-emerald-500 to-teal-400",
-    logoText: "DD",
-    icon: WandSparkles,
-  },
-  {
-    name: "Stacksmith Pro",
-    description: "Plans production-ready Next.js, React, and Node.js builds from a single product idea.",
-    date: "13/02/2026",
-    model: "Gemini 3 Flash Preview",
-    accent: "from-indigo-500 to-sky-500",
-    logoText: "SP",
-    icon: Code2,
-  },
-  {
-    name: "Prospect Pilot",
-    description: "Finds lead angles, outreach hooks, and quick qualification notes for sales work.",
-    date: "17/02/2026",
-    model: "Gemini 3 Flash Preview",
-    accent: "from-rose-500 to-orange-400",
-    logoText: "PP",
-    icon: Target,
-  },
-  {
-    name: "Pixel Planner",
-    description: "Shapes website sections, visual direction, and layout ideas for polished web pages.",
-    date: "13/01/2026",
-    model: "Kimi K2.5",
-    accent: "from-fuchsia-500 to-violet-500",
-    logoText: "PX",
-    icon: Palette,
-  },
-  {
-    name: "Lens Prompt Lab",
-    description: "Creates cleaner image and video prompts with camera angles, style notes, and negatives.",
-    date: "29/01/2026",
-    model: "Gemini 3 Flash Preview",
-    accent: "from-amber-500 to-yellow-400",
-    logoText: "LP",
-    icon: Camera,
-  },
-  {
-    name: "Tosh Companion",
-    description: "A personal assistant for quick drafts, simple research, and daily creative support.",
-    date: "16/01/2026",
-    model: "Kimi K2.5",
-    accent: "from-cyan-500 to-blue-500",
-    logoText: "TC",
-    icon: Sparkles,
-  },
-  {
-    name: "Interface Inspector",
-    description: "Reviews screenshots and UI flows to spot confusing layouts, copy, and interaction gaps.",
-    date: "14/01/2026",
-    model: "GPT 5 nano",
-    accent: "from-slate-700 to-slate-500",
-    logoText: "II",
-    icon: BrainCircuit,
-  },
-  {
-    name: "Commerce Studio",
-    description: "Generates product ad concepts, creative directions, and asset ideas for ecommerce campaigns.",
-    date: "14/01/2026",
-    model: "Gemini 3 Flash Preview",
-    accent: "from-lime-500 to-emerald-500",
-    logoText: "CS",
-    icon: ShoppingBag,
-  },
-  {
-    name: "Search Signal",
-    description: "Drafts SEO briefs, keyword clusters, and page outlines with a sharper content angle.",
-    date: "19/12/2025",
-    model: "Gemini 2.5 Flash",
-    accent: "from-blue-500 to-indigo-500",
-    logoText: "SS",
-    icon: SearchCheck,
-  },
-];
+import { assistants } from "./collection-data";
 
 export default function CollectionPage() {
   return (
@@ -134,8 +33,9 @@ export default function CollectionPage() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {assistants.map((assistant) => (
-            <article
+            <Link
               key={assistant.name}
+              href={`/collection/${assistant.slug}`}
               className="group flex min-h-[236px] flex-col justify-between rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg dark:border-white/10 dark:bg-slate-900 dark:hover:border-sky-400/40"
             >
               <div>
@@ -173,15 +73,14 @@ export default function CollectionPage() {
                     {assistant.model}
                   </span>
                 </div>
-                <Link
-                  href="/dashboard"
+                <span
                   className={`flex h-10 items-center justify-center gap-2 rounded-lg bg-gradient-to-r ${assistant.accent} text-sm font-semibold text-white shadow-sm transition group-hover:shadow-md`}
                 >
                   <MessageCircle className="h-4 w-4" />
                   Start Chat
-                </Link>
+                </span>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       </section>
