@@ -734,25 +734,45 @@ function Composer({
   isSubmitting: boolean;
 }) {
   return (
-    <div className="relative flex flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50">
-      <div className="flex items-center gap-1 p-2">
-        <button type="button" onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600" aria-label="Add new line">
-          <Plus className="h-4 w-4" />
-        </button>
-        <button type="button" onClick={onVoiceInput} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600" aria-label="Voice input">
-          <Mic className="h-4 w-4" />
-        </button>
-      </div>
-      <div className="px-4 pb-4 flex items-end gap-2">
+    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-100">
+      <div className="px-5 pt-5">
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder="What do you want to build?"
-          className="max-h-48 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
+          className="max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
         />
-        <button type="button" onClick={onSubmit} disabled={!prompt.trim() || isSubmitting} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" aria-label="Send prompt">
+      </div>
+      
+      <div className="flex items-center justify-between px-3 pb-3 pt-2">
+        <div className="flex items-center gap-1.5">
+          <button 
+            type="button" 
+            onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} 
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            aria-label="Add content"
+          >
+            <Plus className="h-4.5 w-4.5" />
+          </button>
+          <button 
+            type="button" 
+            onClick={onVoiceInput} 
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            aria-label="Voice input"
+          >
+            <Mic className="h-4.5 w-4.5" />
+          </button>
+        </div>
+        
+        <button 
+          type="button" 
+          onClick={onSubmit} 
+          disabled={!prompt.trim() || isSubmitting} 
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" 
+          aria-label="Send prompt"
+        >
           {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </button>
       </div>

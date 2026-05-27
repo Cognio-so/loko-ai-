@@ -13,6 +13,7 @@ import {
   Lightbulb,
   Menu,
   MessageCircle,
+  Mic,
   Notebook,
   Plus,
   Rocket,
