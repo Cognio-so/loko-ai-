@@ -285,7 +285,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
           </header>
 
           <section className="flex flex-1 flex-col">
-            <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:px-6">
+            <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6 sm:px-6">
               <div className="flex-1 space-y-6">
                 {messages.map((message, index) => (
                   <div
@@ -307,11 +307,11 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
               <div className="sticky bottom-0 mt-6 bg-[#fbfbfb] pb-8 pt-4">
                 <div className="flex items-end gap-4 rounded-[2.5rem] border border-slate-200 bg-white p-4 shadow-xl shadow-slate-200/60 ring-1 ring-slate-100">
-                  <div className="flex items-center gap-2 pb-2">
+                  <div className="flex items-center gap-2 pb-3 pl-1">
                     <button
                       type="button"
                       onClick={() => setPrompt(p => p + "\n")}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
                       aria-label="Add content"
                     >
                       <Plus className="h-5 w-5" />
@@ -319,7 +319,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                     <button
                       type="button"
                       onClick={() => setPrompt("Give me some creative ideas for this project...")}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
                       aria-label="Get ideas"
                     >
                       <Lightbulb className="h-5 w-5" />
@@ -336,16 +336,18 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                     }}
                     placeholder="Ask anything..."
                     rows={1}
-                    className="max-h-48 min-h-12 flex-1 resize-none bg-transparent px-4 py-3 text-base text-slate-900 outline-none placeholder:text-slate-400"
+                    className="max-h-60 min-h-[80px] flex-1 resize-none bg-transparent px-4 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400"
                   />
-                  <button
-                    type="button"
-                    onClick={sendMessage}
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} text-white shadow-lg transition-transform hover:scale-105 active:scale-95`}
-                    aria-label="Send message"
-                  >
-                    <Send className="h-5 w-5" />
-                  </button>
+                  <div className="pb-2">
+                    <button
+                      type="button"
+                      onClick={sendMessage}
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} text-white shadow-lg transition-transform hover:scale-105 active:scale-95`}
+                      aria-label="Send message"
+                    >
+                      <Send className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
