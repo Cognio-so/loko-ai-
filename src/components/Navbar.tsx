@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, LayoutGrid, Zap, Users, Rocket, Trophy, Menu, X, Sun, Moon, LogOut, Gauge } from "lucide-react";
+import { Sparkles, LayoutGrid, Zap, Users, Rocket, Trophy, Menu, X, Sun, Moon, LogOut, Gauge, Library } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthModal from "@/components/AuthModal";
@@ -15,6 +15,7 @@ const navItems = [
   { name: "Integrations", href: "/integrations", icon: LayoutGrid },
   { name: "Partners", href: "/partners", icon: Users },
   { name: "Launchpad", href: "/launchpad", icon: Rocket },
+  { name: "Collection", href: "/collection", icon: Library },
   { name: "Affiliate", href: "/affiliate", icon: Trophy },
   { name: "Pricing", href: "/pricing", icon: Zap },
 ];
@@ -67,12 +68,6 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            <a
-              href="mailto:support@lokoai.com?subject=Need%20Help"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-white/70 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:text-sky-600 hover:bg-sky-50 dark:bg-white/5 dark:text-gray-200 dark:hover:border-sky-400/40 dark:hover:bg-sky-500/10 dark:hover:text-sky-300"
-            >
-              Need Help?
-            </a>
             {/* Theme Toggle Button */}
             <button
               type="button"
@@ -205,13 +200,6 @@ export default function Navbar() {
                         Log in
                       </button>
                     )}
-                    <a
-                      href="mailto:support@lokoai.com?subject=Need%20Help"
-                      onClick={() => setIsOpen(false)}
-                      className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white py-3 font-semibold text-slate-700 transition hover:border-sky-300 hover:text-sky-600 hover:bg-sky-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200 dark:hover:border-sky-400/40 dark:hover:bg-sky-500/10 dark:hover:text-sky-300"
-                    >
-                      Need Help?
-                    </a>
                     <Link
                         href="/login?next=/dashboard"
                         onClick={() => setIsOpen(false)}
