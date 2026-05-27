@@ -315,7 +315,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         sendMessage();
                       }
                     }}
-                    placeholder={`Message ${assistant.name}...`}
+                    placeholder="Ask anything..."
                     rows={1}
                     className="max-h-48 min-h-12 flex-1 resize-none bg-transparent px-4 py-3 text-base text-slate-900 outline-none placeholder:text-slate-400"
                   />
