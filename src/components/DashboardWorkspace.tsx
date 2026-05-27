@@ -441,47 +441,46 @@ export default function DashboardWorkspace() {
           </header>
 
           <section className="relative flex flex-1 items-center justify-center overflow-hidden px-4 pb-16 pt-6">
-            <div className="pointer-events-none absolute inset-x-[8%] top-[18%] h-[54%] rounded-full bg-sky-200/75 blur-[110px]" />
-            <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center">
-              <h1 className="mb-10 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
+            <div className="pointer-events-none absolute inset-x-[10%] top-[18%] h-[58%] rounded-full bg-[radial-gradient(circle,#fed7aa_0%,#bae6fd_50%,transparent_76%)] blur-[88px]" />
+            <div className="relative mx-auto flex w-full max-w-[740px] flex-col items-center">
+              <h1 className="mb-9 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
                 What&apos;s next, {isLoading ? "there" : userName}?
               </h1>
 
-              <div className="w-full rounded-[2.25rem] bg-white px-5 py-4 shadow-[0_16px_44px_rgba(15,23,42,0.16)] ring-1 ring-slate-200">
-                <div className="flex items-end gap-3">
-                  <button
-                    type="button"
-                    className="mb-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
-                    aria-label="Add attachment"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </button>
+              <div className="w-full overflow-hidden rounded-[1.25rem] bg-white shadow-[0_10px_26px_rgba(15,23,42,0.20)] ring-1 ring-slate-200">
+                <div className="px-5 pt-5">
                   <textarea
                     ref={textareaRef}
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask LokoAI"
-                    className="max-h-48 min-h-16 flex-1 resize-none bg-transparent py-3 text-lg leading-7 text-slate-900 outline-none placeholder:text-slate-500"
+                    placeholder="Assign a task or ask anything"
+                    className="max-h-48 min-h-[76px] w-full resize-none bg-transparent text-base leading-7 text-slate-900 outline-none placeholder:text-slate-500"
                   />
-                  <button
-                    type="button"
-                    className="mb-1 hidden h-11 items-center rounded-full px-4 text-sm font-medium text-slate-700 hover:bg-slate-100 sm:inline-flex"
-                  >
-                    Flash
-                  </button>
-                  <button
-                    type="button"
-                    className="mb-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
-                    aria-label="Voice input"
-                  >
-                    <Mic className="h-5 w-5" />
-                  </button>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
+                      aria-label="Add attachment"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100"
+                      aria-label="Voice input"
+                    >
+                      <Mic className="h-5 w-5" />
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={() => void handleSubmit()}
                     disabled={!prompt.trim() || isSubmitting}
-                    className="mb-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-700 disabled:bg-slate-200 disabled:text-slate-400"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white transition hover:bg-sky-600 disabled:bg-slate-200 disabled:text-slate-400"
                     aria-label="Send prompt"
                   >
                     {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -491,13 +490,13 @@ export default function DashboardWorkspace() {
 
               {savedMessage && <p className="mt-3 text-sm text-slate-500">{savedMessage}</p>}
 
-              <div className="mt-5 flex w-full flex-wrap justify-center gap-2">
+              <div className="mt-5 flex w-full flex-wrap justify-center gap-3">
                 {promptIdeas.map((idea) => (
                   <button
                     key={idea}
                     type="button"
                     onClick={() => setPrompt(idea)}
-                    className="inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3.5 py-2 text-sm text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
+                    className="inline-flex h-11 max-w-full items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
                   >
                     <MessageSquare className="h-3.5 w-3.5 shrink-0 text-sky-500" />
                     <span className="truncate">{idea}</span>
