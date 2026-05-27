@@ -30,6 +30,13 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import LandingPage from "@/app/page";
+import IntegrationsPage from "@/app/integrations/page";
+import PartnersPage from "@/app/partners/page";
+import LaunchpadPage from "@/app/launchpad/page";
+import CollectionPage from "@/app/collection/page";
+import AffiliatePage from "@/app/affiliate/page";
+import PricingPage from "@/app/pricing/page";
 
 type ChatRole = "user" | "assistant";
 
