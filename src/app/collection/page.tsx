@@ -21,6 +21,7 @@ const assistants = [
     date: "23/12/2025",
     model: "Gemini 2.5 Flash",
     accent: "from-sky-500 to-cyan-400",
+    logoText: "BB",
     icon: Bot,
   },
   {
@@ -29,6 +30,7 @@ const assistants = [
     date: "30/12/2025",
     model: "GLM 4.7",
     accent: "from-emerald-500 to-teal-400",
+    logoText: "DD",
     icon: WandSparkles,
   },
   {
@@ -37,6 +39,7 @@ const assistants = [
     date: "13/02/2026",
     model: "Gemini 3 Flash Preview",
     accent: "from-indigo-500 to-sky-500",
+    logoText: "SP",
     icon: Code2,
   },
   {
@@ -45,6 +48,7 @@ const assistants = [
     date: "17/02/2026",
     model: "Gemini 3 Flash Preview",
     accent: "from-rose-500 to-orange-400",
+    logoText: "PP",
     icon: Target,
   },
   {
@@ -53,6 +57,7 @@ const assistants = [
     date: "13/01/2026",
     model: "Kimi K2.5",
     accent: "from-fuchsia-500 to-violet-500",
+    logoText: "PX",
     icon: Palette,
   },
   {
@@ -61,6 +66,7 @@ const assistants = [
     date: "29/01/2026",
     model: "Gemini 3 Flash Preview",
     accent: "from-amber-500 to-yellow-400",
+    logoText: "LP",
     icon: Camera,
   },
   {
@@ -69,6 +75,7 @@ const assistants = [
     date: "16/01/2026",
     model: "Kimi K2.5",
     accent: "from-cyan-500 to-blue-500",
+    logoText: "TC",
     icon: Sparkles,
   },
   {
@@ -77,6 +84,7 @@ const assistants = [
     date: "14/01/2026",
     model: "GPT 5 nano",
     accent: "from-slate-700 to-slate-500",
+    logoText: "II",
     icon: BrainCircuit,
   },
   {
@@ -85,6 +93,7 @@ const assistants = [
     date: "14/01/2026",
     model: "Gemini 3 Flash Preview",
     accent: "from-lime-500 to-emerald-500",
+    logoText: "CS",
     icon: ShoppingBag,
   },
   {
@@ -93,6 +102,7 @@ const assistants = [
     date: "19/12/2025",
     model: "Gemini 2.5 Flash",
     accent: "from-blue-500 to-indigo-500",
+    logoText: "SS",
     icon: SearchCheck,
   },
 ];
