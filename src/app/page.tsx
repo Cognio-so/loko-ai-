@@ -1,13 +1,12 @@
 ﻿"use client";
 
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Sparkles, Check, Star, ArrowRight
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { cn, formatDisplayName } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -409,18 +408,6 @@ const AnimatedHeroText = memo(function AnimatedHeroText() {
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
-  const displayName = useMemo(
-    () =>
-      formatDisplayName(
-        user?.user_metadata?.full_name,
-        user?.user_metadata?.name,
-        user?.user_metadata?.username,
-        user?.user_metadata?.user_name,
-        user?.email
-      ),
-    [user]
-  );
   const goToLogin = () => router.push("/dashboard");
 
   return (
@@ -458,8 +445,8 @@ export default function Home() {
             <Sparkles className="relative h-9 w-9 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-11 sm:w-11" />
           </motion.button>
 
-          <h1 className="mx-auto max-w-[14ch] text-balance text-[clamp(2.25rem,7vw,5.8rem)] font-semibold leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
-            How can I help you today, {displayName}?
+          <h1 className="mx-auto max-w-4xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
+            Build Faster with <span className="text-sky-500">LokoAI</span>
           </h1>
 
           <AnimatedHeroText />
