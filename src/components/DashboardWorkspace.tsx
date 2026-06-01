@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Bot,
   Check,
@@ -95,6 +96,23 @@ const quickActions = [
   },
 ];
 
+const heroHeadings = [
+  "How can I help you today, {name}?",
+  "Build anything with AI.",
+  "Design smarter with LokoAI.",
+  "Create stunning apps instantly.",
+  "Your AI-powered creative partner.",
+];
+
+const heroParticles = [
+  { left: "12%", top: "24%", delay: 0.1, size: "h-1.5 w-1.5" },
+  { left: "24%", top: "68%", delay: 0.8, size: "h-1 w-1" },
+  { left: "36%", top: "18%", delay: 1.4, size: "h-2 w-2" },
+  { left: "58%", top: "72%", delay: 0.4, size: "h-1.5 w-1.5" },
+  { left: "70%", top: "22%", delay: 1.1, size: "h-1 w-1" },
+  { left: "84%", top: "58%", delay: 0.6, size: "h-2 w-2" },
+];
+
 const moreQuickActions = [
   {
     title: "Invoicing",
@@ -163,6 +181,133 @@ function getFirstDisplayName(user: ReturnType<typeof useAuth>["user"]) {
   const hypeIndex = cleanedHandle.toLowerCase().indexOf("thealgohype");
   const firstName = hypeIndex > 0 ? cleanedHandle.slice(0, hypeIndex) : cleanedHandle.split(/\s+/)[0];
   return firstName || "there";
+}
+
+function toTitleName(value: string) {
+  if (!value || value === "there") return value;
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function useTypewriterHeadings(userName: string) {
+  const [headingIndex, setHeadingIndex] = useState(0);
+  const [displayText, setDisplayText] = useState("");
+  const [hasStarted, setHasStarted] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    const startTimer = window.setTimeout(() => setHasStarted(true), 1000);
+    return () => window.clearTimeout(startTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    const fullText = heroHeadings[headingIndex].replace("{name}", toTitleName(userName));
+    let timeoutId: number;
+
+    if (isExiting) {
+      timeoutId = window.setTimeout(() => {
+        setDisplayText("");
+        setIsExiting(false);
+        setHeadingIndex((current) => (current + 1) % heroHeadings.length);
+      }, 380);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (displayText.length < fullText.length) {
+      timeoutId = window.setTimeout(() => {
+        setDisplayText(fullText.slice(0, displayText.length + 1));
+      }, displayText.length < 6 ? 95 : 58);
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    timeoutId = window.setTimeout(() => setIsExiting(true), 1000);
+    return () => window.clearTimeout(timeoutId);
+  }, [displayText, hasStarted, headingIndex, isExiting, userName]);
+
+  return { displayText, hasStarted, isExiting, headingIndex };
+}
+
+function AnimatedChatHero({ userName }: { userName: string }) {
+  const { displayText, hasStarted, isExiting, headingIndex } = useTypewriterHeadings(userName);
+
+  return (
+    <div className="relative mb-8 flex min-h-[250px] w-full max-w-4xl items-center justify-center overflow-hidden rounded-[2rem] px-4 py-8 text-center sm:mb-10 sm:min-h-[300px] sm:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.72))]" />
+      <motion.div
+        className="pointer-events-none absolute left-1/2 top-14 h-32 w-32 -translate-x-1/2 rounded-full bg-sky-300/20 blur-3xl"
+        animate={{ opacity: [0.35, 0.85, 0.35], scale: [0.9, 1.2, 0.9] }}
+        transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {heroParticles.map((particle) => (
+        <motion.span
+          key={`${particle.left}-${particle.top}`}
+          className={`absolute rounded-full bg-sky-400/45 ${particle.size}`}
+          style={{ left: particle.left, top: particle.top }}
+          initial={{ opacity: 0, y: 10, scale: 0.6 }}
+          animate={{ opacity: [0.1, 0.65, 0.1], y: [-4, -18, -4], scale: [0.8, 1.15, 0.8] }}
+          transition={{ duration: 5, delay: particle.delay, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+
+      <div className="relative z-10 flex flex-col items-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.78, y: 16, filter: "blur(10px)" }}
+          animate={{
+            opacity: 1,
+            scale: [1, 1.035, 1],
+            y: [0, -8, 0],
+            filter: "blur(0px)",
+          }}
+          transition={{
+            opacity: { duration: 0.8, ease: "easeOut" },
+            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+            y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+            filter: { duration: 0.8 },
+          }}
+          className="relative mb-7 flex h-16 w-16 items-center justify-center rounded-3xl border border-sky-100 bg-white/90 shadow-[0_18px_55px_rgba(14,165,233,0.20),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-20 sm:w-20"
+        >
+          <motion.span
+            className="absolute inset-0 rounded-3xl bg-sky-400/20 blur-xl"
+            animate={{ opacity: [0.25, 0.8, 0.25] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <Sparkles className="relative h-8 w-8 text-sky-500 sm:h-10 sm:w-10" />
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          {hasStarted && (
+            <motion.h1
+              key={headingIndex}
+              initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
+              animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -12 : 0, filter: isExiting ? "blur(8px)" : "blur(0px)" }}
+              exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="min-h-[92px] max-w-4xl text-balance text-4xl font-black leading-[1.06] tracking-tight text-slate-950 sm:min-h-[110px] sm:text-6xl lg:text-7xl"
+            >
+              <span className="bg-gradient-to-r from-slate-950 via-sky-950 to-sky-500 bg-clip-text text-transparent">
+                {displayText}
+              </span>
+              <motion.span
+                className="ml-1 inline-block h-[0.85em] w-[3px] translate-y-1 rounded-full bg-sky-500"
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.h1>
+          )}
+        </AnimatePresence>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: hasStarted && !isExiting ? 1 : 0.4, y: hasStarted ? 0 : 10 }}
+          transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+          className="mt-3 max-w-xl text-base font-semibold text-slate-500 sm:text-lg"
+        >
+          Build, design, and launch polished AI experiences with LokoAI.
+        </motion.p>
+      </div>
+    </div>
+  );
 }
 
 function MarkdownContent({ content }: { content: string }) {
@@ -635,16 +780,8 @@ export default function DashboardWorkspace() {
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
                   {messages.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center px-4">
-                      <div className="mb-10 text-center">
-                        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 shadow-sm ring-1 ring-slate-100">
-                          <Sparkles className="h-8 w-8 text-sky-500" />
-                        </div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                          How can I help you today, {userName}?
-                        </h1>
-                        <p className="mt-3 text-slate-500 font-medium">Build, design, or create anything with LokoAI.</p>
-                      </div>
+                    <div className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:py-8">
+                      <AnimatedChatHero userName={userName} />
                       <div className="w-full max-w-2xl">
                         <Composer
                           prompt={prompt}
