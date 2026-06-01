@@ -429,32 +429,40 @@ export default function Home() {
       <div className="absolute left-[-4.5rem] top-24 h-[220px] w-[220px] rounded-full bg-sky-400/10 blur-[90px] pointer-events-none sm:top-1/4 sm:-left-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
       <div className="absolute right-[-4.5rem] top-40 h-[220px] w-[220px] rounded-full bg-cyan-400/10 blur-[90px] pointer-events-none sm:top-1/3 sm:-right-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
       <div className="absolute bottom-12 left-1/2 h-[240px] w-[240px] -translate-x-1/2 rounded-full bg-sky-300/5 blur-[100px] pointer-events-none sm:bottom-1/4 sm:left-1/3 sm:h-[500px] sm:w-[500px] sm:translate-x-0 sm:blur-[160px]" />
-      <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-5xl mx-auto">
-          <div className="mb-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-semibold text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-gray-400 sm:mb-8">
-            <Sparkles className="h-3.5 w-3.5 text-sky-500" />
-            Build AI apps, superagents and workflows in minutes
-          </div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
-            Build Faster with <span className="text-sky-500">LokoAI</span>
+      <section className="relative z-10 mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-7xl items-center justify-center px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.72, ease: "easeOut" }}
+          className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center"
+        >
+          <motion.button
+            type="button"
+            aria-label="Open LokoAI dashboard"
+            onClick={goToLogin}
+            animate={{ y: [0, -10, 0] }}
+            whileHover={{ scale: 1.07 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{
+              y: {
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+              scale: { duration: 0.22, ease: "easeOut" },
+            }}
+            className="group relative mb-8 flex h-20 w-20 items-center justify-center rounded-[1.4rem] border border-slate-200/80 bg-white/90 text-sky-500 shadow-[0_22px_70px_rgba(14,165,233,0.18)] outline-none backdrop-blur-xl transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 dark:border-white/10 dark:bg-white/[0.07] dark:text-sky-300 dark:shadow-[0_26px_90px_rgba(56,189,248,0.24)] sm:mb-10 sm:h-24 sm:w-24 sm:rounded-[1.75rem]"
+          >
+            <span className="absolute inset-[-18px] rounded-[2rem] bg-sky-400/20 blur-2xl transition-opacity duration-300 group-hover:opacity-90 dark:bg-sky-300/20" />
+            <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white via-sky-50 to-cyan-100 opacity-95 dark:from-white/15 dark:via-sky-400/10 dark:to-cyan-300/10" />
+            <Sparkles className="relative h-9 w-9 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-11 sm:w-11" />
+          </motion.button>
+
+          <h1 className="mx-auto max-w-[14ch] text-balance text-[clamp(2.25rem,7vw,5.8rem)] font-semibold leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
+            How can I help you today, {displayName}?
           </h1>
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-600 dark:text-gray-400 sm:text-lg">
-            Create production-ready AI apps, automate workflows, and orchestrate multiple models without dealing with infrastructure complexity.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <button onClick={goToLogin} className="inline-flex items-center justify-center gap-2 rounded-full bg-sky-500 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-sky-500/10 transition-all active:scale-95 group hover:bg-sky-600">
-              Get Started
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition-all hover:border-sky-300 hover:text-sky-600 dark:border-white/10 dark:bg-white/5 dark:text-white">
-              Book Demo
-            </button>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs font-semibold text-slate-500 dark:text-gray-400">
-            <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Multi-model routing</span>
-            <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Pay-as-you-go</span>
-            <span className="flex items-center gap-2"><Check className="w-4 h-4 text-sky-500" /> Cancel Anytime</span>
-          </div>
+
+          <AnimatedHeroText />
         </motion.div>
       </section>
       <section className="relative z-10 overflow-hidden border-y border-slate-100 bg-slate-50/50 py-10 dark:border-white/5 dark:bg-slate-950/20 sm:py-12">
