@@ -65,6 +65,92 @@ function normalizeMessages(value: unknown): ChatMessage[] {
   });
 }
 
+function selectModelsForPrompt(
+  prompt: string,
+  config: ReturnType<typeof getOpenRouterConfig>
+) {
+  const lowerPrompt = prompt.toLowerCase();
+  const isSearchPrompt = /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather)\b/.test(
+    lowerPrompt
+  );
+  const isWebsitePrompt = /\b(website|design|ui|app|landing|dashboard|code|component|page|frontend|html|css|react|next)\b/.test(
+    lowerPrompt
+  );
+
+  if (isSearchPrompt) return config.searchModels;
+  if (isWebsitePrompt) return config.websiteModels;
+  return config.fallbackModels;
+}
+
+function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[]) {
+  return {
+    model,
+    stream: true,
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are LokoAI, a concise and helpful AI assistant. Use markdown when useful. For code, use fenced code blocks with language names.",
+      },
+      ...messagesBeforeAi.slice(-12).map((message) => ({
+        role: message.role,
+        content: message.content,
+      })),
+    ],
+  };
+}
+
+async function requestOpenRouterStream(
+  chatCompletionsUrl: string,
+  apiKey: string,
+  models: string[],
+  messagesBeforeAi: ChatMessage[]
+): Promise<
+  | { upstream: Response; model: string }
+  | { error: string; status: number }
+> {
+  let lastErrorText = "";
+  let lastStatus = 500;
+
+  for (const model of models) {
+    let upstream: Response;
+    try {
+      upstream = await fetch(chatCompletionsUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
+          "X-Title": "LokoAI",
+        },
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi)),
+      });
+    } catch (error) {
+      lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
+      lastStatus = 502;
+      continue;
+    }
+
+    if (upstream.ok && upstream.body) {
+      return { upstream, model };
+    }
+
+    lastStatus = upstream.status || 500;
+    lastErrorText = await upstream.text().catch(() => "");
+
+    if (lastStatus === 401) {
+      break;
+    }
+
+    console.warn(`OpenRouter chat model failed, trying next fallback: ${model}`, lastErrorText);
+  }
+
+  return {
+    error: getProviderErrorMessage(lastErrorText, lastStatus),
+    status: lastStatus,
+  };
+}
+
 export async function POST(req: Request) {
   let body: ChatRequestBody;
   try {
@@ -115,44 +201,20 @@ export async function POST(req: Request) {
     });
   }
 
-  const { chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
-  const selectedModel = model || freeModel;
+  const config = getOpenRouterConfig();
+  const selectedModels = Array.from(new Set(selectModelsForPrompt(userText, config)));
+  const streamResult = await requestOpenRouterStream(
+    config.chatCompletionsUrl,
+    apiKey,
+    selectedModels,
+    messagesBeforeAi
+  );
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(chatCompletionsUrl, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
-        "X-Title": "LokoAI",
-      },
-      body: JSON.stringify({
-        model: selectedModel,
-        stream: true,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are LokoAI, a concise and helpful AI assistant. Use markdown when useful. For code, use fenced code blocks with language names.",
-          },
-          ...messagesBeforeAi.slice(-12).map((message) => ({
-            role: message.role,
-            content: message.content,
-          })),
-        ],
-      }),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "AI provider request failed.";
-    return jsonError(message, 502);
+  if ("error" in streamResult) {
+    return jsonError(streamResult.error, streamResult.status);
   }
 
-  if (!upstream.ok || !upstream.body) {
-    const text = await upstream.text().catch(() => "");
-    return jsonError(getProviderErrorMessage(text, upstream.status), upstream.status || 500);
-  }
+  const { upstream, model: selectedModel } = streamResult;
 
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
@@ -219,6 +281,7 @@ export async function POST(req: Request) {
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       "X-Chat-Id": chatId,
+      "X-AI-Model": selectedModel,
     },
   });
 }

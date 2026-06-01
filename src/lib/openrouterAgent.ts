@@ -36,8 +36,16 @@ export async function getOpenRouterAgentResponse(
   useFreeModel: boolean = false
 ) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const { apiBaseUrl, model, freeModel } = getOpenRouterConfig();
-  const selectedModel = useFreeModel ? freeModel : model;
+  const { apiBaseUrl, model, freeModel, fallbackModels, websiteModels } = getOpenRouterConfig();
+  const selectedModels = Array.from(
+    new Set(
+      useFreeModel
+        ? [freeModel, ...fallbackModels]
+        : isJson
+          ? websiteModels
+          : [model, ...fallbackModels]
+    )
+  );
 
   if (!apiKey) {
     throw new Error("Missing OPENROUTER_API_KEY in environment variables.");
@@ -59,13 +67,29 @@ export async function getOpenRouterAgentResponse(
     .filter(Boolean)
     .join("\n");
 
-  const result = callModel(client, {
-    model: selectedModel,
-    input,
-    tools: isJson ? ([validateJsonTool] as const) : ([] as const),
-  });
+  let text = "";
+  let lastError: unknown;
 
-  let text = await result.getText();
+  for (const selectedModel of selectedModels) {
+    try {
+      const result = callModel(client, {
+        model: selectedModel,
+        input,
+        tools: isJson ? ([validateJsonTool] as const) : ([] as const),
+      });
+      text = await result.getText();
+      break;
+    } catch (error) {
+      lastError = error;
+      console.warn(`OpenRouter agent model failed, trying next fallback: ${selectedModel}`, error);
+    }
+  }
+
+  if (!text) {
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("OpenRouter agent returned no content from the configured fallback models.");
+  }
 
   if (isJson) {
     text = stripJsonFences(text);

@@ -355,6 +355,29 @@ async function requestOpenRouter(
   throw new Error(`OpenRouter request failed with model "${model}" after retries.`);
 }
 
+async function requestOpenRouterWithFallback(
+  apiKey: string,
+  chatCompletionsUrl: string,
+  models: string[],
+  systemPrompt: string,
+  userPrompt: string
+) {
+  let lastError: unknown;
+
+  for (const model of models) {
+    try {
+      return await requestOpenRouter(apiKey, chatCompletionsUrl, model, systemPrompt, userPrompt);
+    } catch (error) {
+      lastError = error;
+      console.warn(`OpenRouter model failed, trying next fallback: ${model}`, error);
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("OpenRouter request failed for every configured model.");
+}
+
 export async function getOpenRouterResponse(
   systemPrompt: string,
   userPrompt: string,
@@ -362,8 +385,12 @@ export async function getOpenRouterResponse(
   useFreeModel: boolean = false
 ) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const { chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
-  const selectedModel = useFreeModel ? freeModel : model;
+  const { chatCompletionsUrl, model, freeModel, fallbackModels, websiteModels } = getOpenRouterConfig();
+  const selectedModels = useFreeModel
+    ? [freeModel, ...fallbackModels]
+    : isJson
+      ? websiteModels
+      : [model, ...fallbackModels];
 
   // If key is missing, fall back to offline generation for JSON flows.
   if (!apiKey) {
@@ -372,11 +399,17 @@ export async function getOpenRouterResponse(
   }
 
   try {
-    const data = await requestOpenRouter(apiKey, chatCompletionsUrl, selectedModel, systemPrompt, userPrompt);
+    const data = await requestOpenRouterWithFallback(
+      apiKey,
+      chatCompletionsUrl,
+      Array.from(new Set(selectedModels)),
+      systemPrompt,
+      userPrompt
+    );
     let text = data.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new Error(`OpenRouter returned no content with model "${selectedModel}".`);
+      throw new Error("OpenRouter returned no content from the configured fallback models.");
     }
 
     if (isJson) {
