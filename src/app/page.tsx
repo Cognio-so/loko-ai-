@@ -1,20 +1,11 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import Script from "next/script";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Sparkles, Check, Star, ArrowRight
+  Sparkles, Check, Star, ArrowRight, Plus, Mic, Send
 } from "lucide-react";
-
-declare global {
-  interface Window {
-    VANTA?: {
-      BIRDS: (options: Record<string, unknown>) => { destroy: () => void };
-    };
-  }
-}
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -336,112 +327,154 @@ const pricingPlans = [
   }
 ];
 
+const heroPlaceholders = [
+  "Ask LokoAI anything...",
+  "Build a modern website...",
+  "Create AI images instantly...",
+  "Generate React apps...",
+  "Design futuristic UI...",
+  "Fix my code errors...",
+  "Create viral content ideas...",
+  "Search latest IPL news...",
+];
+
+const heroParticles = [
+  { left: "14%", top: "30%", size: "h-1.5 w-1.5", delay: 0.2, duration: 5.8 },
+  { left: "23%", top: "62%", size: "h-2 w-2", delay: 1.1, duration: 6.4 },
+  { left: "34%", top: "22%", size: "h-1 w-1", delay: 0.7, duration: 5.2 },
+  { left: "68%", top: "28%", size: "h-1.5 w-1.5", delay: 1.5, duration: 6.1 },
+  { left: "79%", top: "58%", size: "h-2 w-2", delay: 0.4, duration: 5.6 },
+  { left: "88%", top: "38%", size: "h-1 w-1", delay: 1.9, duration: 6.8 },
+];
+
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
-  const [isThreeLoaded, setIsThreeLoaded] = useState(false);
-  const [isVantaLoaded, setIsVantaLoaded] = useState(false);
-  const vantaRef = useRef<HTMLElement | null>(null);
-  const vantaEffectRef = useRef<{ destroy: () => void } | null>(null);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [typedPlaceholder, setTypedPlaceholder] = useState("");
+  const [isDeletingPlaceholder, setIsDeletingPlaceholder] = useState(false);
   const router = useRouter();
   const goToLogin = () => router.push("/dashboard");
 
-  const initializeVanta = useCallback(() => {
-    if (!isThreeLoaded || !isVantaLoaded || !vantaRef.current || !window.VANTA || vantaEffectRef.current) {
-      return;
-    }
-
-    vantaEffectRef.current = window.VANTA.BIRDS({
-      el: vantaRef.current,
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200,
-      minWidth: 200,
-      scale: 1,
-      scaleMobile: 1,
-      backgroundColor: 0x1c2f3c,
-      color1: 0x69ff,
-      color2: 0xb3ff,
-      birdSize: 1.5,
-      wingSpan: 15,
-      speedLimit: 3,
-      separation: 17,
-      alignment: 23,
-      cohesion: 29,
-      quantity: 4,
-    });
-  }, [isThreeLoaded, isVantaLoaded]);
-
   useEffect(() => {
-    initializeVanta();
-  }, [initializeVanta]);
+    const currentPlaceholder = heroPlaceholders[placeholderIndex];
+    const isComplete = typedPlaceholder === currentPlaceholder;
+    const isEmpty = typedPlaceholder.length === 0;
+    const timeout = window.setTimeout(() => {
+      if (!isDeletingPlaceholder && isComplete) {
+        setIsDeletingPlaceholder(true);
+        return;
+      }
 
-  useEffect(() => {
-    return () => {
-      vantaEffectRef.current?.destroy();
-      vantaEffectRef.current = null;
-    };
-  }, []);
+      if (isDeletingPlaceholder && isEmpty) {
+        setIsDeletingPlaceholder(false);
+        setPlaceholderIndex((current) => (current + 1) % heroPlaceholders.length);
+        return;
+      }
+
+      setTypedPlaceholder((current) =>
+        isDeletingPlaceholder
+          ? currentPlaceholder.slice(0, Math.max(current.length - 1, 0))
+          : currentPlaceholder.slice(0, current.length + 1)
+      );
+    }, isComplete ? 1300 : isDeletingPlaceholder ? 32 : 58);
+
+    return () => window.clearTimeout(timeout);
+  }, [isDeletingPlaceholder, placeholderIndex, typedPlaceholder]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
-      <Script
-        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
-        strategy="afterInteractive"
-        onLoad={() => setIsThreeLoaded(true)}
-      />
-      {isThreeLoaded && (
-        <Script
-          src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.birds.min.js"
-          strategy="afterInteractive"
-          onLoad={() => setIsVantaLoaded(true)}
-        />
-      )}
-      <div className="absolute inset-0 bg-grid-pattern opacity-80 pointer-events-none" />
-      <div className="absolute left-[-4.5rem] top-24 h-[220px] w-[220px] rounded-full bg-sky-400/10 blur-[90px] pointer-events-none sm:top-1/4 sm:-left-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
-      <div className="absolute right-[-4.5rem] top-40 h-[220px] w-[220px] rounded-full bg-cyan-400/10 blur-[90px] pointer-events-none sm:top-1/3 sm:-right-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
-      <div className="absolute bottom-12 left-1/2 h-[240px] w-[240px] -translate-x-1/2 rounded-full bg-sky-300/5 blur-[100px] pointer-events-none sm:bottom-1/4 sm:left-1/3 sm:h-[500px] sm:w-[500px] sm:translate-x-0 sm:blur-[160px]" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-70 pointer-events-none" />
+      <div className="absolute left-[-5rem] top-16 h-[260px] w-[260px] rounded-full bg-sky-300/20 blur-[100px] pointer-events-none sm:left-[-8rem] sm:h-[480px] sm:w-[480px] sm:blur-[150px]" />
+      <div className="absolute right-[-5rem] top-28 h-[240px] w-[240px] rounded-full bg-cyan-300/18 blur-[100px] pointer-events-none sm:right-[-7rem] sm:h-[460px] sm:w-[460px] sm:blur-[150px]" />
+      <div className="absolute bottom-20 left-1/2 h-[280px] w-[280px] -translate-x-1/2 rounded-full bg-blue-200/18 blur-[120px] pointer-events-none sm:h-[560px] sm:w-[560px] sm:blur-[170px]" />
       <section
-        id="home-vanta-birds"
-        ref={vantaRef}
+        id="home-hero"
         className="relative z-10 flex min-h-[calc(100svh-5rem)] w-full items-center justify-center overflow-hidden px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.14),transparent_42%),linear-gradient(180deg,rgba(28,47,60,0.08),rgba(28,47,60,0.42))] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.13),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.82),rgba(240,249,255,0.62)_54%,rgba(255,255,255,0.95))] pointer-events-none dark:bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.18),transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.94))]" />
+        {heroParticles.map((particle, index) => (
+          <motion.span
+            key={index}
+            aria-hidden="true"
+            className={`absolute rounded-full bg-sky-400/55 shadow-[0_0_22px_rgba(14,165,233,0.42)] ${particle.size}`}
+            style={{ left: particle.left, top: particle.top }}
+            animate={{ opacity: [0.18, 0.9, 0.18], y: [0, -18, 0], scale: [1, 1.35, 1] }}
+            transition={{ duration: particle.duration, delay: particle.delay, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ))}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.72, ease: "easeOut" }}
-          className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center justify-center"
+          className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center justify-center"
         >
-          <motion.button
-            type="button"
-            aria-label="Open LokoAI dashboard"
-            onClick={goToLogin}
-            animate={{ y: [0, -10, 0] }}
-            whileHover={{ scale: 1.07 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{
-              y: {
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              },
-              scale: { duration: 0.22, ease: "easeOut" },
-            }}
-            className="group relative mb-8 flex h-20 w-20 items-center justify-center rounded-[1.4rem] border border-white/25 bg-white/15 text-sky-200 shadow-[0_22px_70px_rgba(14,165,233,0.22)] outline-none backdrop-blur-xl transition-colors focus-visible:ring-2 focus-visible:ring-sky-300 sm:mb-10 sm:h-24 sm:w-24 sm:rounded-[1.75rem]"
+          <div className="relative flex min-h-[104px] items-center justify-center">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.82, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: [0, -8, 0] }}
+              transition={{
+                opacity: { duration: 0.78, ease: "easeOut" },
+                scale: { duration: 0.78, ease: "easeOut" },
+                filter: { duration: 0.78, ease: "easeOut" },
+                y: { duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 },
+              }}
+              className="relative z-10"
+            >
+              <button
+                type="button"
+                aria-label="Open LokoAI dashboard"
+                onClick={goToLogin}
+                className="group relative flex h-16 w-16 items-center justify-center rounded-2xl border border-sky-200/80 bg-white/80 text-sky-500 shadow-[0_24px_80px_rgba(14,165,233,0.24)] outline-none backdrop-blur-xl transition-transform duration-300 hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-300 dark:border-white/15 dark:bg-white/10 dark:text-sky-200 sm:h-[74px] sm:w-[74px]"
+              >
+                <span className="absolute inset-[-18px] rounded-[2rem] bg-sky-300/35 blur-2xl transition-opacity duration-300 group-hover:opacity-90" />
+                <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white via-sky-50 to-cyan-100/70 opacity-95 dark:from-white/25 dark:via-sky-300/15 dark:to-cyan-200/10" />
+                <motion.span
+                  className="absolute inset-[-7px] rounded-[1.45rem] border border-sky-300/30"
+                  animate={{ opacity: [0.16, 0.64, 0.16], scale: [0.92, 1.12, 0.92] }}
+                  transition={{ duration: 2.7, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <Sparkles className="relative h-8 w-8 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-9 sm:w-9" />
+              </button>
+            </motion.div>
+            <motion.div
+              initial={{ width: 0, opacity: 0, x: -18, filter: "blur(14px)" }}
+              animate={{ width: "auto", opacity: 1, x: 0, filter: "blur(0px)" }}
+              transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.85 }}
+              className="ml-4 overflow-hidden sm:ml-5"
+            >
+              <span className="block whitespace-nowrap bg-gradient-to-r from-slate-950 via-sky-600 to-cyan-500 bg-clip-text text-[clamp(2.7rem,9vw,5.6rem)] font-black leading-none tracking-normal text-transparent drop-shadow-[0_18px_50px_rgba(14,165,233,0.20)] dark:from-white dark:via-sky-200 dark:to-cyan-300">
+                LokoAI
+              </span>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.78, ease: "easeOut", delay: 1.85 }}
+            className="relative mt-10 w-full max-w-3xl sm:mt-12"
           >
-            <span className="absolute inset-[-18px] rounded-[2rem] bg-sky-400/20 blur-2xl transition-opacity duration-300 group-hover:opacity-90 dark:bg-sky-300/20" />
-            <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white/30 via-sky-300/20 to-cyan-200/15 opacity-95" />
-            <Sparkles className="relative h-9 w-9 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-11 sm:w-11" />
-          </motion.button>
-
-          <h1 className="mx-auto max-w-5xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-white drop-shadow-[0_12px_38px_rgba(0,0,0,0.28)]">
-            One Platform. Infinite AI Possibilities.
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-3xl text-balance text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-sky-50/90 drop-shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
-            Build agents, automate tasks, and scale without limits.
-          </p>
+            <div className="absolute inset-0 rounded-[1.75rem] bg-sky-300/25 blur-2xl" />
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/78 p-4 text-left shadow-[0_28px_90px_rgba(15,23,42,0.09)] backdrop-blur-2xl transition-all duration-300 hover:border-sky-200 hover:shadow-[0_32px_100px_rgba(14,165,233,0.14)] dark:border-white/10 dark:bg-white/8 sm:p-5">
+              <div className="min-h-[58px] px-1 text-[clamp(1rem,2.5vw,1.18rem)] font-medium leading-relaxed text-slate-500 dark:text-slate-300">
+                <span>{typedPlaceholder}</span>
+                <span className="typewriter-cursor ml-0.5 inline-block h-5 w-[2px] translate-y-1 rounded-full bg-sky-500" />
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-white/10">
+                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-300">
+                  <button type="button" aria-label="Add attachment" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 transition-colors hover:border-sky-200 hover:text-sky-500 dark:border-white/10 dark:bg-white/10">
+                    <Plus className="h-4 w-4" />
+                  </button>
+                  <button type="button" aria-label="Use voice input" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 transition-colors hover:border-sky-200 hover:text-sky-500 dark:border-white/10 dark:bg-white/10">
+                    <Mic className="h-4 w-4" />
+                  </button>
+                </div>
+                <button type="button" aria-label="Start with LokoAI" onClick={goToLogin} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-white shadow-lg shadow-sky-500/15 transition-all hover:-translate-y-0.5 hover:bg-sky-500 active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-sky-200">
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </motion.div>
       </section>
       <section className="relative z-10 overflow-hidden border-y border-slate-100 bg-slate-50/50 py-10 dark:border-white/5 dark:bg-slate-950/20 sm:py-12">
