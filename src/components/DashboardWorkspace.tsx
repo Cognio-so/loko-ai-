@@ -231,50 +231,32 @@ function useTypewriterPlaceholder() {
 
 function AnimatedChatHero() {
   return (
-    <div className="relative mb-5 flex min-h-[132px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[150px] sm:py-7">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.72))]" />
-      {heroParticles.map((particle) => (
-        <motion.span
-          key={`${particle.left}-${particle.top}`}
-          className={`absolute rounded-full bg-sky-400/25 ${particle.size}`}
-          style={{ left: particle.left, top: particle.top }}
-          initial={{ opacity: 0, y: 10, scale: 0.6 }}
-          animate={{ opacity: [0.06, 0.34, 0.06], y: [-4, -14, -4], scale: [0.8, 1.08, 0.8] }}
-          transition={{ duration: 5, delay: particle.delay, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ))}
-
-      <div className="relative z-10 flex items-center justify-center">
+    <div className="relative mb-2 flex min-h-[64px] w-full max-w-2xl items-end justify-start overflow-visible px-5 text-left sm:min-h-[72px]">
+      <div className="relative z-10 flex items-center justify-start">
         <motion.div
           initial={{ opacity: 0, scale: 0.78, y: 16, filter: "blur(10px)" }}
           animate={{
             opacity: 1,
-            scale: [1, 1.035, 1],
-            y: [0, -8, 0],
+            scale: 1,
+            y: [0, -3, 0],
             filter: "blur(0px)",
           }}
           transition={{
             opacity: { duration: 0.8, ease: "easeOut" },
-            scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
             y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
             filter: { duration: 0.8 },
           }}
-          className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-sky-100 bg-white/95 shadow-[0_10px_28px_rgba(14,165,233,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-12 sm:w-12"
+          className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm sm:h-10 sm:w-10"
         >
-          <motion.span
-            className="absolute inset-0 rounded-2xl bg-sky-400/10 blur-md"
-            animate={{ opacity: [0.12, 0.34, 0.12] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <Sparkles className="relative h-5 w-5 text-sky-500 sm:h-6 sm:w-6" />
+          <Sparkles className="relative h-5 w-5 sm:h-5 sm:w-5" />
         </motion.div>
         <motion.div
           initial={{ width: 0, opacity: 0, x: -16, filter: "blur(12px)" }}
           animate={{ width: "auto", opacity: 1, x: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.05, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
-          className="ml-3 overflow-hidden sm:ml-4"
+          className="ml-2.5 overflow-hidden sm:ml-3"
         >
-          <span className="block whitespace-nowrap bg-gradient-to-r from-slate-950 via-sky-800 to-sky-500 bg-clip-text text-[clamp(1.75rem,5.2vw,3.35rem)] font-black leading-none tracking-normal text-transparent">
+          <span className="block whitespace-nowrap bg-gradient-to-r from-slate-800 via-slate-700 to-sky-600 bg-clip-text text-[clamp(1.2rem,3vw,1.75rem)] font-medium leading-none tracking-normal text-transparent">
             LokoAI
           </span>
         </motion.div>
