@@ -614,8 +614,10 @@ export default function DashboardWorkspace() {
                           textareaRef={textareaRef}
                           onKeyDown={handleKeyDown}
                           onSubmit={() => void handleSubmit()}
+                          onAddContent={handleAddContent}
                           onVoiceInput={handleVoiceInput}
                           isSubmitting={isSubmitting}
+                          notice={composerNotice}
                         />
                         <PromptChips setPrompt={setPrompt} />
                       </div>
