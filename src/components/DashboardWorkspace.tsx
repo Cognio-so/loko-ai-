@@ -290,6 +290,11 @@ function MarkdownContent({ content }: { content: string }) {
 
 function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false);
+  const normalizedLanguage = language.toLowerCase();
+  const canPreview =
+    normalizedLanguage.includes("html") ||
+    code.trimStart().toLowerCase().startsWith("<!doctype html") ||
+    code.trimStart().toLowerCase().startsWith("<html");
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -298,28 +303,48 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-700/40 bg-[#111827] text-slate-100 shadow-[0_18px_42px_rgba(15,23,42,0.18)]">
-      <div className="flex items-center justify-between border-b border-white/10 bg-[#172033] px-4 py-2.5 text-xs text-slate-300">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 font-normal text-slate-300">{language}</span>
+    <div className="space-y-3">
+      <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+            <span className="ml-2 font-normal text-slate-500">{language}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleCopy()}
+            className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-normal text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600"
+            aria-label="Copy code"
+            title="Copy code"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+            <span>{copied ? "Copied" : "Copy"}</span>
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => void handleCopy()}
-          className="inline-flex h-8 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 text-xs font-normal text-slate-200 transition hover:bg-sky-400/15 hover:text-white"
-          aria-label="Copy code"
-          title="Copy code"
-        >
-          {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
-          <span>{copied ? "Copied" : "Copy"}</span>
-        </button>
+        <pre className="scrollbar-soft max-h-96 w-full overflow-auto bg-white p-4 text-xs font-normal leading-6 text-slate-700 selection:bg-sky-100">
+          <code className="whitespace-pre-wrap break-words">{code}</code>
+        </pre>
       </div>
-      <pre className="scrollbar-soft max-h-80 overflow-auto bg-[linear-gradient(180deg,#111827,#0f172a)] p-4 text-xs font-normal leading-6 text-slate-100 selection:bg-sky-500/30">
-        <code>{code}</code>
-      </pre>
+      {canPreview && <CodePreview html={code} />}
+    </div>
+  );
+}
+
+function CodePreview({ html }: { html: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.08)]">
+      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-normal text-slate-500">
+        <span>Preview</span>
+        <span className="text-slate-400">Live page</span>
+      </div>
+      <iframe
+        title="Generated page preview"
+        srcDoc={html}
+        sandbox="allow-scripts allow-forms allow-popups allow-modals"
+        className="h-[440px] w-full bg-white"
+      />
     </div>
   );
 }
