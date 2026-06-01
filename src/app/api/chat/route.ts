@@ -17,6 +17,38 @@ type ChatRequestBody = {
   messages?: ChatMessage[];
 };
 
+type OpenRouterTool =
+  | {
+      type: "openrouter:web_search";
+      parameters: {
+        engine: "auto";
+        max_results: number;
+        max_total_results: number;
+        search_context_size: "low" | "medium" | "high";
+      };
+    }
+  | {
+      type: "openrouter:image_generation";
+      parameters: {
+        model?: string;
+        quality: "low" | "medium" | "high";
+        aspect_ratio: "16:9" | "1:1" | "4:3";
+        output_format: "png";
+      };
+    };
+
+const CURRENT_FACT_PATTERN =
+  /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather|score|match|final|winner|won|result|live|update|breaking|stock|crypto|rate|ipl|cricket|election|kal|aaj|aj|abhi|haal|mausam|mousam|jiti|jeeti|jita|jeeta|kon|kaun|konsi|konsa|kisne|kab)\b/i;
+
+const WEBSITE_PATTERN =
+  /\b(website|design|ui|ux|app|landing|dashboard|code|component|page|frontend|html|css|react|next|desktop)\b/i;
+
+const IMAGE_PATTERN =
+  /\b(image|photo|picture|poster|banner|thumbnail|logo|illustration|avatar|wallpaper|visual|generate image|create image|image bana|photo bana|tasveer|taseer|chitra|चित्र|तस्वीर)\b/i;
+
+const PROMPT_REQUEST_PATTERN =
+  /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
+
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
@@ -69,38 +101,85 @@ function selectModelsForPrompt(
   prompt: string,
   config: ReturnType<typeof getOpenRouterConfig>
 ) {
-  const lowerPrompt = prompt.toLowerCase();
-  const isSearchPrompt = /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather)\b/.test(
-    lowerPrompt
-  );
-  const isWebsitePrompt = /\b(website|design|ui|app|landing|dashboard|code|component|page|frontend|html|css|react|next)\b/.test(
-    lowerPrompt
-  );
-
-  if (isSearchPrompt) return config.searchModels;
-  if (isWebsitePrompt) return config.websiteModels;
+  if (isSearchPrompt(prompt)) return config.searchModels;
+  if (isImagePrompt(prompt)) return config.imageModels;
+  if (WEBSITE_PATTERN.test(prompt)) return config.websiteModels;
   return config.fallbackModels;
 }
 
 function isSearchPrompt(prompt: string) {
-  return /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather)\b/i.test(
-    prompt
-  );
+  return CURRENT_FACT_PATTERN.test(prompt);
+}
+
+function isImagePrompt(prompt: string) {
+  return IMAGE_PATTERN.test(prompt);
+}
+
+function isPromptRequest(prompt: string) {
+  return PROMPT_REQUEST_PATTERN.test(prompt);
+}
+
+function getCurrentDateForPrompt() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function getOpenRouterTools(userText: string): OpenRouterTool[] | undefined {
+  const tools: OpenRouterTool[] = [];
+
+  if (isSearchPrompt(userText)) {
+    tools.push({
+      type: "openrouter:web_search",
+      parameters: {
+        engine: "auto",
+        max_results: 5,
+        max_total_results: 10,
+        search_context_size: "medium",
+      },
+    });
+  }
+
+  if (isImagePrompt(userText)) {
+    const imageModel = process.env.OPENROUTER_IMAGE_GENERATION_MODEL?.trim();
+    tools.push({
+      type: "openrouter:image_generation",
+      parameters: {
+        ...(imageModel ? { model: imageModel } : {}),
+        quality: "high",
+        aspect_ratio: "16:9",
+        output_format: "png",
+      },
+    });
+  }
+
+  return tools.length ? tools : undefined;
 }
 
 function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], userText: string) {
   const searchInstruction = isSearchPrompt(userText)
-    ? " For current, latest, news, price, weather, or web-search questions: do not invent live facts. If this model cannot access live search results, clearly say live search is unavailable and give only stable general guidance."
+    ? " For current, latest, sports, news, price, weather, or web-search questions: use web search before answering. Cite sources with markdown links. If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing."
     : "";
+  const promptInstruction = isPromptRequest(userText)
+    ? " If the user asks for a prompt, provide a clean copy-ready prompt in the user's language and include useful details without asking unnecessary follow-up questions."
+    : "";
+  const imageInstruction = isImagePrompt(userText)
+    ? " If the user asks to create an image, use the image generation tool. Also include the final image prompt you used. If image generation is unavailable, provide a polished image prompt and say image generation could not run."
+    : "";
+  const tools = getOpenRouterTools(userText);
 
   return {
     model,
     stream: true,
+    ...(tools ? { tools } : {}),
     messages: [
       {
         role: "system",
         content:
-          `You are LokoAI, a concise and helpful AI assistant. Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}`,
+          `You are LokoAI, a concise and helpful AI assistant. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}`,
       },
       ...messagesBeforeAi.slice(-12).map((message) => ({
         role: message.role,

@@ -9,11 +9,17 @@ const DEFAULT_OPENROUTER_MODELS = [
   "qwen/qwen3-coder:free",
 ];
 const DEFAULT_WEBSITE_MODELS = [
+  "google/gemini-3.5-flash",
   "moonshotai/kimi-k2.6:free",
   "qwen/qwen3-coder:free",
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
   "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+];
+const DEFAULT_IMAGE_MODELS = [
+  "google/gemini-3.5-flash",
+  "moonshotai/kimi-k2.6:free",
+  "openai/gpt-oss-120b:free",
 ];
 const DEFAULT_SEARCH_MODELS = [
   "openai/gpt-4o-mini-search-preview",
@@ -74,6 +80,9 @@ export function getOpenRouterConfig() {
   const websiteModels = uniqueModels(
     parseModelList(process.env.OPENROUTER_WEBSITE_MODELS, DEFAULT_WEBSITE_MODELS)
   );
+  const imageModels = uniqueModels(
+    parseModelList(process.env.OPENROUTER_IMAGE_MODELS, DEFAULT_IMAGE_MODELS)
+  );
   const searchModels = uniqueModels(
     parseModelList(process.env.OPENROUTER_SEARCH_MODELS, DEFAULT_SEARCH_MODELS)
   );
@@ -85,6 +94,7 @@ export function getOpenRouterConfig() {
     freeModel,
     fallbackModels,
     websiteModels,
+    imageModels,
     searchModels,
   };
 }
