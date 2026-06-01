@@ -1,11 +1,20 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Sparkles, Check, Star, ArrowRight
 } from "lucide-react";
+
+declare global {
+  interface Window {
+    VANTA?: {
+      BIRDS: (options: Record<string, unknown>) => { destroy: () => void };
+    };
+  }
+}
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -329,21 +338,80 @@ const pricingPlans = [
 
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
+  const [isThreeLoaded, setIsThreeLoaded] = useState(false);
+  const [isVantaLoaded, setIsVantaLoaded] = useState(false);
+  const vantaRef = useRef<HTMLElement | null>(null);
+  const vantaEffectRef = useRef<{ destroy: () => void } | null>(null);
   const router = useRouter();
   const goToLogin = () => router.push("/dashboard");
 
+  const initializeVanta = useCallback(() => {
+    if (!isThreeLoaded || !isVantaLoaded || !vantaRef.current || !window.VANTA || vantaEffectRef.current) {
+      return;
+    }
+
+    vantaEffectRef.current = window.VANTA.BIRDS({
+      el: vantaRef.current,
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200,
+      minWidth: 200,
+      scale: 1,
+      scaleMobile: 1,
+      backgroundColor: 0x1c2f3c,
+      color1: 0x69ff,
+      color2: 0xb3ff,
+      birdSize: 1.5,
+      wingSpan: 15,
+      speedLimit: 3,
+      separation: 17,
+      alignment: 23,
+      cohesion: 29,
+      quantity: 4,
+    });
+  }, [isThreeLoaded, isVantaLoaded]);
+
+  useEffect(() => {
+    initializeVanta();
+  }, [initializeVanta]);
+
+  useEffect(() => {
+    return () => {
+      vantaEffectRef.current?.destroy();
+      vantaEffectRef.current = null;
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
+      <Script
+        src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"
+        strategy="afterInteractive"
+        onLoad={() => setIsThreeLoaded(true)}
+      />
+      {isThreeLoaded && (
+        <Script
+          src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.birds.min.js"
+          strategy="afterInteractive"
+          onLoad={() => setIsVantaLoaded(true)}
+        />
+      )}
       <div className="absolute inset-0 bg-grid-pattern opacity-80 pointer-events-none" />
       <div className="absolute left-[-4.5rem] top-24 h-[220px] w-[220px] rounded-full bg-sky-400/10 blur-[90px] pointer-events-none sm:top-1/4 sm:-left-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
       <div className="absolute right-[-4.5rem] top-40 h-[220px] w-[220px] rounded-full bg-cyan-400/10 blur-[90px] pointer-events-none sm:top-1/3 sm:-right-20 sm:h-[450px] sm:w-[450px] sm:blur-[140px]" />
       <div className="absolute bottom-12 left-1/2 h-[240px] w-[240px] -translate-x-1/2 rounded-full bg-sky-300/5 blur-[100px] pointer-events-none sm:bottom-1/4 sm:left-1/3 sm:h-[500px] sm:w-[500px] sm:translate-x-0 sm:blur-[160px]" />
-      <section className="relative z-10 mx-auto flex min-h-[calc(100svh-5rem)] w-full max-w-7xl items-center justify-center px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8">
+      <section
+        id="home-vanta-birds"
+        ref={vantaRef}
+        className="relative z-10 flex min-h-[calc(100svh-5rem)] w-full items-center justify-center overflow-hidden px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.14),transparent_42%),linear-gradient(180deg,rgba(28,47,60,0.08),rgba(28,47,60,0.42))] pointer-events-none" />
         <motion.div
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.72, ease: "easeOut" }}
-          className="mx-auto flex w-full max-w-5xl flex-col items-center justify-center"
+          className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center justify-center"
         >
           <motion.button
             type="button"
@@ -360,18 +428,18 @@ export default function Home() {
               },
               scale: { duration: 0.22, ease: "easeOut" },
             }}
-            className="group relative mb-8 flex h-20 w-20 items-center justify-center rounded-[1.4rem] border border-slate-200/80 bg-white/90 text-sky-500 shadow-[0_22px_70px_rgba(14,165,233,0.18)] outline-none backdrop-blur-xl transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 dark:border-white/10 dark:bg-white/[0.07] dark:text-sky-300 dark:shadow-[0_26px_90px_rgba(56,189,248,0.24)] sm:mb-10 sm:h-24 sm:w-24 sm:rounded-[1.75rem]"
+            className="group relative mb-8 flex h-20 w-20 items-center justify-center rounded-[1.4rem] border border-white/25 bg-white/15 text-sky-200 shadow-[0_22px_70px_rgba(14,165,233,0.22)] outline-none backdrop-blur-xl transition-colors focus-visible:ring-2 focus-visible:ring-sky-300 sm:mb-10 sm:h-24 sm:w-24 sm:rounded-[1.75rem]"
           >
             <span className="absolute inset-[-18px] rounded-[2rem] bg-sky-400/20 blur-2xl transition-opacity duration-300 group-hover:opacity-90 dark:bg-sky-300/20" />
-            <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white via-sky-50 to-cyan-100 opacity-95 dark:from-white/15 dark:via-sky-400/10 dark:to-cyan-300/10" />
+            <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white/30 via-sky-300/20 to-cyan-200/15 opacity-95" />
             <Sparkles className="relative h-9 w-9 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-11 sm:w-11" />
           </motion.button>
 
-          <h1 className="mx-auto max-w-5xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
+          <h1 className="mx-auto max-w-5xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-white drop-shadow-[0_12px_38px_rgba(0,0,0,0.28)]">
             One Platform. Infinite AI Possibilities.
           </h1>
 
-          <p className="mx-auto mt-6 max-w-3xl text-balance text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-slate-600 dark:text-stone-300">
+          <p className="mx-auto mt-6 max-w-3xl text-balance text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-sky-50/90 drop-shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
             Build agents, automate tasks, and scale without limits.
           </p>
         </motion.div>
