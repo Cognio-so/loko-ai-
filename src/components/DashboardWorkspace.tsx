@@ -381,66 +381,6 @@ function MarkdownText({ content }: { content: string }) {
     </>
   );
 }
-          </div>
-          <button
-            type="button"
-            onClick={() => void handleCopy()}
-            className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-normal text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600"
-            aria-label="Copy code"
-            title="Copy code"
-          >
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
-            <span>{copied ? "Copied" : "Copy"}</span>
-          </button>
-        </div>
-        <pre className="scrollbar-soft max-h-96 w-full overflow-auto bg-white p-4 text-xs font-normal leading-6 text-slate-700 selection:bg-sky-100">
-          <code className="whitespace-pre-wrap break-words">{code}</code>
-        </pre>
-      </div>
-      {canPreview && <CodePreview html={code} />}
-    </div>
-  );
-}
-
-function CodePreview({ html }: { html: string }) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_16px_38px_rgba(15,23,42,0.08)]">
-      <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-normal text-slate-500">
-        <span>Preview</span>
-        <span className="text-slate-400">Live page</span>
-      </div>
-      <iframe
-        title="Generated page preview"
-        srcDoc={html}
-        sandbox="allow-scripts allow-forms allow-popups allow-modals"
-        className="h-[440px] w-full bg-white"
-      />
-    </div>
-  );
-}
-
-function MarkdownText({ content }: { content: string }) {
-  const segments = content.split(/!\[([^\]]*)\]\((data:image\/[^)]+|https?:\/\/[^)\s]+)\)/g);
-
-  return (
-    <>
-      {segments.map((segment, index) => {
-        if (index % 3 === 1) return null;
-        if (index % 3 === 2) {
-          const alt = segments[index - 1] || "Generated image";
-          return (
-            <span key={index} className="my-3 block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={segment} alt={alt} className="block max-h-[520px] w-full object-contain" />
-            </span>
-          );
-        }
-
-        return <FormattedMarkdownText key={index} content={segment} />;
-      })}
-    </>
-  );
-}
 
 function cleanMarkdownText(value: string) {
   return value
