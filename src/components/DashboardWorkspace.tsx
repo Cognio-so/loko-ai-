@@ -341,7 +341,38 @@ function MarkdownText({ content }: { content: string }) {
           );
         }
 
-        return segment;
+        return <FormattedMarkdownText key={index} content={segment} />;
+      })}
+    </>
+  );
+}
+
+function cleanMarkdownText(value: string) {
+  return value
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/^>\s+/, "")
+    .replace(/^[-*+]\s+/, "")
+    .replace(/^\d+\.\s+/, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .trim();
+}
+
+function FormattedMarkdownText({ content }: { content: string }) {
+  const lines = content.split(/\r?\n/);
+
+  return (
+    <>
+      {lines.map((line, index) => {
+        const cleaned = cleanMarkdownText(line);
+        if (!cleaned) return <div key={index} className="h-3" />;
+
+        return (
+          <p key={index} className="mb-2 text-[0.95rem] font-normal leading-7 text-slate-700">
+            {cleaned}
+          </p>
+        );
       })}
     </>
   );
