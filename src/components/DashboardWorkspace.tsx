@@ -465,11 +465,11 @@ export default function DashboardWorkspace() {
     <div data-app-shell className="h-dvh overflow-hidden bg-white text-slate-900">
       <div className="flex h-full min-h-0 overflow-hidden">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 h-dvh w-[280px] overflow-hidden border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
+          className={`scrollbar-soft fixed inset-y-0 left-0 z-40 h-dvh w-[280px] overflow-y-auto overscroll-contain border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex h-full min-h-0 flex-col">
+          <div className="flex min-h-full flex-col">
             <div className="mb-8 flex items-center justify-between px-2">
               <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
@@ -527,7 +527,7 @@ export default function DashboardWorkspace() {
               </div>
             </div>
 
-            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-1 pr-2">
+            <div className="px-1 pr-2">
               <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
                 <span>Recent History</span>
                 <History className="h-3.5 w-3.5 opacity-50" />
@@ -557,7 +557,7 @@ export default function DashboardWorkspace() {
               )}
             </div>
 
-            <div className="mt-6 space-y-3 border-t border-slate-100 pt-6">
+            <div className="mt-auto space-y-3 border-t border-slate-100 pt-6">
               <div className="flex flex-col gap-1">
                 <button type="button" onClick={() => router.push("/projects")} className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900">
                   <FolderOpen className="h-4 w-4" />
@@ -647,7 +647,7 @@ export default function DashboardWorkspace() {
                     </div>
                   ) : (
                     <>
-                      <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 sm:px-6">
+                      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 sm:px-6">
                         <div className="space-y-12">
                           {messages.map((message) => (
                             <MessageBubble
