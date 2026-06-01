@@ -323,7 +323,14 @@ export default function DashboardWorkspace() {
 
       if (!response.ok || !response.body) {
         const errorText = await response.text();
-        throw new Error(errorText || "AI response failed");
+        let message = errorText || "AI response failed";
+        try {
+          const data = JSON.parse(errorText) as { error?: string };
+          message = data.error || message;
+        } catch {
+          // Keep the plain text provider error.
+        }
+        throw new Error(message);
       }
 
       const nextChatId = response.headers.get("X-Chat-Id");
@@ -353,6 +360,10 @@ export default function DashboardWorkspace() {
       loadProjects();
     } catch (error) {
       console.warn("Chat send failed:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong while generating the response. Please retry.";
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantId
@@ -360,7 +371,7 @@ export default function DashboardWorkspace() {
                 ...message,
                 isStreaming: false,
                 isError: true,
-                content: "Something went wrong while generating the response. Please retry.",
+                content: errorMessage,
               }
             : message
         )
