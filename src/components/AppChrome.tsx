@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,11 @@ function isAppRoute(pathname: string | null) {
 export default function AppChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const hideMarketingChrome = isAppRoute(pathname);
+
+  useEffect(() => {
+    document.body.classList.toggle("app-shell-active", hideMarketingChrome);
+    return () => document.body.classList.remove("app-shell-active");
+  }, [hideMarketingChrome]);
 
   return (
     <>

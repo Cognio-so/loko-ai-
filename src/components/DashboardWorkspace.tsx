@@ -620,8 +620,6 @@ export default function DashboardWorkspace() {
                             <MessageBubble
                               key={message.id}
                               message={message}
-                              userAvatar={userAvatar}
-                              userName={userName}
                               copied={copiedMessageId === message.id}
                               onCopy={() => void handleCopyMessage(message)}
                               onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
@@ -793,15 +791,11 @@ function Composer({
 
 function MessageBubble({
   message,
-  userAvatar,
-  userName,
   copied,
   onCopy,
   onRetry,
 }: {
   message: ChatMessage;
-  userAvatar: string;
-  userName: string;
   copied: boolean;
   onCopy: () => void;
   onRetry: () => void;

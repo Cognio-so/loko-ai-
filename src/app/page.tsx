@@ -1,11 +1,13 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Sparkles, Check, Star, ArrowRight
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { cn, formatDisplayName } from "@/lib/utils";
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
