@@ -329,9 +329,98 @@ const pricingPlans = [
   }
 ];
 
+const heroMessages = [
+  "Build powerful AI agents.",
+  "Create stunning websites.",
+  "Generate production-ready code.",
+  "Design premium user interfaces.",
+  "Automate your workflow.",
+  "Launch your startup faster.",
+  "Create apps with AI.",
+  "Build anything in minutes.",
+];
+
+const AnimatedHeroText = memo(function AnimatedHeroText() {
+  const [messageIndex, setMessageIndex] = useState(0);
+  const [visibleCharacters, setVisibleCharacters] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+
+  const message = heroMessages[messageIndex];
+  const typedMessage = message.slice(0, visibleCharacters);
+  const isTyping = visibleCharacters < message.length;
+
+  useEffect(() => {
+    if (isTyping) {
+      const typingTimer = window.setTimeout(() => {
+        setVisibleCharacters((current) => current + 1);
+      }, 42);
+
+      return () => window.clearTimeout(typingTimer);
+    }
+
+    const holdTimer = window.setTimeout(() => setIsFading(true), 3000);
+    return () => window.clearTimeout(holdTimer);
+  }, [isTyping, message.length, visibleCharacters]);
+
+  useEffect(() => {
+    if (!isFading) return;
+
+    const nextMessageTimer = window.setTimeout(() => {
+      setMessageIndex((current) => (current + 1) % heroMessages.length);
+      setVisibleCharacters(0);
+      setIsFading(false);
+    }, 360);
+
+    return () => window.clearTimeout(nextMessageTimer);
+  }, [isFading]);
+
+  return (
+    <div
+      aria-live="polite"
+      className="mt-5 flex min-h-[2.3em] w-full items-center justify-center overflow-hidden px-2 text-center text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-slate-600 dark:text-stone-300 sm:mt-6"
+    >
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={messageIndex}
+          initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+          animate={{
+            opacity: isFading ? 0 : 1,
+            y: isFading ? -8 : 0,
+            filter: isFading ? "blur(4px)" : "blur(0px)",
+          }}
+          exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
+          transition={{ duration: 0.32, ease: "easeOut" }}
+          className="max-w-full whitespace-normal break-words will-change-transform"
+        >
+          <span>{typedMessage}</span>
+          <span
+            aria-hidden="true"
+            className={cn(
+              "typewriter-cursor ml-1 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] rounded-full bg-slate-500 dark:bg-stone-200",
+              !isTyping && "opacity-80"
+            )}
+          />
+        </motion.p>
+      </AnimatePresence>
+    </div>
+  );
+});
+
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const router = useRouter();
+  const { user } = useAuth();
+  const displayName = useMemo(
+    () =>
+      formatDisplayName(
+        user?.user_metadata?.full_name,
+        user?.user_metadata?.name,
+        user?.user_metadata?.username,
+        user?.user_metadata?.user_name,
+        user?.email
+      ),
+    [user]
+  );
   const goToLogin = () => router.push("/dashboard");
 
   return (
