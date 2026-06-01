@@ -248,7 +248,8 @@ async function requestOpenRouterImage(
   let lastStatus = 500;
 
   for (const model of models) {
-    try {
+    for (const modalities of [["image", "text"], ["image"]] as string[][]) {
+      try {
       const response = await fetch(chatCompletionsUrl, {
         method: "POST",
         headers: {
@@ -259,7 +260,7 @@ async function requestOpenRouterImage(
         },
         body: JSON.stringify({
           model,
-          modalities: ["image", "text"],
+          modalities,
           messages: [
             {
               role: "system",
@@ -311,9 +312,10 @@ async function requestOpenRouterImage(
 
       lastStatus = 502;
       lastErrorText = "Image generation returned no image.";
-    } catch (error) {
-      lastErrorText = error instanceof Error ? error.message : "AI image generation failed.";
-      lastStatus = 502;
+      } catch (error) {
+        lastErrorText = error instanceof Error ? error.message : "AI image generation failed.";
+        lastStatus = 502;
+      }
     }
   }
 
