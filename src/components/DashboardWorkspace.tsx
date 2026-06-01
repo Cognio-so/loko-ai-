@@ -16,6 +16,7 @@ import {
   Loader2,
   Menu,
   Mic,
+  Moon,
   Notebook,
   Plus,
   RefreshCw,
@@ -24,6 +25,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Sun,
   Trash2,
   Trophy,
   Users,
@@ -31,6 +33,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/components/ThemeProvider";
 import LandingPage from "@/app/page";
 import IntegrationsPage from "@/app/integrations/page";
 import PartnersPage from "@/app/partners/page";
@@ -415,6 +418,7 @@ function FormattedMarkdownText({ content }: { content: string }) {
 
 export default function DashboardWorkspace() {
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, isLoading, signOut } = useAuth();
@@ -809,8 +813,14 @@ export default function DashboardWorkspace() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Upgrade Pro
               </button>
-              <button type="button" onClick={() => router.push("/profile")} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-medium text-white shadow-sm transition hover:bg-slate-800" aria-label="Profile">
-                A
+              <button
+                type="button"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to night mode"}
+                title={theme === "dark" ? "Light mode" : "Night mode"}
+              >
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
             </div>
           </header>
