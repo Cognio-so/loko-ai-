@@ -228,11 +228,9 @@ function useTypewriterHeadings(userName: string) {
   return { displayText, hasStarted, isExiting, headingIndex };
 }
 
-function AnimatedChatHero({ userName }: { userName: string }) {
-  const { displayText, hasStarted, isExiting, headingIndex } = useTypewriterHeadings(userName);
-
+function AnimatedChatHero() {
   return (
-    <div className="relative mb-5 flex min-h-[170px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[210px] sm:py-7">
+    <div className="relative mb-5 flex min-h-[126px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[150px] sm:py-7">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.72))]" />
       <motion.div
         className="pointer-events-none absolute left-1/2 top-8 h-20 w-20 -translate-x-1/2 rounded-full bg-sky-300/20 blur-2xl"
@@ -274,37 +272,6 @@ function AnimatedChatHero({ userName }: { userName: string }) {
           />
           <Sparkles className="relative h-6 w-6 text-sky-500 sm:h-7 sm:w-7" />
         </motion.div>
-
-        <AnimatePresence mode="wait">
-          {hasStarted && (
-            <motion.h1
-              key={headingIndex}
-              initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
-              animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -12 : 0, filter: isExiting ? "blur(8px)" : "blur(0px)" }}
-              exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
-              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="min-h-[56px] max-w-2xl text-balance text-2xl font-black leading-[1.08] tracking-tight text-slate-950 sm:min-h-[76px] sm:text-4xl lg:text-5xl"
-            >
-              <span className="bg-gradient-to-r from-slate-950 via-sky-950 to-sky-500 bg-clip-text text-transparent">
-                {displayText}
-              </span>
-              <motion.span
-                className="ml-1 inline-block h-[0.85em] w-[3px] translate-y-1 rounded-full bg-sky-500"
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.h1>
-          )}
-        </AnimatePresence>
-
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: hasStarted && !isExiting ? 1 : 0.4, y: hasStarted ? 0 : 10 }}
-          transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-          className="mt-2 max-w-lg text-sm font-semibold text-slate-500 sm:text-base"
-        >
-          Build, design, and launch polished AI experiences with LokoAI.
-        </motion.p>
       </div>
     </div>
   );
@@ -781,9 +748,10 @@ export default function DashboardWorkspace() {
                 <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
                   {messages.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:py-8">
-                      <AnimatedChatHero userName={userName} />
+                      <AnimatedChatHero />
                       <div className="w-full max-w-2xl">
                         <Composer
+                          userName={userName}
                           prompt={prompt}
                           setPrompt={setPrompt}
                           textareaRef={textareaRef}
@@ -822,6 +790,7 @@ export default function DashboardWorkspace() {
                       <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md sm:pb-10">
                         <div className="mx-auto max-w-2xl">
                           <Composer
+                            userName={userName}
                             prompt={prompt}
                             setPrompt={setPrompt}
                             textareaRef={textareaRef}
@@ -911,6 +880,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
 }
 
 function Composer({
+  userName,
   prompt,
   setPrompt,
   textareaRef,
@@ -921,6 +891,7 @@ function Composer({
   isSubmitting,
   notice,
 }: {
+  userName: string;
   prompt: string;
   setPrompt: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
@@ -931,16 +902,40 @@ function Composer({
   isSubmitting: boolean;
   notice: string;
 }) {
+  const { displayText, hasStarted, isExiting, headingIndex } = useTypewriterHeadings(userName);
+  const shouldShowAnimatedPlaceholder = !prompt.trim() && !isSubmitting;
+
   return (
     <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all focus-within:border-slate-300">
-      <div className="px-5 pt-5">
+      <div className="relative px-5 pt-5">
+        <AnimatePresence mode="wait">
+          {shouldShowAnimatedPlaceholder && hasStarted && (
+            <motion.div
+              key={headingIndex}
+              initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+              animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -8 : 0, filter: isExiting ? "blur(8px)" : "blur(0px)" }}
+              exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="pointer-events-none absolute left-5 right-5 top-5 z-10 flex min-h-[44px] items-center overflow-hidden py-2.5"
+            >
+              <span className="line-clamp-2 bg-gradient-to-r from-slate-500 via-sky-700 to-sky-400 bg-clip-text text-base font-semibold leading-relaxed text-transparent sm:text-lg">
+                {displayText}
+              </span>
+              <motion.span
+                className="ml-1 inline-block h-[1.05em] w-[2px] shrink-0 translate-y-0.5 rounded-full bg-sky-500"
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="What do you want to build?"
-          className="max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
+          placeholder={isSubmitting ? "Generating..." : ""}
+          className="relative z-0 max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
         />
       </div>
       
