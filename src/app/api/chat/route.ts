@@ -82,7 +82,17 @@ function selectModelsForPrompt(
   return config.fallbackModels;
 }
 
-function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[]) {
+function isSearchPrompt(prompt: string) {
+  return /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather)\b/i.test(
+    prompt
+  );
+}
+
+function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], userText: string) {
+  const searchInstruction = isSearchPrompt(userText)
+    ? " For current, latest, news, price, weather, or web-search questions: do not invent live facts. If this model cannot access live search results, clearly say live search is unavailable and give only stable general guidance."
+    : "";
+
   return {
     model,
     stream: true,
@@ -90,7 +100,7 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[]) 
       {
         role: "system",
         content:
-          "You are LokoAI, a concise and helpful AI assistant. Use markdown when useful. For code, use fenced code blocks with language names.",
+          `You are LokoAI, a concise and helpful AI assistant. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}`,
       },
       ...messagesBeforeAi.slice(-12).map((message) => ({
         role: message.role,
@@ -104,7 +114,8 @@ async function requestOpenRouterStream(
   chatCompletionsUrl: string,
   apiKey: string,
   models: string[],
-  messagesBeforeAi: ChatMessage[]
+  messagesBeforeAi: ChatMessage[],
+  userText: string
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -123,7 +134,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
@@ -207,7 +218,8 @@ export async function POST(req: Request) {
     config.chatCompletionsUrl,
     apiKey,
     selectedModels,
-    messagesBeforeAi
+    messagesBeforeAi,
+    userText
   );
 
   if ("error" in streamResult) {
