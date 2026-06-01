@@ -10,6 +10,7 @@ import {
   Copy,
   FileText,
   FolderOpen,
+  Maximize2,
   Grid3X3,
   History,
   Home,
@@ -294,6 +295,7 @@ function MarkdownContent({ content }: { content: string }) {
 function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<"code" | "preview">("code");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const normalizedLanguage = language.toLowerCase();
   const canPreview =
     normalizedLanguage.includes("html") ||
@@ -334,6 +336,21 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
               </button>
             </div>
           )}
+          {canPreview && (
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("preview");
+                setIsFullscreen(true);
+              }}
+              className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-normal text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600"
+              aria-label="Open preview fullscreen"
+              title="Fullscreen preview"
+            >
+              <Maximize2 className="h-3.5 w-3.5" />
+              <span>Full</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => void handleCopy()}
@@ -358,6 +375,35 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           <code className="whitespace-pre-wrap break-words">{code}</code>
         </pre>
       )}
+      <AnimatePresence>
+        {isFullscreen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col bg-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 text-sm text-slate-600">
+              <span>Preview</span>
+              <button
+                type="button"
+                onClick={() => setIsFullscreen(false)}
+                className="inline-flex h-8 items-center justify-center rounded-lg border border-slate-200 px-3 text-xs transition hover:bg-slate-50"
+                aria-label="Close fullscreen preview"
+              >
+                Close
+              </button>
+            </div>
+            <iframe
+              title="Generated page fullscreen preview"
+              srcDoc={code}
+              sandbox="allow-scripts allow-forms allow-popups allow-modals"
+              className="min-h-0 flex-1 bg-white"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
