@@ -590,14 +590,14 @@ export default function DashboardWorkspace() {
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
                   <Sparkles className="h-5 w-5" />
                 </span>
-                <span className="text-xl font-bold tracking-tight text-slate-900">LokoAI</span>
+                <span className="text-xl font-normal tracking-tight text-slate-900">LokoAI</span>
               </button>
               <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 lg:hidden" aria-label="Close sidebar">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <button type="button" onClick={startNewChat} className="group mb-2 flex h-11 w-full items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]">
+            <button type="button" onClick={startNewChat} className="group mb-2 flex h-11 w-full items-center gap-3 rounded-xl bg-white border border-slate-200 px-4 text-sm font-normal text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98]">
               <Plus className="h-4 w-4 text-slate-400 transition group-hover:text-slate-600" />
               New chat
             </button>
@@ -622,7 +622,7 @@ export default function DashboardWorkspace() {
             )}
 
             <div className="mb-6 space-y-1 border-t border-slate-100 pt-6">
-              <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Navigation</p>
+              <p className="mb-3 px-4 text-[11px] font-normal uppercase tracking-[0.1em] text-slate-400">Navigation</p>
               <div className="space-y-0.5">
                 {navItems.map((item) => (
                   <button
@@ -643,7 +643,7 @@ export default function DashboardWorkspace() {
             </div>
 
             <div className="px-1 pr-2">
-              <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+              <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-normal uppercase tracking-[0.1em] text-slate-400">
                 <span>Recent History</span>
                 <History className="h-3.5 w-3.5 opacity-50" />
               </div>
@@ -658,8 +658,8 @@ export default function DashboardWorkspace() {
                   {filteredProjects.slice(0, 20).map((project) => (
                     <div key={project.id} className={`group relative flex items-center gap-2 rounded-xl px-3 py-2.5 transition hover:bg-white hover:shadow-sm hover:ring-1 hover:ring-slate-100 ${activeChatId === project.id ? "bg-white shadow-sm ring-1 ring-slate-100" : ""}`}>
                       <button type="button" onClick={() => openProject(project)} className="min-w-0 flex-1 text-left" title={project.prompt || project.title}>
-                        <span className={`line-clamp-1 text-sm ${activeChatId === project.id ? "font-bold text-slate-900" : "text-slate-600"}`}>{project.title || project.prompt || "Untitled chat"}</span>
-                        <span className="mt-0.5 block text-[10px] font-bold text-slate-400">{getTimeAgo(project.updated_at || project.created_at)}</span>
+                        <span className={`line-clamp-1 text-sm ${activeChatId === project.id ? "font-medium text-slate-900" : "text-slate-600"}`}>{project.title || project.prompt || "Untitled chat"}</span>
+                        <span className="mt-0.5 block text-[10px] font-normal text-slate-400">{getTimeAgo(project.updated_at || project.created_at)}</span>
                       </button>
                       <button type="button" onClick={() => void handleDeleteProject(project.id)} className="rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" aria-label={`Delete ${project.title || "chat"}`}>
                         {deletingProjectId === project.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
@@ -689,14 +689,14 @@ export default function DashboardWorkspace() {
                     {userAvatar ? (
                       <img src={userAvatar} alt={userName} className="h-10 w-10 shrink-0 rounded-xl object-cover shadow-sm ring-1 ring-slate-100" />
                     ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-medium text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
                     )}
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                      <p className="truncate text-sm font-normal text-slate-900">{userName}</p>
                       <p className="truncate text-[11px] text-slate-400">{user.email}</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => void signOut()} className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600">
+                  <button type="button" onClick={() => void signOut()} className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-normal text-slate-500 transition hover:bg-red-50 hover:text-red-600">
                     <Bot className="h-3.5 w-3.5" />
                     Sign out
                   </button>
@@ -720,11 +720,11 @@ export default function DashboardWorkspace() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-bold text-sky-600 transition hover:bg-sky-100">
+              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-normal text-sky-600 transition hover:bg-sky-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Upgrade Pro
               </button>
-              <button type="button" onClick={() => router.push("/profile")} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800" aria-label="Profile">
+              <button type="button" onClick={() => router.push("/profile")} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-medium text-white shadow-sm transition hover:bg-slate-800" aria-label="Profile">
                 A
               </button>
             </div>
@@ -766,7 +766,7 @@ export default function DashboardWorkspace() {
                             />
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
-                            <div className="flex items-center gap-3 text-sm font-bold text-slate-400">
+                            <div className="flex items-center gap-3 text-sm font-normal text-slate-400">
                               <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
                               LokoAI is thinking...
                             </div>
@@ -824,7 +824,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -834,7 +834,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {item.title}
@@ -844,7 +844,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
       </div>
       {isMoreOpen && (
         <div className="absolute bottom-12 right-0 z-30 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200 sm:left-1/2 sm:right-auto sm:-translate-x-1/2">
-          <div className="mb-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Templates</div>
+          <div className="mb-2 px-3 py-1 text-[10px] font-normal uppercase tracking-widest text-slate-400">Templates</div>
           {moreQuickActions.map((moreItem) => (
             <button
               key={moreItem.title}
@@ -853,7 +853,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
                 setPrompt(moreItem.prompt);
                 setIsMoreOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-normal text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {moreItem.title}
@@ -902,7 +902,7 @@ function Composer({
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
               className="pointer-events-none absolute left-5 right-5 top-5 z-10 flex min-h-[44px] items-center overflow-hidden py-2.5"
             >
-              <span className="line-clamp-2 text-[0.95rem] font-semibold leading-relaxed text-slate-600 sm:text-base">
+              <span className="line-clamp-2 text-[0.95rem] font-normal leading-relaxed text-slate-600 sm:text-base">
                 {displayText}
               </span>
               <motion.span
@@ -984,7 +984,7 @@ function MessageBubble({
         
         <div className="group relative">
           {isUser && (
-            <div className="absolute -top-6 right-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
+            <div className="absolute -top-6 right-1 text-[10px] font-normal uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
               You
             </div>
           )}
@@ -995,7 +995,7 @@ function MessageBubble({
             {message.isStreaming && <span className="mt-2 inline-block h-1 w-8 animate-pulse rounded-full bg-sky-400" />}
           </div>
 
-          <div className={`mt-2 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 ${isUser ? "justify-end" : "justify-start"}`}>
+          <div className={`mt-2 flex items-center gap-3 text-[10px] font-normal uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 ${isUser ? "justify-end" : "justify-start"}`}>
             <span>{formatTime(message.createdAt)}</span>
             <button type="button" onClick={onCopy} className="hover:text-slate-900 transition flex items-center gap-1">
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
