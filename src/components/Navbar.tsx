@@ -1,9 +1,9 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sparkles, LayoutGrid, Zap, Users, Rocket, Trophy, Menu, X, Sun, Moon, LogOut, Gauge, Library } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AuthModal from "@/components/AuthModal";
 import { useTheme } from "@/components/ThemeProvider";
@@ -22,38 +22,68 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { user, isLoading, signOut } = useAuth();
   const currentTheme = theme;
 
+  useEffect(() => {
+    const routesToPrefetch = [
+      ...navItems.map((item) => item.href),
+      "/dashboard",
+      "/profile",
+      "/projects",
+      "/settings",
+      "/workspace",
+      "/login?next=/dashboard",
+    ];
+
+    routesToPrefetch.forEach((href) => {
+      router.prefetch(href);
+    });
+  }, [router]);
+
+  const prefetchRoute = (href: string) => {
+    router.prefetch(href);
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/75 dark:bg-slate-950/75 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/10 transition-colors duration-300">
       {/* Subtle brand grid pattern overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.04] pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex justify-between h-20 items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2.5 group">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex justify-between h-16 sm:h-20 items-center gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Link
+              href="/"
+              prefetch
+              onMouseEnter={() => prefetchRoute("/")}
+              onFocus={() => prefetchRoute("/")}
+              className="flex min-w-0 items-center gap-2.5 group"
+            >
               <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 p-0.5 shadow-md shadow-sky-500/20 transition-transform group-hover:scale-105">
                 <Sparkles className="h-5 w-5 text-white animate-pulse" />
               </div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-sky-500 transition-colors">
+              <span className="truncate text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-sky-500 transition-colors">
                 Loko<span className="text-sky-500">AI</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav - Beautiful Center Links */}
-          <div className="hidden md:flex items-center gap-1.5 mx-auto">
+          <div className="hidden lg:flex items-center gap-1.5 mx-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch
+                  onMouseEnter={() => prefetchRoute(item.href)}
+                  onFocus={() => prefetchRoute(item.href)}
                   className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 group ${
                     isActive 
                       ? "text-sky-600 dark:text-sky-400 bg-sky-500/10 dark:bg-sky-500/10" 
@@ -67,7 +97,7 @@ export default function Navbar() {
             })}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {/* Theme Toggle Button */}
             <button
               type="button"
@@ -86,6 +116,9 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 <Link 
                   href="/dashboard" 
+                  prefetch
+                  onMouseEnter={() => prefetchRoute("/dashboard")}
+                  onFocus={() => prefetchRoute("/dashboard")}
                   className="hidden sm:flex items-center gap-2 rounded-full border border-slate-200 dark:border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-700 transition hover:bg-sky-500/10 dark:text-gray-200"
                 >
                   <Gauge className="h-4 w-4 text-sky-500" />
@@ -105,6 +138,9 @@ export default function Navbar() {
                 )}
                 <Link
                   href="/login?next=/dashboard"
+                  prefetch
+                  onMouseEnter={() => prefetchRoute("/login?next=/dashboard")}
+                  onFocus={() => prefetchRoute("/login?next=/dashboard")}
                   className="relative inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold text-slate-950 dark:text-black bg-gradient-to-r from-sky-400 to-cyan-300 hover:from-sky-300 hover:to-cyan-200 transition-all duration-300 shadow-md shadow-sky-500/10 hover:shadow-lg hover:shadow-sky-500/20 active:scale-95"
                 >
                   Get Started
@@ -114,7 +150,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center gap-3">
+          <div className="lg:hidden flex items-center gap-2 shrink-0">
              <button
                 type="button"
                 aria-label={`Switch to ${currentTheme === "dark" ? "light" : "dark"} mode`}
@@ -145,14 +181,17 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden absolute top-20 left-0 right-0 glass border-b border-white/10 p-4"
+            className="lg:hidden absolute top-16 sm:top-20 left-0 right-0 glass border-b border-white/10 p-4"
           >
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch
                   onClick={() => setIsOpen(false)}
+                  onMouseEnter={() => prefetchRoute(item.href)}
+                  onFocus={() => prefetchRoute(item.href)}
                   className={`px-4 py-3 rounded-xl text-base font-medium flex items-center gap-3 ${
                     pathname === item.href
                       ? "bg-sky-500/10 text-slate-950 dark:bg-white/10 dark:text-white"
@@ -168,7 +207,10 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/dashboard"
+                      prefetch
                       onClick={() => setIsOpen(false)}
+                      onMouseEnter={() => prefetchRoute("/dashboard")}
+                      onFocus={() => prefetchRoute("/dashboard")}
                       className="flex items-center justify-center gap-2 rounded-xl bg-white/5 py-3 font-bold text-slate-700 dark:text-white"
                     >
                       <Gauge className="h-4 w-4 text-sky-500" />
@@ -201,12 +243,15 @@ export default function Navbar() {
                       </button>
                     )}
                     <Link
-                        href="/login?next=/dashboard"
-                        onClick={() => setIsOpen(false)}
-                        className="flex w-full items-center justify-center rounded-xl brand-btn py-3 font-bold"
-                      >
-                        Get Started
-                      </Link>
+                      href="/login?next=/dashboard"
+                      prefetch
+                      onClick={() => setIsOpen(false)}
+                      onMouseEnter={() => prefetchRoute("/login?next=/dashboard")}
+                      onFocus={() => prefetchRoute("/login?next=/dashboard")}
+                      className="flex w-full items-center justify-center rounded-xl brand-btn py-3 font-bold"
+                    >
+                      Get Started
+                    </Link>
                   </>
                 )}
               </div>
