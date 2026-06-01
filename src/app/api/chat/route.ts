@@ -43,6 +43,12 @@ const CURRENT_FACT_PATTERN =
 const WEBSITE_PATTERN =
   /\b(website|design|ui|ux|app|landing|dashboard|code|component|page|frontend|html|css|react|next|desktop)\b/i;
 
+const CODE_PATTERN =
+  /\b(code|coding|program|function|component|debug|bug|fix|error|typescript|javascript|react|next|node|api|route|css|html|database|sql|python|java|php|build|compile)\b/i;
+
+const REASONING_PATTERN =
+  /\b(reason|reasoning|think|analyze|analyse|logic|strategy|plan|compare|decide|explain why|deep|complex|architecture|system design)\b/i;
+
 const IMAGE_PATTERN =
   /\b(image|photo|picture|poster|banner|thumbnail|logo|illustration|avatar|wallpaper|visual|generate image|create image|image bana|photo bana|tasveer|taseer|chitra|चित्र|तस्वीर)\b/i;
 
@@ -109,8 +115,11 @@ function selectModelsForPrompt(
   prompt: string,
   config: ReturnType<typeof getOpenRouterConfig>
 ) {
+  if (!config.enableSmartRouting) return config.fallbackModels;
   if (isSearchPrompt(prompt)) return config.searchModels;
   if (isImagePrompt(prompt)) return [...IMAGE_CAPABLE_MODELS, ...config.imageModels];
+  if (CODE_PATTERN.test(prompt)) return config.coderModels;
+  if (REASONING_PATTERN.test(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
   if (WEBSITE_PATTERN.test(prompt)) return config.websiteModels;
   return config.fallbackModels;
 }
@@ -136,17 +145,20 @@ function getCurrentDateForPrompt() {
   }).format(new Date());
 }
 
-function getOpenRouterTools(userText: string): OpenRouterTool[] | undefined {
+function getOpenRouterTools(
+  userText: string,
+  config: ReturnType<typeof getOpenRouterConfig>
+): OpenRouterTool[] | undefined {
   const tools: OpenRouterTool[] = [];
 
-  if (isSearchPrompt(userText)) {
+  if (config.enableWebSearch && isSearchPrompt(userText)) {
     tools.push({
       type: "openrouter:web_search",
       parameters: {
         engine: "auto",
-        max_results: 5,
-        max_total_results: 10,
-        search_context_size: "medium",
+        max_results: config.enableDeepSearch ? 8 : 5,
+        max_total_results: config.enableDeepSearch ? 16 : 10,
+        search_context_size: config.enableDeepSearch ? "high" : "medium",
       },
     });
   }
@@ -157,8 +169,8 @@ function getOpenRouterTools(userText: string): OpenRouterTool[] | undefined {
       type: "openrouter:image_generation",
       parameters: {
         ...(imageModel ? { model: imageModel } : {}),
-        quality: "high",
-        aspect_ratio: "16:9",
+        quality: config.imageQuality === "hd" ? "high" : "medium",
+        aspect_ratio: config.imageSize.aspectRatio,
         output_format: "png",
       },
     });
@@ -172,9 +184,20 @@ function enhanceImagePrompt(userText: string) {
   return `${cleaned}. Create a complete high-quality AI image, photorealistic or cinematic style, ultra HD 4K, highly detailed, visually attractive modern artwork, professional composition, realistic lighting, rich environment, strong camera angle, detailed textures, realistic shadows, depth of field, refined color grading, sharp focus, no text, no watermark, no ASCII art, no code, no sketch placeholder.`;
 }
 
-function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], userText: string) {
+function getTemperatureForPrompt(userText: string, config: ReturnType<typeof getOpenRouterConfig>) {
+  if (isSearchPrompt(userText)) return config.searchTemperature;
+  if (CODE_PATTERN.test(userText)) return config.coderTemperature;
+  return config.chatTemperature;
+}
+
+function buildOpenRouterPayload(
+  model: string,
+  messagesBeforeAi: ChatMessage[],
+  userText: string,
+  config: ReturnType<typeof getOpenRouterConfig>
+) {
   const searchInstruction = isSearchPrompt(userText)
-    ? " For current, latest, sports, news, price, weather, or web-search questions: use web search before answering. Cite sources with markdown links. If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing."
+    ? ` For current, latest, sports, news, price, weather, or web-search questions: ${config.enableWebSearch ? "use web search before answering" : "web search is disabled, so do not invent live facts"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing.`
     : "";
   const promptInstruction = isPromptRequest(userText)
     ? " If the user asks for a prompt, provide a clean copy-ready prompt in the user's language and include useful details without asking unnecessary follow-up questions."
@@ -182,7 +205,7 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], 
   const imageInstruction = isImagePrompt(userText)
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
-  const tools = getOpenRouterTools(userText);
+  const tools = getOpenRouterTools(userText, config);
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => ({
     role: message.role,
     content:
@@ -193,7 +216,9 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], 
 
   return {
     model,
-    stream: true,
+    stream: config.enableStreaming,
+    temperature: getTemperatureForPrompt(userText, config),
+    max_tokens: config.maxOutputTokens,
     ...(tools ? { tools } : {}),
     messages: [
       {
@@ -242,7 +267,8 @@ async function requestOpenRouterImage(
   apiKey: string,
   models: string[],
   messagesBeforeAi: ChatMessage[],
-  userText: string
+  userText: string,
+  config: ReturnType<typeof getOpenRouterConfig>
 ): Promise<{ content: string; model: string } | { error: string; status: number }> {
   let lastErrorText = "";
   let lastStatus = 500;
@@ -261,6 +287,8 @@ async function requestOpenRouterImage(
         body: JSON.stringify({
           model,
           modalities,
+          temperature: config.chatTemperature,
+          max_tokens: config.maxOutputTokens,
           messages: [
             {
               role: "system",
@@ -330,7 +358,8 @@ async function requestOpenRouterStream(
   apiKey: string,
   models: string[],
   messagesBeforeAi: ChatMessage[],
-  userText: string
+  userText: string,
+  config: ReturnType<typeof getOpenRouterConfig>
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -349,7 +378,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
@@ -364,7 +393,7 @@ async function requestOpenRouterStream(
     lastStatus = upstream.status || 500;
     lastErrorText = await upstream.text().catch(() => "");
 
-    if (lastStatus === 401) {
+    if (lastStatus === 401 || !config.enableAutoRetry) {
       break;
     }
 
@@ -436,7 +465,8 @@ export async function POST(req: Request) {
       apiKey,
       selectedModels,
       messagesBeforeAi,
-      userText
+      userText,
+      config
     );
 
     if ("error" in imageResult) {
@@ -469,7 +499,8 @@ export async function POST(req: Request) {
     apiKey,
     selectedModels,
     messagesBeforeAi,
-    userText
+    userText,
+    config
   );
 
   if ("error" in streamResult) {
