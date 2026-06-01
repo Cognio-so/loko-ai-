@@ -100,7 +100,7 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], 
       {
         role: "system",
         content:
-          `You are LokoAI, a concise and helpful AI assistant. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}`,
+          `You are LokoAI, a concise and helpful AI assistant. Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}`,
       },
       ...messagesBeforeAi.slice(-12).map((message) => ({
         role: message.role,

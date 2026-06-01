@@ -207,6 +207,7 @@ export default function DashboardWorkspace() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [composerNotice, setComposerNotice] = useState("");
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
@@ -290,6 +291,7 @@ export default function DashboardWorkspace() {
     if (!trimmed || isSubmitting) return;
 
     setIsSubmitting(true);
+    setComposerNotice("");
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -401,18 +403,24 @@ export default function DashboardWorkspace() {
     };
     const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (!Recognition) {
-      setPrompt((current) => current || "Voice input is not supported in this browser.");
+      setComposerNotice("Voice input will be available soon for this browser.");
       return;
     }
 
     const recognition = new Recognition();
-    recognition.lang = "en-US";
+    recognition.lang = navigator.language || "en-US";
     recognition.interimResults = false;
     recognition.onresult = (event) => {
       const transcript = event.results[0]?.[0]?.transcript;
       if (transcript) setPrompt((current) => `${current}${current ? " " : ""}${transcript}`);
+      setComposerNotice("");
     };
+    setComposerNotice("Listening...");
     recognition.start();
+  }
+
+  function handleAddContent() {
+    setComposerNotice("File attachments and extra content tools are coming soon.");
   }
 
   async function handleCopyMessage(message: ChatMessage) {
@@ -642,13 +650,12 @@ export default function DashboardWorkspace() {
                             textareaRef={textareaRef}
                             onKeyDown={handleKeyDown}
                             onSubmit={() => void handleSubmit()}
+                            onAddContent={handleAddContent}
                             onVoiceInput={handleVoiceInput}
                             isSubmitting={isSubmitting}
+                            notice={composerNotice}
                           />
                           <PromptChips setPrompt={setPrompt} />
-                          <p className="mt-4 text-center text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                            AI may produce inaccurate information about people, places, or facts.
-                          </p>
                         </div>
                       </div>
                     </>
@@ -677,49 +684,50 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <div className="relative mt-6 flex w-full flex-nowrap justify-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-      {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
-        item.title === "Explore More" ? (
-          <div key={item.title} className="relative shrink-0">
+    <div className="relative mt-6 w-full">
+      <div className="flex w-full flex-nowrap justify-start gap-2.5 overflow-x-auto pb-2 scrollbar-none sm:justify-center">
+        {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
+          item.title === "Explore More" ? (
             <button
+              key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+              className="inline-flex h-9 shrink-0 items-center gap-2 overflow-visible rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
             >
-              <Plus className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
               Explore More
             </button>
-            {isMoreOpen && (
-              <div className="absolute bottom-12 left-1/2 z-30 w-64 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200">
-                <div className="mb-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Templates</div>
-                {moreQuickActions.map((moreItem) => (
-                  <button
-                    key={moreItem.title}
-                    type="button"
-                    onClick={() => {
-                      setPrompt(moreItem.prompt);
-                      setIsMoreOpen(false);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-400" />
-                    {moreItem.title}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <button
-            key={item.title}
-            type="button"
-            onClick={() => setPrompt(item.prompt)}
-            className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
-          >
-            <Sparkles className="h-3 w-3 shrink-0 text-sky-400" />
-            {item.title}
-          </button>
-        )
+          ) : (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => setPrompt(item.prompt)}
+              className="inline-flex h-9 shrink-0 items-center gap-2 overflow-visible rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+            >
+              <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
+              {item.title}
+            </button>
+          )
+        )}
+      </div>
+      {isMoreOpen && (
+        <div className="absolute bottom-12 right-0 z-30 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200 sm:left-1/2 sm:right-auto sm:-translate-x-1/2">
+          <div className="mb-2 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">Templates</div>
+          {moreQuickActions.map((moreItem) => (
+            <button
+              key={moreItem.title}
+              type="button"
+              onClick={() => {
+                setPrompt(moreItem.prompt);
+                setIsMoreOpen(false);
+              }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+            >
+              <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
+              {moreItem.title}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -731,16 +739,20 @@ function Composer({
   textareaRef,
   onKeyDown,
   onSubmit,
+  onAddContent,
   onVoiceInput,
   isSubmitting,
+  notice,
 }: {
   prompt: string;
   setPrompt: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onKeyDown: (event: ReactKeyboardEvent<HTMLTextAreaElement>) => void;
   onSubmit: () => void;
+  onAddContent: () => void;
   onVoiceInput: () => void;
   isSubmitting: boolean;
+  notice: string;
 }) {
   return (
     <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-100">
@@ -759,19 +771,21 @@ function Composer({
         <div className="flex items-center gap-1.5">
           <button 
             type="button" 
-            onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} 
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            onClick={onAddContent} 
+            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
             aria-label="Add content"
+            title="Add content"
           >
-            <Plus className="h-4.5 w-4.5" />
+            <Plus className="size-5 overflow-visible" />
           </button>
           <button 
             type="button" 
             onClick={onVoiceInput} 
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
             aria-label="Voice input"
+            title="Voice input"
           >
-            <Mic className="h-4.5 w-4.5" />
+            <Mic className="size-5 overflow-visible" />
           </button>
         </div>
         
@@ -779,12 +793,13 @@ function Composer({
           type="button" 
           onClick={onSubmit} 
           disabled={!prompt.trim() || isSubmitting} 
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" 
+          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" 
           aria-label="Send prompt"
         >
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {isSubmitting ? <Loader2 className="size-4 animate-spin overflow-visible" /> : <Send className="size-4 overflow-visible" />}
         </button>
       </div>
+      {notice && <p className="px-5 pb-3 text-xs font-medium text-slate-500">{notice}</p>}
     </div>
   );
 }
