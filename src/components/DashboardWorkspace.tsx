@@ -273,24 +273,7 @@ function MarkdownContent({ content }: { content: string }) {
       {parts.map((part, index) => {
         if (index % 3 === 2) {
           const language = parts[index - 1] || "code";
-          return (
-            <div key={index} className="overflow-hidden rounded-2xl bg-slate-950 text-slate-100 shadow-sm">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
-                <span>{language}</span>
-                <button
-                  type="button"
-                  onClick={() => void navigator.clipboard.writeText(part)}
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-white/10"
-                >
-                  <Copy className="h-3 w-3" />
-                  Copy
-                </button>
-              </div>
-              <pre className="max-h-80 overflow-auto p-4 text-xs leading-6">
-                <code>{part}</code>
-              </pre>
-            </div>
-          );
+          return <CodeBlock key={index} language={language} code={part} />;
         }
 
         if (index % 3 === 1) return null;
@@ -301,6 +284,42 @@ function MarkdownContent({ content }: { content: string }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function CodeBlock({ language, code }: { language: string; code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  };
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-700/40 bg-[#111827] text-slate-100 shadow-[0_18px_42px_rgba(15,23,42,0.18)]">
+      <div className="flex items-center justify-between border-b border-white/10 bg-[#172033] px-4 py-2.5 text-xs text-slate-300">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+          <span className="ml-2 font-normal text-slate-300">{language}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleCopy()}
+          className="inline-flex h-8 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 text-xs font-normal text-slate-200 transition hover:bg-sky-400/15 hover:text-white"
+          aria-label="Copy code"
+          title="Copy code"
+        >
+          {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
+          <span>{copied ? "Copied" : "Copy"}</span>
+        </button>
+      </div>
+      <pre className="scrollbar-soft max-h-80 overflow-auto bg-[linear-gradient(180deg,#111827,#0f172a)] p-4 text-xs font-normal leading-6 text-slate-100 selection:bg-sky-500/30">
+        <code>{code}</code>
+      </pre>
     </div>
   );
 }
