@@ -15,7 +15,6 @@ import {
   Loader2,
   Menu,
   Mic,
-  Monitor,
   Notebook,
   Plus,
   RefreshCw,
@@ -151,6 +150,21 @@ function formatTime(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function getFirstDisplayName(user: ReturnType<typeof useAuth>["user"]) {
+  const fullName = user?.user_metadata?.full_name;
+  if (typeof fullName === "string" && fullName.trim()) {
+    return fullName.trim().split(/\s+/)[0];
+  }
+
+  const handle = user?.email?.split("@")[0] || "";
+  const cleanedHandle = handle.replace(/[_\-.]+/g, " ").trim();
+  if (!cleanedHandle) return "there";
+
+  const hypeIndex = cleanedHandle.toLowerCase().indexOf("thealgohype");
+  const firstName = hypeIndex > 0 ? cleanedHandle.slice(0, hypeIndex) : cleanedHandle.split(/\s+/)[0];
+  return firstName || "there";
+}
+
 function MarkdownContent({ content }: { content: string }) {
   const parts = content.split(/```([\w-]*)\n([\s\S]*?)```/g);
 
@@ -234,7 +248,7 @@ export default function DashboardWorkspace() {
   const [composerNotice, setComposerNotice] = useState("");
 
   const userName = useMemo(() => {
-    return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
+    return getFirstDisplayName(user);
   }, [user]);
 
   const userAvatar = useMemo(() => {
@@ -472,11 +486,11 @@ export default function DashboardWorkspace() {
         >
           <div className="flex min-h-full flex-col">
             <div className="mb-8 flex items-center justify-between px-2">
-              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-slate-950 bg-white text-slate-950">
-                  <Monitor className="h-6 w-6 stroke-[2.4]" />
+              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
+                  <Sparkles className="h-5 w-5" />
                 </span>
-                <span className="font-serif text-3xl font-medium tracking-normal text-slate-950">Aryan</span>
+                <span className="text-xl font-bold tracking-tight text-slate-900">LokoAI</span>
               </button>
               <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 lg:hidden" aria-label="Close sidebar">
                 <X className="h-5 w-5" />
@@ -711,14 +725,14 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
 
   return (
     <div className="relative mt-6 w-full">
-      <div className="flex w-full flex-nowrap justify-start gap-2.5 overflow-x-auto pb-2 scrollbar-none sm:justify-center">
+      <div className="flex w-full flex-wrap justify-center gap-3 overflow-visible pb-1">
         {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
           item.title === "Explore More" ? (
             <button
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 overflow-visible rounded-2xl border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 shadow-[0_3px_0_rgba(148,163,184,0.22),0_10px_22px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -728,7 +742,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 overflow-visible rounded-2xl border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 shadow-[0_3px_0_rgba(148,163,184,0.22),0_10px_22px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {item.title}
