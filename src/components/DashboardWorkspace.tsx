@@ -431,14 +431,14 @@ export default function DashboardWorkspace() {
   const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
 
   return (
-    <div className="min-h-dvh bg-white text-slate-900">
-      <div className="flex min-h-dvh">
+    <div data-app-shell className="h-dvh overflow-hidden bg-white text-slate-900">
+      <div className="flex h-full min-h-0 overflow-hidden">
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 backdrop-blur-xl px-4 py-6 transition-transform lg:static lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 h-dvh w-[280px] overflow-hidden border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex h-full flex-col">
+          <div className="flex h-full min-h-0 flex-col">
             <div className="mb-8 flex items-center justify-between px-2">
               <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
                 <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
@@ -496,7 +496,7 @@ export default function DashboardWorkspace() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto px-1">
+            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-1 pr-2">
               <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
                 <span>Recent History</span>
                 <History className="h-3.5 w-3.5 opacity-50" />
@@ -562,8 +562,8 @@ export default function DashboardWorkspace() {
 
         {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
 
-        <main className="flex min-w-0 flex-1 flex-col bg-white">
-          <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-50 bg-white/80 backdrop-blur-md px-4 sm:px-8">
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
+          <header className="z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-50 bg-white/80 px-4 backdrop-blur-md sm:px-8">
             <div className="flex items-center gap-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
@@ -586,8 +586,8 @@ export default function DashboardWorkspace() {
 
           <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
             {activeView === "chat" ? (
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
                   {messages.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center px-4">
                       <div className="mb-10 text-center">
@@ -614,7 +614,7 @@ export default function DashboardWorkspace() {
                     </div>
                   ) : (
                     <>
-                      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-10 sm:px-6">
+                      <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 sm:px-6">
                         <div className="space-y-12">
                           {messages.map((message) => (
                             <MessageBubble
@@ -636,7 +636,7 @@ export default function DashboardWorkspace() {
                           <div ref={messagesEndRef} />
                         </div>
                       </div>
-                      <div className="sticky bottom-0 bg-white/80 pb-10 pt-4 backdrop-blur-md px-4">
+                      <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md sm:pb-10">
                         <div className="mx-auto max-w-2xl">
                           <Composer
                             prompt={prompt}
@@ -658,7 +658,7 @@ export default function DashboardWorkspace() {
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto">
+              <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {activeView === "home" && <LandingPage />}
                 {activeView === "integrations" && <IntegrationsPage />}
                 {activeView === "partners" && <PartnersPage />}
@@ -810,7 +810,7 @@ function MessageBubble({
 
   return (
     <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-      <div className={`flex gap-4 max-w-[90%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+      <div className={`flex max-w-[90%] gap-4 ${isUser ? "justify-end" : "flex-row"}`}>
         {!isUser && (
           <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm shadow-sky-200">
             <Sparkles className="h-5 w-5" />
@@ -844,16 +844,6 @@ function MessageBubble({
             )}
           </div>
         </div>
-
-        {isUser && (
-          <div className="mt-1 shrink-0">
-            {userAvatar ? (
-              <img src={userAvatar} alt={userName} className="h-9 w-9 rounded-xl object-cover shadow-sm ring-1 ring-slate-100" />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
