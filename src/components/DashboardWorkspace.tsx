@@ -232,10 +232,10 @@ function AnimatedChatHero({ userName }: { userName: string }) {
   const { displayText, hasStarted, isExiting, headingIndex } = useTypewriterHeadings(userName);
 
   return (
-    <div className="relative mb-8 flex min-h-[250px] w-full max-w-4xl items-center justify-center overflow-hidden rounded-[2rem] px-4 py-8 text-center sm:mb-10 sm:min-h-[300px] sm:py-12">
+    <div className="relative mb-5 flex min-h-[170px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[210px] sm:py-7">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.72))]" />
       <motion.div
-        className="pointer-events-none absolute left-1/2 top-14 h-32 w-32 -translate-x-1/2 rounded-full bg-sky-300/20 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-8 h-20 w-20 -translate-x-1/2 rounded-full bg-sky-300/20 blur-2xl"
         animate={{ opacity: [0.35, 0.85, 0.35], scale: [0.9, 1.2, 0.9] }}
         transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -265,14 +265,14 @@ function AnimatedChatHero({ userName }: { userName: string }) {
             y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
             filter: { duration: 0.8 },
           }}
-          className="relative mb-7 flex h-16 w-16 items-center justify-center rounded-3xl border border-sky-100 bg-white/90 shadow-[0_18px_55px_rgba(14,165,233,0.20),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-20 sm:w-20"
+          className="relative mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-100 bg-white/90 shadow-[0_14px_38px_rgba(14,165,233,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] sm:mb-6 sm:h-14 sm:w-14"
         >
           <motion.span
-            className="absolute inset-0 rounded-3xl bg-sky-400/20 blur-xl"
+            className="absolute inset-0 rounded-2xl bg-sky-400/20 blur-lg"
             animate={{ opacity: [0.25, 0.8, 0.25] }}
             transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
           />
-          <Sparkles className="relative h-8 w-8 text-sky-500 sm:h-10 sm:w-10" />
+          <Sparkles className="relative h-6 w-6 text-sky-500 sm:h-7 sm:w-7" />
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -283,7 +283,7 @@ function AnimatedChatHero({ userName }: { userName: string }) {
               animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -12 : 0, filter: isExiting ? "blur(8px)" : "blur(0px)" }}
               exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="min-h-[92px] max-w-4xl text-balance text-4xl font-black leading-[1.06] tracking-tight text-slate-950 sm:min-h-[110px] sm:text-6xl lg:text-7xl"
+              className="min-h-[56px] max-w-2xl text-balance text-2xl font-black leading-[1.08] tracking-tight text-slate-950 sm:min-h-[76px] sm:text-4xl lg:text-5xl"
             >
               <span className="bg-gradient-to-r from-slate-950 via-sky-950 to-sky-500 bg-clip-text text-transparent">
                 {displayText}
@@ -301,7 +301,7 @@ function AnimatedChatHero({ userName }: { userName: string }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: hasStarted && !isExiting ? 1 : 0.4, y: hasStarted ? 0 : 10 }}
           transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-          className="mt-3 max-w-xl text-base font-semibold text-slate-500 sm:text-lg"
+          className="mt-2 max-w-lg text-sm font-semibold text-slate-500 sm:text-base"
         >
           Build, design, and launch polished AI experiences with LokoAI.
         </motion.p>
