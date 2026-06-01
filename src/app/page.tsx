@@ -1,12 +1,11 @@
 ﻿"use client";
 
-import { memo, useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Sparkles, Check, Star, ArrowRight
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
 const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -328,83 +327,6 @@ const pricingPlans = [
   }
 ];
 
-const heroMessages = [
-  "Build powerful AI agents.",
-  "Create stunning websites.",
-  "Generate production-ready code.",
-  "Design premium user interfaces.",
-  "Automate your workflow.",
-  "Launch your startup faster.",
-  "Create apps with AI.",
-  "Build anything in minutes.",
-];
-
-const AnimatedHeroText = memo(function AnimatedHeroText() {
-  const [messageIndex, setMessageIndex] = useState(0);
-  const [visibleCharacters, setVisibleCharacters] = useState(0);
-  const [isFading, setIsFading] = useState(false);
-
-  const message = heroMessages[messageIndex];
-  const typedMessage = message.slice(0, visibleCharacters);
-  const isTyping = visibleCharacters < message.length;
-
-  useEffect(() => {
-    if (isTyping) {
-      const typingTimer = window.setTimeout(() => {
-        setVisibleCharacters((current) => current + 1);
-      }, 42);
-
-      return () => window.clearTimeout(typingTimer);
-    }
-
-    const holdTimer = window.setTimeout(() => setIsFading(true), 3000);
-    return () => window.clearTimeout(holdTimer);
-  }, [isTyping, message.length, visibleCharacters]);
-
-  useEffect(() => {
-    if (!isFading) return;
-
-    const nextMessageTimer = window.setTimeout(() => {
-      setMessageIndex((current) => (current + 1) % heroMessages.length);
-      setVisibleCharacters(0);
-      setIsFading(false);
-    }, 360);
-
-    return () => window.clearTimeout(nextMessageTimer);
-  }, [isFading]);
-
-  return (
-    <div
-      aria-live="polite"
-      className="mt-5 flex min-h-[2.3em] w-full items-center justify-center overflow-hidden px-2 text-center text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-slate-600 dark:text-stone-300 sm:mt-6"
-    >
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={messageIndex}
-          initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-          animate={{
-            opacity: isFading ? 0 : 1,
-            y: isFading ? -8 : 0,
-            filter: isFading ? "blur(4px)" : "blur(0px)",
-          }}
-          exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
-          transition={{ duration: 0.32, ease: "easeOut" }}
-          className="max-w-full whitespace-normal break-words will-change-transform"
-        >
-          <span>{typedMessage}</span>
-          <span
-            aria-hidden="true"
-            className={cn(
-              "typewriter-cursor ml-1 inline-block h-[1.05em] w-[2px] translate-y-[0.18em] rounded-full bg-slate-500 dark:bg-stone-200",
-              !isTyping && "opacity-80"
-            )}
-          />
-        </motion.p>
-      </AnimatePresence>
-    </div>
-  );
-});
-
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const router = useRouter();
@@ -445,11 +367,13 @@ export default function Home() {
             <Sparkles className="relative h-9 w-9 drop-shadow-sm transition-transform duration-300 group-hover:rotate-6 sm:h-11 sm:w-11" />
           </motion.button>
 
-          <h1 className="mx-auto max-w-4xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
-            Build Faster with <span className="text-sky-500">LokoAI</span>
+          <h1 className="mx-auto max-w-5xl text-balance text-[clamp(2.5rem,7vw,5.8rem)] font-black leading-[1.04] tracking-normal text-slate-950 dark:text-stone-50">
+            One Platform. Infinite AI Possibilities.
           </h1>
 
-          <AnimatedHeroText />
+          <p className="mx-auto mt-6 max-w-3xl text-balance text-[clamp(1.05rem,2vw,1.55rem)] font-medium leading-snug text-slate-600 dark:text-stone-300">
+            Build agents, automate tasks, and scale without limits.
+          </p>
         </motion.div>
       </section>
       <section className="relative z-10 overflow-hidden border-y border-slate-100 bg-slate-50/50 py-10 dark:border-white/5 dark:bg-slate-950/20 sm:py-12">
