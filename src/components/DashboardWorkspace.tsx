@@ -182,11 +182,34 @@ function MarkdownContent({ content }: { content: string }) {
 
         return (
           <div key={index} className="whitespace-pre-wrap">
-            {part}
+            <MarkdownText content={part} />
           </div>
         );
       })}
     </div>
+  );
+}
+
+function MarkdownText({ content }: { content: string }) {
+  const segments = content.split(/!\[([^\]]*)\]\((data:image\/[^)]+|https?:\/\/[^)\s]+)\)/g);
+
+  return (
+    <>
+      {segments.map((segment, index) => {
+        if (index % 3 === 1) return null;
+        if (index % 3 === 2) {
+          const alt = segments[index - 1] || "Generated image";
+          return (
+            <span key={index} className="my-3 block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={segment} alt={alt} className="block max-h-[520px] w-full object-contain" />
+            </span>
+          );
+        }
+
+        return segment;
+      })}
+    </>
   );
 }
 
