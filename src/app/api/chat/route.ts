@@ -159,6 +159,11 @@ function getOpenRouterTools(userText: string): OpenRouterTool[] | undefined {
   return tools.length ? tools : undefined;
 }
 
+function enhanceImagePrompt(userText: string) {
+  const cleaned = userText.trim().replace(/\s+/g, " ");
+  return `${cleaned}. Create a complete high-quality AI image, photorealistic or cinematic style, ultra HD 4K, highly detailed, visually attractive modern artwork, professional composition, realistic lighting, rich environment, strong camera angle, detailed textures, realistic shadows, depth of field, refined color grading, sharp focus, no text, no watermark, no ASCII art, no code, no sketch placeholder.`;
+}
+
 function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], userText: string) {
   const searchInstruction = isSearchPrompt(userText)
     ? " For current, latest, sports, news, price, weather, or web-search questions: use web search before answering. Cite sources with markdown links. If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing."
@@ -167,9 +172,16 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], 
     ? " If the user asks for a prompt, provide a clean copy-ready prompt in the user's language and include useful details without asking unnecessary follow-up questions."
     : "";
   const imageInstruction = isImagePrompt(userText)
-    ? " If the user asks to create an image, use the image generation tool. Also include the final image prompt you used. If image generation is unavailable, provide a polished image prompt and say image generation could not run."
+    ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
   const tools = getOpenRouterTools(userText);
+  const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => ({
+    role: message.role,
+    content:
+      isImagePrompt(userText) && index === items.length - 1 && message.role === "user"
+        ? enhanceImagePrompt(message.content)
+        : message.content,
+  }));
 
   return {
     model,
@@ -181,11 +193,114 @@ function buildOpenRouterPayload(model: string, messagesBeforeAi: ChatMessage[], 
         content:
           `You are LokoAI, a concise and helpful AI assistant. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}`,
       },
-      ...messagesBeforeAi.slice(-12).map((message) => ({
-        role: message.role,
-        content: message.content,
-      })),
+      ...preparedMessages,
     ],
+  };
+}
+
+function extractImageMarkdown(value: unknown) {
+  const urls: string[] = [];
+
+  function visit(item: unknown) {
+    if (!item || typeof item !== "object") return;
+    if (Array.isArray(item)) {
+      item.forEach(visit);
+      return;
+    }
+
+    const record = item as Record<string, unknown>;
+    const directUrl = record.url || record.imageUrl;
+    if (typeof directUrl === "string") urls.push(directUrl);
+
+    const imageUrl = record.image_url;
+    if (imageUrl && typeof imageUrl === "object") {
+      const nestedUrl = (imageUrl as Record<string, unknown>).url;
+      if (typeof nestedUrl === "string") urls.push(nestedUrl);
+    }
+
+    const images = record.images;
+    if (Array.isArray(images)) images.forEach(visit);
+  }
+
+  visit(value);
+
+  return Array.from(new Set(urls))
+    .map((url, index) => `![Generated image ${index + 1}](${url})`)
+    .join("\n\n");
+}
+
+async function requestOpenRouterImage(
+  chatCompletionsUrl: string,
+  apiKey: string,
+  models: string[],
+  messagesBeforeAi: ChatMessage[],
+  userText: string
+): Promise<{ content: string; model: string } | { error: string; status: number }> {
+  let lastErrorText = "";
+  let lastStatus = 500;
+
+  for (const model of models) {
+    try {
+      const response = await fetch(chatCompletionsUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
+          "X-Title": "LokoAI",
+        },
+        body: JSON.stringify({
+          ...buildOpenRouterPayload(model, messagesBeforeAi, userText),
+          stream: false,
+        }),
+      });
+
+      if (!response.ok) {
+        lastStatus = response.status || 500;
+        lastErrorText = await response.text().catch(() => "");
+        if (lastStatus === 401) break;
+        continue;
+      }
+
+      const data = (await response.json()) as {
+        choices?: Array<{
+          message?: {
+            content?: string;
+            images?: unknown[];
+          };
+        }>;
+      };
+      const message = data.choices?.[0]?.message;
+      const imageMarkdown = extractImageMarkdown(message);
+      const content = [
+        imageMarkdown,
+        message?.content?.trim() && !/```|copy-paste|ascii/i.test(message.content)
+          ? message.content.trim()
+          : "",
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+
+      if (imageMarkdown || content) {
+        return {
+          content:
+            content ||
+            `I could not display the generated image, but I prepared the image request: ${enhanceImagePrompt(userText)}`,
+          model,
+        };
+      }
+
+      lastStatus = 502;
+      lastErrorText = "Image generation returned no image.";
+    } catch (error) {
+      lastErrorText = error instanceof Error ? error.message : "AI image generation failed.";
+      lastStatus = 502;
+    }
+  }
+
+  return {
+    error: getProviderErrorMessage(lastErrorText, lastStatus),
+    status: lastStatus,
   };
 }
 
@@ -293,6 +408,41 @@ export async function POST(req: Request) {
 
   const config = getOpenRouterConfig();
   const selectedModels = Array.from(new Set(selectModelsForPrompt(userText, config)));
+
+  if (isImagePrompt(userText)) {
+    const imageResult = await requestOpenRouterImage(
+      config.chatCompletionsUrl,
+      apiKey,
+      selectedModels,
+      messagesBeforeAi,
+      userText
+    );
+
+    if ("error" in imageResult) {
+      return jsonError(imageResult.error, imageResult.status);
+    }
+
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: imageResult.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    dbUpdateProject(chatId, {
+      chat_messages: [...messagesBeforeAi, assistantMessage],
+    });
+
+    return new Response(imageResult.content, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Chat-Id": chatId,
+        "X-AI-Model": imageResult.model,
+      },
+    });
+  }
+
   const streamResult = await requestOpenRouterStream(
     config.chatCompletionsUrl,
     apiKey,
