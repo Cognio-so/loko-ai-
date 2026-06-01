@@ -290,6 +290,7 @@ function MarkdownContent({ content }: { content: string }) {
 
 function CodeBlock({ language, code }: { language: string; code: string }) {
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"code" | "preview">("code");
   const normalizedLanguage = language.toLowerCase();
   const canPreview =
     normalizedLanguage.includes("html") ||
@@ -303,14 +304,83 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-            <span className="ml-2 font-normal text-slate-500">{language}</span>
+    <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
+          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+          <span className="ml-2 font-normal text-slate-500">{language}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {canPreview && (
+            <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setActiveTab("code")}
+                className={`h-7 rounded-md px-2.5 text-xs font-normal transition ${activeTab === "code" ? "bg-sky-50 text-sky-600" : "text-slate-500 hover:bg-slate-50"}`}
+              >
+                Code
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("preview")}
+                className={`h-7 rounded-md px-2.5 text-xs font-normal transition ${activeTab === "preview" ? "bg-sky-50 text-sky-600" : "text-slate-500 hover:bg-slate-50"}`}
+              >
+                Preview
+              </button>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleCopy()}
+            className="inline-flex h-8 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-normal text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600"
+            aria-label="Copy code"
+            title="Copy code"
+          >
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+            <span>{copied ? "Copied" : "Copy"}</span>
+          </button>
+        </div>
+      </div>
+      {canPreview && activeTab === "preview" ? (
+        <iframe
+          title="Generated page preview"
+          srcDoc={code}
+          sandbox="allow-scripts allow-forms allow-popups allow-modals"
+          className="h-[440px] w-full bg-white"
+        />
+      ) : (
+        <pre className="scrollbar-soft max-h-96 w-full overflow-auto bg-white p-4 text-xs font-normal leading-6 text-slate-700 selection:bg-sky-100">
+          <code className="whitespace-pre-wrap break-words">{code}</code>
+        </pre>
+      )}
+    </div>
+  );
+}
+
+function MarkdownText({ content }: { content: string }) {
+  const segments = content.split(/!\[([^\]]*)\]\((data:image\/[^)]+|https?:\/\/[^)\s]+)\)/g);
+
+  return (
+    <>
+      {segments.map((segment, index) => {
+        if (index % 3 === 1) return null;
+        if (index % 3 === 2) {
+          const alt = segments[index - 1] || "Generated image";
+          return (
+            <span key={index} className="my-3 block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={segment} alt={alt} className="block max-h-[520px] w-full object-contain" />
+            </span>
+          );
+        }
+
+        return <FormattedMarkdownText key={index} content={segment} />;
+      })}
+    </>
+  );
+}
           </div>
           <button
             type="button"
