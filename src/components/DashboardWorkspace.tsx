@@ -908,8 +908,10 @@ export default function DashboardWorkspace() {
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
                             <div className="flex items-center gap-3 text-sm font-normal text-slate-400">
-                              <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
-                              LokoAI is thinking...
+                              <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm">
+                                <Sparkles className="h-4 w-4" />
+                              </span>
+                              LokoAI is writing...
                             </div>
                           )}
                           <div ref={messagesEndRef} />
@@ -1133,7 +1135,6 @@ function MessageBubble({
             <div className={!isUser ? "prose prose-slate max-w-none text-slate-700" : ""}>
               <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
             </div>
-            {message.isStreaming && <span className="mt-2 inline-block h-1 w-8 animate-pulse rounded-full bg-sky-400" />}
           </div>
 
           <div className={`mt-2 flex items-center gap-3 text-[10px] font-normal uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 ${isUser ? "justify-end" : "justify-start"}`}>
