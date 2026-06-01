@@ -96,12 +96,15 @@ const quickActions = [
   },
 ];
 
-const heroHeadings = [
-  "How can I help you today, {name}?",
-  "Build anything with AI.",
-  "Design smarter with LokoAI.",
-  "Create stunning apps instantly.",
-  "Your AI-powered creative partner.",
+const searchPlaceholders = [
+  "Ask LokoAI anything...",
+  "Build a modern website...",
+  "Create AI images instantly...",
+  "Generate React apps...",
+  "Design futuristic UI...",
+  "Fix my code errors...",
+  "Create viral content ideas...",
+  "Search latest IPL news...",
 ];
 
 const heroParticles = [
@@ -183,57 +186,55 @@ function getFirstDisplayName(user: ReturnType<typeof useAuth>["user"]) {
   return firstName || "there";
 }
 
-function toTitleName(value: string) {
-  if (!value || value === "there") return value;
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function useTypewriterHeadings(userName: string) {
-  const [headingIndex, setHeadingIndex] = useState(0);
+function useTypewriterPlaceholder() {
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [hasStarted, setHasStarted] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const startTimer = window.setTimeout(() => setHasStarted(true), 1000);
+    const startTimer = window.setTimeout(() => setHasStarted(true), 1900);
     return () => window.clearTimeout(startTimer);
   }, []);
 
   useEffect(() => {
     if (!hasStarted) return;
 
-    const fullText = heroHeadings[headingIndex].replace("{name}", toTitleName(userName));
-    let timeoutId: number;
+    const fullText = searchPlaceholders[placeholderIndex];
+    const isComplete = displayText === fullText;
+    const isEmpty = displayText.length === 0;
 
-    if (isExiting) {
-      timeoutId = window.setTimeout(() => {
-        setDisplayText("");
-        setIsExiting(false);
-        setHeadingIndex((current) => (current + 1) % heroHeadings.length);
-      }, 380);
+    const timeoutId = window.setTimeout(() => {
+      if (!isDeleting && isComplete) {
+        setIsDeleting(true);
+        return;
+      }
+
+      if (isDeleting && isEmpty) {
+        setIsDeleting(false);
+        setPlaceholderIndex((current) => (current + 1) % searchPlaceholders.length);
+        return;
+      }
+
+      setDisplayText((current) =>
+        isDeleting
+          ? fullText.slice(0, Math.max(current.length - 1, 0))
+          : fullText.slice(0, current.length + 1)
+      );
+    }, isComplete ? 1250 : isDeleting ? 34 : 58);
+
       return () => window.clearTimeout(timeoutId);
-    }
+  }, [displayText, hasStarted, isDeleting, placeholderIndex]);
 
-    if (displayText.length < fullText.length) {
-      timeoutId = window.setTimeout(() => {
-        setDisplayText(fullText.slice(0, displayText.length + 1));
-      }, displayText.length < 6 ? 95 : 58);
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    timeoutId = window.setTimeout(() => setIsExiting(true), 1000);
-    return () => window.clearTimeout(timeoutId);
-  }, [displayText, hasStarted, headingIndex, isExiting, userName]);
-
-  return { displayText, hasStarted, isExiting, headingIndex };
+  return { displayText, hasStarted, placeholderIndex };
 }
 
 function AnimatedChatHero() {
   return (
-    <div className="relative mb-5 flex min-h-[126px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[150px] sm:py-7">
+    <div className="relative mb-5 flex min-h-[150px] w-full max-w-2xl items-center justify-center overflow-hidden rounded-3xl px-4 py-5 text-center sm:mb-6 sm:min-h-[170px] sm:py-7">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(56,189,248,0.16),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.72))]" />
       <motion.div
-        className="pointer-events-none absolute left-1/2 top-8 h-20 w-20 -translate-x-1/2 rounded-full bg-sky-300/20 blur-2xl"
+        className="pointer-events-none absolute left-1/2 top-9 h-24 w-24 -translate-x-1/2 rounded-full bg-sky-300/25 blur-2xl sm:h-32 sm:w-32"
         animate={{ opacity: [0.35, 0.85, 0.35], scale: [0.9, 1.2, 0.9] }}
         transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -248,7 +249,7 @@ function AnimatedChatHero() {
         />
       ))}
 
-      <div className="relative z-10 flex flex-col items-center">
+      <div className="relative z-10 flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.78, y: 16, filter: "blur(10px)" }}
           animate={{
@@ -263,7 +264,7 @@ function AnimatedChatHero() {
             y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
             filter: { duration: 0.8 },
           }}
-          className="relative mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-sky-100 bg-white/90 shadow-[0_14px_38px_rgba(14,165,233,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] sm:mb-6 sm:h-14 sm:w-14"
+          className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-sky-100 bg-white/90 shadow-[0_14px_38px_rgba(14,165,233,0.18),inset_0_1px_0_rgba(255,255,255,0.9)] sm:h-14 sm:w-14"
         >
           <motion.span
             className="absolute inset-0 rounded-2xl bg-sky-400/20 blur-lg"
@@ -271,6 +272,16 @@ function AnimatedChatHero() {
             transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
           />
           <Sparkles className="relative h-6 w-6 text-sky-500 sm:h-7 sm:w-7" />
+        </motion.div>
+        <motion.div
+          initial={{ width: 0, opacity: 0, x: -16, filter: "blur(12px)" }}
+          animate={{ width: "auto", opacity: 1, x: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.05, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
+          className="ml-4 overflow-hidden sm:ml-5"
+        >
+          <span className="block whitespace-nowrap bg-gradient-to-r from-slate-950 via-sky-700 to-cyan-400 bg-clip-text text-[clamp(2.1rem,7vw,4.4rem)] font-black leading-none tracking-normal text-transparent drop-shadow-[0_18px_50px_rgba(14,165,233,0.18)]">
+            LokoAI
+          </span>
         </motion.div>
       </div>
     </div>
@@ -751,7 +762,6 @@ export default function DashboardWorkspace() {
                       <AnimatedChatHero />
                       <div className="w-full max-w-2xl">
                         <Composer
-                          userName={userName}
                           prompt={prompt}
                           setPrompt={setPrompt}
                           textareaRef={textareaRef}
@@ -790,7 +800,6 @@ export default function DashboardWorkspace() {
                       <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md sm:pb-10">
                         <div className="mx-auto max-w-2xl">
                           <Composer
-                            userName={userName}
                             prompt={prompt}
                             setPrompt={setPrompt}
                             textareaRef={textareaRef}
@@ -880,7 +889,6 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
 }
 
 function Composer({
-  userName,
   prompt,
   setPrompt,
   textareaRef,
@@ -891,7 +899,6 @@ function Composer({
   isSubmitting,
   notice,
 }: {
-  userName: string;
   prompt: string;
   setPrompt: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
@@ -902,7 +909,7 @@ function Composer({
   isSubmitting: boolean;
   notice: string;
 }) {
-  const { displayText, hasStarted, isExiting, headingIndex } = useTypewriterHeadings(userName);
+  const { displayText, hasStarted, placeholderIndex } = useTypewriterPlaceholder();
   const shouldShowAnimatedPlaceholder = !prompt.trim() && !isSubmitting;
 
   return (
@@ -911,9 +918,9 @@ function Composer({
         <AnimatePresence mode="wait">
           {shouldShowAnimatedPlaceholder && hasStarted && (
             <motion.div
-              key={headingIndex}
+              key={placeholderIndex}
               initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-              animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -8 : 0, filter: isExiting ? "blur(8px)" : "blur(0px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
               className="pointer-events-none absolute left-5 right-5 top-5 z-10 flex min-h-[44px] items-center overflow-hidden py-2.5"
