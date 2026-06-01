@@ -15,6 +15,7 @@ import {
   Loader2,
   Menu,
   Mic,
+  Monitor,
   Notebook,
   Plus,
   RefreshCw,
@@ -471,11 +472,11 @@ export default function DashboardWorkspace() {
         >
           <div className="flex min-h-full flex-col">
             <div className="mb-8 flex items-center justify-between px-2">
-              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
-                  <Sparkles className="h-5 w-5" />
+              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-3 rounded-xl px-1 py-1 text-left transition hover:opacity-80">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-slate-950 bg-white text-slate-950">
+                  <Monitor className="h-6 w-6 stroke-[2.4]" />
                 </span>
-                <span className="text-xl font-bold tracking-tight text-slate-900">LokoAI</span>
+                <span className="font-serif text-3xl font-medium tracking-normal text-slate-950">Aryan</span>
               </button>
               <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 lg:hidden" aria-label="Close sidebar">
                 <X className="h-5 w-5" />
@@ -610,7 +611,7 @@ export default function DashboardWorkspace() {
                 Upgrade Pro
               </button>
               <button type="button" onClick={() => router.push("/profile")} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-white shadow-sm transition hover:bg-slate-800" aria-label="Profile">
-                {userName.slice(0, 1).toUpperCase()}
+                A
               </button>
             </div>
           </header>
@@ -717,7 +718,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-9 shrink-0 items-center gap-2 overflow-visible rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+              className="inline-flex h-10 shrink-0 items-center gap-2 overflow-visible rounded-2xl border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 shadow-[0_3px_0_rgba(148,163,184,0.22),0_10px_22px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -727,7 +728,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="inline-flex h-9 shrink-0 items-center gap-2 overflow-visible rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+              className="inline-flex h-10 shrink-0 items-center gap-2 overflow-visible rounded-2xl border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 shadow-[0_3px_0_rgba(148,163,184,0.22),0_10px_22px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {item.title}
@@ -780,7 +781,7 @@ function Composer({
   notice: string;
 }) {
   return (
-    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all focus-within:border-slate-300 focus-within:ring-2 focus-within:ring-slate-100">
+    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all focus-within:border-slate-300">
       <div className="px-5 pt-5">
         <textarea
           ref={textareaRef}
