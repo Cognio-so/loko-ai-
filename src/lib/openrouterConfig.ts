@@ -17,9 +17,12 @@ const DEFAULT_WEBSITE_MODELS = [
   "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
 ];
 const DEFAULT_IMAGE_MODELS = [
+  "google/gemini-2.5-flash-image",
+  "google/gemini-2.5-flash-image-preview",
+  "openai/gpt-5-image-mini",
+  "black-forest-labs/flux.2-pro",
+  "black-forest-labs/flux.2-flex",
   "google/gemini-3.5-flash",
-  "moonshotai/kimi-k2.6:free",
-  "openai/gpt-oss-120b:free",
 ];
 const DEFAULT_SEARCH_MODELS = [
   "openai/gpt-4o-mini-search-preview",

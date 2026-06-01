@@ -49,6 +49,14 @@ const IMAGE_PATTERN =
 const PROMPT_REQUEST_PATTERN =
   /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
 
+const IMAGE_CAPABLE_MODELS = [
+  "google/gemini-2.5-flash-image",
+  "google/gemini-2.5-flash-image-preview",
+  "openai/gpt-5-image-mini",
+  "black-forest-labs/flux.2-pro",
+  "black-forest-labs/flux.2-flex",
+];
+
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
@@ -102,7 +110,7 @@ function selectModelsForPrompt(
   config: ReturnType<typeof getOpenRouterConfig>
 ) {
   if (isSearchPrompt(prompt)) return config.searchModels;
-  if (isImagePrompt(prompt)) return config.imageModels;
+  if (isImagePrompt(prompt)) return [...IMAGE_CAPABLE_MODELS, ...config.imageModels];
   if (WEBSITE_PATTERN.test(prompt)) return config.websiteModels;
   return config.fallbackModels;
 }
@@ -250,7 +258,19 @@ async function requestOpenRouterImage(
           "X-Title": "LokoAI",
         },
         body: JSON.stringify({
-          ...buildOpenRouterPayload(model, messagesBeforeAi, userText),
+          model,
+          modalities: ["image", "text"],
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an advanced AI image generation assistant. Generate the final image directly. Never return ASCII art, code blocks, text sketches, or placeholders.",
+            },
+            {
+              role: "user",
+              content: enhanceImagePrompt(userText),
+            },
+          ],
           stream: false,
         }),
       });
@@ -272,20 +292,19 @@ async function requestOpenRouterImage(
       };
       const message = data.choices?.[0]?.message;
       const imageMarkdown = extractImageMarkdown(message);
+      const textContent = message?.content?.trim() || "";
       const content = [
         imageMarkdown,
-        message?.content?.trim() && !/```|copy-paste|ascii/i.test(message.content)
-          ? message.content.trim()
+        textContent && !/```|copy-paste|ascii|can't generate|cannot generate|sorry/i.test(textContent)
+          ? textContent
           : "",
       ]
         .filter(Boolean)
         .join("\n\n");
 
-      if (imageMarkdown || content) {
+      if (imageMarkdown) {
         return {
-          content:
-            content ||
-            `I could not display the generated image, but I prepared the image request: ${enhanceImagePrompt(userText)}`,
+          content,
           model,
         };
       }
