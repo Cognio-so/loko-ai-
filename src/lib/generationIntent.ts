@@ -60,13 +60,18 @@ function titleFromPrompt(prompt: string) {
 export function detectGenerationIntent(prompt: string): GenerationIntent {
   const normalized = cleanPrompt(prompt);
   const lower = normalized.toLowerCase();
+  const isWebsiteLikePrompt =
+    /(website|web app|landing page|html|css|navbar|hero|dashboard|product preview|features|pricing|testimonials|cta|footer|responsive|browser ui)/.test(lower);
+  const isImageOnlyPrompt =
+    /(logo|poster|banner|thumbnail|flyer|cover art|album art|illustration|graphic|generate image|create image|ai image|photo)/.test(lower) ||
+    (/\bimage\b/.test(lower) && !isWebsiteLikePrompt && !/\b(no|without|broken|unstyled)\b.{0,18}\bimages?\b/.test(lower));
 
   const base = {
     title: titleFromPrompt(prompt),
     summary: normalized || "A premium AI-generated digital experience.",
   };
 
-  if (/(logo|poster|banner|thumbnail|flyer|cover art|album art|illustration|image|graphic)/.test(lower)) {
+  if (isImageOnlyPrompt) {
     return {
       ...base,
       surface: "image",
@@ -304,15 +309,15 @@ export function detectGenerationIntent(prompt: string): GenerationIntent {
     ...base,
     surface: "website",
     category: "saas",
-    styleDirection: "Premium product-led website with stronger differentiation, modern section flow, and less template-like repetition.",
-    sectionLabels: ["Hero", "Features", "Proof", "CTA"],
+    styleDirection: "Lovable-style product landing page with crisp copy, refined spacing, realistic product UI, and polished conversion sections.",
+    sectionLabels: ["Hero", "Product Preview", "Features", "Pricing"],
     palette: {
-      bg: "#081121",
-      surface: "#121c31",
-      accent: "#7c8cff",
-      accent2: "#62e6ff",
-      text: "#f8fbff",
-      muted: "#9db0c9",
+      bg: "#f7f9fc",
+      surface: "#ffffff",
+      accent: "#2563eb",
+      accent2: "#06b6d4",
+      text: "#0f172a",
+      muted: "#64748b",
     },
   };
 }

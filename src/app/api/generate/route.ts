@@ -48,10 +48,14 @@ Preferred development style:
 - Maintain production-ready code quality
 - Avoid duplicated logic and placeholder sections
 
-UI/UX standards:
-- The design should feel modern, premium, responsive, smooth, visually polished, startup-quality, futuristic, clean, and elegant
-- Use gradients, glassmorphism, hover effects, animations, micro interactions, responsive layouts, and dark mode support when they improve the result
-- Think like a senior Silicon Valley engineer and premium SaaS designer before generating code
+      UI/UX standards:
+      - The design should feel modern, premium, responsive, smooth, visually polished, startup-quality, futuristic, clean, and elegant
+      - Use gradients, glassmorphism, hover effects, animations, micro interactions, responsive layouts, and dark mode support when they improve the result
+      - Think like a senior Silicon Valley engineer and premium SaaS designer before generating code
+      - Match the quality bar of Lovable, v0, Linear, Stripe, Raycast, Notion, and Framer websites: clean spacing, tasteful color, crisp typography, realistic product UI, and purposeful sections
+      - For website and landing page requests, create an actual website experience, not an image board, prompt note board, debug panel, or generic dark placeholder screen
+      - Avoid huge empty black hero blocks, repeated template copy, raw "design direction" labels, broken visual placeholders, and vague "future of..." messaging
+      - Prefer polished light-mode SaaS/product pages unless the prompt explicitly requests dark, cyberpunk, gaming, or cinematic style
 
 Performance, accessibility, and SEO standards:
 - Optimize for fast loading, responsive rendering, Lighthouse quality, SEO, accessibility, and mobile-first design
