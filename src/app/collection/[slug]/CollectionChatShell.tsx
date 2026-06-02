@@ -424,69 +424,57 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
                 <div className="mx-auto max-w-2xl px-4">
-                  <div className="relative flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white shadow-lg transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50 p-6">
-                    {/* Top toolbar: Plus and Mic */}
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setPrompt((p) => p + "\n")}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600 hover:border-slate-300"
-                        aria-label="Add file"
-                      >
-                        <Plus className="h-5 w-5" />
-                      </button>
+                  <div className="relative flex items-center gap-3 rounded-3xl border border-slate-200 bg-white shadow-lg transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50 px-5 py-4">
+                    {/* Plus button */}
+                    <button
+                      type="button"
+                      onClick={() => setPrompt((p) => p + "\n")}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                      aria-label="Add"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={handleVoiceInput}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600 hover:border-slate-300"
-                        aria-label="Voice input"
-                      >
-                        <Mic className="h-5 w-5" />
-                      </button>
-                    </div>
+                    {/* Mic button */}
+                    <button
+                      type="button"
+                      onClick={handleVoiceInput}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                      aria-label="Voice input"
+                    >
+                      <Mic className="h-5 w-5" />
+                    </button>
 
-                    {/* Main input area */}
-                    <div className="flex items-end gap-4">
-                      <textarea
-                        value={prompt}
-                        onChange={(event) => setPrompt(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" && !event.shiftKey) {
-                            event.preventDefault();
-                            sendMessage();
-                          }
-                        }}
-                        placeholder="Ask LokoAI anything..."
-                        rows={3}
-                        className="flex-1 resize-none bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={sendMessage}
-                        disabled={!prompt.trim()}
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition-all hover:bg-slate-300 active:scale-95 disabled:opacity-40 disabled:grayscale"
-                        aria-label="Send message"
-                      >
-                        <Send className="h-5 w-5" />
-                      </button>
-                    </div>
+                    {/* Textarea */}
+                    <textarea
+                      value={prompt}
+                      onChange={(event) => setPrompt(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Ask LokoAI anything..."
+                      rows={1}
+                      className="flex-1 resize-none bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
+                    />
 
                     {/* Model selector */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                       <button
                         type="button"
                         onClick={() => setIsModelMenuOpen((s) => !s)}
-                        className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
+                        className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                       >
-                        <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
+                        <span className="h-5 w-5 flex items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">
                           {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
                         </span>
-                        <span className="max-w-[140px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
-                        <ChevronDown className="h-4 w-4 text-slate-400" />
+                        <span className="max-w-[120px] truncate text-xs">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Model"}</span>
+                        <ChevronDown className="h-3 w-3 text-slate-400" />
                       </button>
                       {isModelMenuOpen && (
-                        <div className="absolute bottom-12 left-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
+                        <div className="absolute bottom-11 right-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
                           <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                             {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
                               <button
@@ -508,6 +496,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         </div>
                       )}
                     </div>
+
+                    {/* Send button */}
+                    <button
+                      type="button"
+                      onClick={sendMessage}
+                      disabled={!prompt.trim()}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-300 text-slate-600 transition-all hover:bg-slate-400 active:scale-95 disabled:opacity-40 disabled:grayscale"
+                      aria-label="Send message"
+                    >
+                      <Send className="h-5 w-5" />
+                    </button>
                   </div>
                   <p className="mt-3 text-center text-xs text-slate-400">
                     AI can make mistakes. Check important info.
