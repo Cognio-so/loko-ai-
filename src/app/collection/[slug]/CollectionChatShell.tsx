@@ -435,47 +435,45 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         }
                       }}
                       placeholder={"Ask LokoAI anything..."}
-                      className="max-h-72 min-h-[80px] w-full resize-none bg-transparent px-5 py-4 text-[17px] text-slate-700 outline-none placeholder:text-slate-400"
+                      className="max-h-72 min-h-[60px] w-full resize-none bg-transparent px-6 py-4 text-[16.5px] text-slate-700 outline-none placeholder:text-slate-400"
                     />
 
-                    <div className="flex items-center justify-between px-2 pb-2 pt-1">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between px-3 pb-3 pt-1">
+                      <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => setPrompt((p) => p + "\n")}
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+                          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
                           aria-label="Add newline"
                         >
-                          <Plus className="h-5 w-5" />
+                          <Plus className="h-4.5 w-4.5" />
                         </button>
 
                         <button
                           type="button"
                           onClick={handleVoiceInput}
-                          className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
                           aria-label="Voice input"
                         >
-                          <Mic className="h-5 w-5" />
+                          <Mic className="h-4.5 w-4.5" />
                         </button>
-
-                        <div className="h-5 w-px bg-slate-100 mx-1" />
 
                         <div className="relative">
                           <button
                             type="button"
                             onClick={() => setIsModelMenuOpen((s) => !s)}
-                            className="flex items-center gap-2 rounded-full border border-slate-100 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+                            className="flex items-center gap-2.5 rounded-full border border-slate-100 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
                           >
-                            <span className="h-6 w-6 flex items-center justify-center rounded-full bg-sky-50 text-[10px] font-bold text-sky-600">
+                            <div className="flex h-5 w-5 items-center justify-center rounded bg-sky-500 text-[10px] font-bold text-white">
                               {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
-                            </span>
-                            <span className="max-w-[140px] truncate text-[13px] font-medium text-slate-600">
+                            </div>
+                            <span className="max-w-[150px] truncate text-[13.5px] font-medium text-slate-600">
                               {getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}
                             </span>
                             <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                           </button>
                           {isModelMenuOpen && (
-                            <div className="absolute bottom-14 left-0 z-50 w-72 rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl ring-1 ring-slate-200/5">
+                            <div className="absolute bottom-12 left-0 z-50 w-72 rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl ring-1 ring-slate-200/5">
                               <div className="flex max-h-64 flex-col gap-1 overflow-y-auto p-1">
                                 {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
                                   <button
@@ -486,9 +484,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                                     }}
                                     className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50/50 text-sky-600" : ""}`}
                                   >
-                                    <span className="h-7 w-7 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-500">
+                                    <div className="flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-[11px] font-bold text-white">
                                       {model.provider[0]}
-                                    </span>
+                                    </div>
                                     <div className="min-w-0 text-left">
                                       <div className="truncate font-semibold">{model.name}</div>
                                       <div className="truncate text-[10px] uppercase tracking-wider text-slate-400">{model.provider}</div>
@@ -505,14 +503,14 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         type="button"
                         onClick={sendMessage}
                         disabled={!prompt.trim() || isSubmitting}
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 disabled:opacity-30 ${
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
                           prompt.trim() && !isSubmitting
                             ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
-                            : "bg-slate-100 text-slate-400"
+                            : "bg-slate-200 text-slate-400 opacity-50"
                         }`}
                         aria-label="Send message"
                       >
-                        <Send className="h-4.5 w-4.5" />
+                        <Send className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
