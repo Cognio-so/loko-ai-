@@ -17,19 +17,24 @@ import {
   ChevronDown,
   File,
   FileText,
+  Grid3X3,
   Home,
   Library,
   Lightbulb,
   Menu,
   Mic,
   Plus,
+  Rocket,
   Search,
   Send,
   Settings,
   Sparkles,
   Trash2,
+  Trophy,
   Upload,
+  Users,
   X,
+  Zap,
 } from "lucide-react";
 
 type ChatMessage = {
@@ -223,11 +228,32 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
         <nav className="space-y-2 mb-8">
           <Link
-            href="/dashboard"
+            href="/"
             className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
           >
             <Home className="h-4 w-4" />
             Home
+          </Link>
+          <Link
+            href="/integrations"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          >
+            <Grid3X3 className="h-4 w-4" />
+            Integrations
+          </Link>
+          <Link
+            href="/partners"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          >
+            <Users className="h-4 w-4" />
+            Partners
+          </Link>
+          <Link
+            href="/launchpad"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          >
+            <Rocket className="h-4 w-4" />
+            Launchpad
           </Link>
           <Link
             href="/collection"
@@ -235,6 +261,20 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
           >
             <Library className="h-4 w-4" />
             Collection
+          </Link>
+          <Link
+            href="/affiliate"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          >
+            <Trophy className="h-4 w-4" />
+            Affiliate
+          </Link>
+          <Link
+            href="/pricing"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          >
+            <Zap className="h-4 w-4" />
+            Pricing
           </Link>
           <Link
             href="/settings"
