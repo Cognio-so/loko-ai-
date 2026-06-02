@@ -61,12 +61,18 @@ type ChatMessage = {
   isError?: boolean;
 };
 
+type GeneratedCodeFile = {
+  path: string;
+  content: string;
+};
+
 type Project = {
   id: string;
   title: string;
   description: string | null;
   prompt: string | null;
   preview_html: string | null;
+  generated_code: GeneratedCodeFile[];
   chat_messages: ChatMessage[];
   created_at: string;
   updated_at: string;
@@ -79,6 +85,15 @@ type UploadedAttachment = {
   type: string;
   size: number;
   dataUrl: string;
+};
+
+type BuilderTab = "preview" | "code";
+
+type GeneratedProjectResponse = {
+  projectTitle?: string;
+  description?: string;
+  previewHtml?: string;
+  files?: GeneratedCodeFile[];
 };
 
 const ACCEPTED_ATTACHMENT_TYPES = [
@@ -97,6 +112,32 @@ const ACCEPTED_ATTACHMENT_TYPES = [
 ].join(",");
 
 const MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024;
+
+const BUILD_REQUEST_PATTERN =
+  /\b(create|build|make|design|generate|develop|bna|banao|bnao).{0,60}\b(website|web app|landing page|page|dashboard|app|desktop app|ui|ux|component|saas)\b|\b(website|landing page|web app|dashboard|desktop app|saas page)\b/i;
+
+function isBuildRequestPrompt(value: string) {
+  return BUILD_REQUEST_PATTERN.test(value) && !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(value);
+}
+
+function normalizeGeneratedFiles(value: unknown): GeneratedCodeFile[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.filter((item): item is GeneratedCodeFile => {
+    return (
+      Boolean(item) &&
+      typeof item === "object" &&
+      "path" in item &&
+      "content" in item &&
+      typeof item.path === "string" &&
+      typeof item.content === "string"
+    );
+  });
+}
+
+function getDefaultGeneratedFile(project: Project | null) {
+  return project?.generated_code?.[0]?.path ?? "";
+}
 
 const navItems = [
   { label: "Home", href: "/", icon: Home, view: "home" as View },
