@@ -6,6 +6,7 @@ import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 import { normalizeOpenRouterModelId } from "@/lib/openrouterModelAliases";
+import { checkAgentSpecialization, getAgentSystemPrompt } from "@/lib/agentSpecialization";
 
 type ChatRole = "user" | "assistant";
 
@@ -770,6 +771,14 @@ export async function POST(req: Request) {
   const userText = body.message?.trim();
   if (!userText) {
     return jsonError("Message is required.");
+  }
+
+  // Check agent specialization
+  if (body.agent) {
+    const specializationCheck = checkAgentSpecialization(body.agent, userText);
+    if (!specializationCheck.isAllowed) {
+      return jsonError(specializationCheck.reason || "This request is outside my specialization.", 400);
+    }
   }
 
   let processedFile: ProcessedChatFile | null = null;
