@@ -143,7 +143,6 @@ function selectModelsForPrompt(
 ) {
   if (!config.enableSmartRouting) return config.fallbackModels;
   if (isSearchPrompt(prompt)) return config.searchModels;
-  if (isVideoPrompt(prompt)) return [VIDEO_GENERATION_MODEL, ...config.fallbackModels];
   if (isImagePrompt(prompt)) {
     return Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
   }
@@ -869,34 +868,6 @@ export async function POST(req: Request) {
   const selectedModels = Array.from(
     new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config)])
   );
-
-  if (isVideoPrompt(userText)) {
-    const videoResult = await requestOpenRouterVideo(apiKey, userText, processedFile);
-
-    if ("error" in videoResult) {
-      return jsonError(videoResult.error, videoResult.status);
-    }
-
-    const assistantMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: videoResult.content,
-      createdAt: new Date().toISOString(),
-    };
-
-    dbUpdateProject(chatId, {
-      chat_messages: [...messagesBeforeAi, assistantMessage],
-    });
-
-    return new Response(videoResult.content, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Chat-Id": chatId,
-        "X-AI-Model": videoResult.model,
-      },
-    });
-  }
 
   if (isImagePrompt(userText)) {
     const imageModels = Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
