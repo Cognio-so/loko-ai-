@@ -75,11 +75,10 @@ const WORKFLOW_PATTERN =
   /\b(create|build|generate|explain|design).{0,40}\b(workflow|process flow|sop|step by step|business workflow|ai workflow|automation workflow|system architecture|user journey|customer flow|app workflow|website workflow)\b|\b(workflow|process flow|sop|step by step|system architecture|user journey|customer flow)\b/i;
 
 const IMAGE_CAPABLE_MODELS = [
-  "google/gemini-2.5-flash-image",
-  "google/gemini-2.5-flash-image-preview",
-  "openai/gpt-5-image-mini",
-  "black-forest-labs/flux.2-pro",
-  "black-forest-labs/flux.2-flex",
+  "black-forest-labs/flux-pro",
+  "black-forest-labs/flux-1-dev",
+  "openai/dall-e-3",
+  "black-forest-labs/flux-schnell",
 ];
 
 const VIDEO_GENERATION_MODEL = "x-ai/grok-imagine-video";
@@ -142,7 +141,7 @@ function selectModelsForPrompt(
   if (isSearchPrompt(prompt)) return config.searchModels;
   if (isVideoPrompt(prompt)) return [VIDEO_GENERATION_MODEL, ...config.fallbackModels];
   if (isImagePrompt(prompt)) {
-    return Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
+    return Array.from(new Set(["black-forest-labs/flux-pro", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
   }
   if (isWorkflowPrompt(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
   if (CODE_PATTERN.test(prompt)) return config.coderModels;
@@ -870,7 +869,7 @@ export async function POST(req: Request) {
   }
 
   if (isImagePrompt(userText)) {
-    const imageModels = Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
+    const imageModels = Array.from(new Set(["black-forest-labs/flux-pro", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
     const imageResult = await requestOpenRouterImage(
       config.chatCompletionsUrl,
       apiKey,
