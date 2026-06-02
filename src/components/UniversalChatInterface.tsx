@@ -8,6 +8,7 @@ import {
   DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
   getOpenRouterModelById,
+  isSupportedOpenRouterModel,
 } from "@/lib/openrouterModels";
 import { useAuth } from "@/hooks/useAuth";
 import { getAssistant, type CollectionAssistant } from "@/app/collection/collection-data";
@@ -60,7 +61,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
     { role: "assistant", content: assistant.welcome },
   ]);
   const [prompt, setPrompt] = useState("");
-  const [selectedModelId, setSelectedModelId] = useState<string>(DEFAULT_SELECTED_OPENROUTER_MODEL);
+  const [selectedModelId, setSelectedModelId] = useState<string>(assistant.modelId || DEFAULT_SELECTED_OPENROUTER_MODEL);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -71,11 +72,15 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
     try {
       const storageKey = `${SELECTED_MODEL_STORAGE_KEY}:collection:${slug}`;
       const stored = window.localStorage.getItem(storageKey);
-      setSelectedModelId(stored || DEFAULT_SELECTED_OPENROUTER_MODEL);
+      const nextModelId =
+        stored && isSupportedOpenRouterModel(stored)
+          ? stored
+          : assistant.modelId || DEFAULT_SELECTED_OPENROUTER_MODEL;
+      setSelectedModelId(nextModelId);
     } catch {
-      setSelectedModelId(DEFAULT_SELECTED_OPENROUTER_MODEL);
+      setSelectedModelId(assistant.modelId || DEFAULT_SELECTED_OPENROUTER_MODEL);
     }
-  }, [slug]);
+  }, [assistant.modelId, slug]);
 
   useEffect(() => {
     try {
@@ -407,7 +412,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
                     <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-600 text-[11px] font-bold text-slate-700 dark:text-slate-300">
                       {selectedModel?.provider?.[0] ?? "A"}
                     </span>
-                    <span className="max-w-[140px] truncate text-sm">{selectedModel?.name ?? "Select model"}</span>
+                    <span className="max-w-[140px] truncate text-sm">{selectedModel?.name ?? assistant.model}</span>
                     <ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" />
                   </button>
 
