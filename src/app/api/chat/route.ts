@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dbCreateProject, dbGetProject, dbUpdateProject } from "@/lib/db";
+import { processUploadedChatFile, type ProcessedChatFile, type UploadedChatFile } from "@/lib/file-analysis";
 import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
 import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
@@ -18,7 +19,15 @@ type ChatRequestBody = {
   message?: string;
   messages?: ChatMessage[];
   selectedModel?: string;
+  attachment?: UploadedChatFile | null;
 };
+
+type OpenRouterMessageContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
 
 type OpenRouterTool =
   | {
