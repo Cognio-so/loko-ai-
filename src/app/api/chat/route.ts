@@ -473,6 +473,16 @@ export async function POST(req: Request) {
     return jsonError("Message is required.");
   }
 
+  let processedFile: ProcessedChatFile | null = null;
+  if (body.attachment) {
+    try {
+      processedFile = await processUploadedChatFile(body.attachment);
+    } catch (error) {
+      console.error("Uploaded file processing failed:", error);
+      return jsonError("Uploaded file could not be processed. Please try a different file.", 400);
+    }
+  }
+
   const now = new Date().toISOString();
   const userMessage: ChatMessage = {
     id: crypto.randomUUID(),
@@ -593,7 +603,8 @@ export async function POST(req: Request) {
     selectedModels,
     messagesBeforeAi,
     userText,
-    config
+    config,
+    processedFile
   );
 
   if ("error" in streamResult) {
