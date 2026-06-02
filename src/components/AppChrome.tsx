@@ -42,7 +42,7 @@ export default function AppChrome({ children }: { children: ReactNode }) {
       {!hideMarketingChrome && <Navbar />}
       <main
         className={cn(
-          "transition-colors duration-300",
+          "bg-background text-foreground transition-colors duration-300",
           hideMarketingChrome ? "h-dvh overflow-hidden pt-0" : "min-h-dvh pt-20"
         )}
       >

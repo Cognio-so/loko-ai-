@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable, "dark")}>
-      <body className="antialiased">
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+      <body className="bg-background text-foreground antialiased transition-colors duration-300">
 
         <ThemeProvider defaultTheme="dark">
           <AuthProvider>
