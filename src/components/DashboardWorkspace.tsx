@@ -43,6 +43,12 @@ import CollectionPage from "@/app/collection/page";
 import AffiliatePage from "@/app/affiliate/page";
 import PricingPage from "@/app/pricing/page";
 import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
+import { ModelPicker } from "@/components/ModelPicker";
+import {
+  DEFAULT_SELECTED_OPENROUTER_MODEL,
+  SELECTED_MODEL_STORAGE_KEY,
+  isSupportedOpenRouterModel,
+} from "@/lib/openrouterModels";
 
 type ChatRole = "user" | "assistant";
 
@@ -519,6 +525,7 @@ export default function DashboardWorkspace() {
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [composerNotice, setComposerNotice] = useState("");
+  const [selectedModelId, setSelectedModelId] = useState(DEFAULT_SELECTED_OPENROUTER_MODEL);
 
   const userName = useMemo(() => {
     return getFirstDisplayName(user);
@@ -550,6 +557,13 @@ export default function DashboardWorkspace() {
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
+
+  useEffect(() => {
+    const storedModel = window.localStorage.getItem(SELECTED_MODEL_STORAGE_KEY);
+    if (isSupportedOpenRouterModel(storedModel)) {
+      setSelectedModelId(storedModel);
+    }
+  }, []);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -631,6 +645,7 @@ export default function DashboardWorkspace() {
           chatId: activeChatId,
           message: trimmed,
           messages,
+          selectedModel: selectedModelId,
         }),
       });
 
@@ -893,6 +908,7 @@ export default function DashboardWorkspace() {
             </div>
 
             <div className="flex items-center gap-3">
+              <ModelPicker selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
               <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-normal text-sky-600 transition hover:bg-sky-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Upgrade Pro

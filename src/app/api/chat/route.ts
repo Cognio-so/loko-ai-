@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbCreateProject, dbGetProject, dbUpdateProject } from "@/lib/db";
 import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
+import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 
 type ChatRole = "user" | "assistant";
@@ -16,6 +17,7 @@ type ChatRequestBody = {
   chatId?: string;
   message?: string;
   messages?: ChatMessage[];
+  selectedModel?: string;
 };
 
 type OpenRouterTool =
@@ -518,7 +520,10 @@ export async function POST(req: Request) {
   }
 
   const config = getOpenRouterConfig();
-  const selectedModels = Array.from(new Set(selectModelsForPrompt(userText, config)));
+  const requestedModel = getOpenRouterModelById(body.selectedModel);
+  const selectedModels = Array.from(
+    new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config)])
+  );
 
   if (isImagePrompt(userText)) {
     const imageResult = await requestOpenRouterImage(

@@ -15,7 +15,7 @@ const DEFAULT_WEBSITE_MODELS = [
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
   "nousresearch/hermes-3-llama-3.1-405b:free",
-  "google/gemini-3.5-flash",
+  "google/gemini-2.5-flash",
 ];
 const DEFAULT_CODER_MODELS = [
   "qwen/qwen3-coder:free",

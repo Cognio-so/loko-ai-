@@ -1,0 +1,135 @@
+export const MODEL_CATEGORIES = ["Chat Models", "Coding Models", "Search Models", "Image Models"] as const;
+
+export type ModelCategory = (typeof MODEL_CATEGORIES)[number];
+
+export type OpenRouterProvider =
+  | "Moonshot AI"
+  | "OpenAI"
+  | "Meta"
+  | "Qwen"
+  | "Nous Research"
+  | "Arcee AI"
+  | "Cognitive Computations"
+  | "Google"
+  | "Black Forest Labs";
+
+export type OpenRouterModelOption = {
+  id: string;
+  name: string;
+  provider: OpenRouterProvider;
+  type: "Chat" | "Coding" | "Search" | "Image" | "Reasoning";
+  categories: ModelCategory[];
+  free?: boolean;
+};
+
+export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
+  {
+    id: "moonshotai/kimi-k2.6:free",
+    name: "Kimi K2.6",
+    provider: "Moonshot AI",
+    type: "Chat",
+    categories: ["Chat Models", "Search Models", "Coding Models"],
+    free: true,
+  },
+  {
+    id: "openai/gpt-oss-120b:free",
+    name: "GPT OSS 120B",
+    provider: "OpenAI",
+    type: "Chat",
+    categories: ["Chat Models", "Coding Models"],
+    free: true,
+  },
+  {
+    id: "openai/gpt-4o-mini",
+    name: "GPT-4o Mini",
+    provider: "OpenAI",
+    type: "Chat",
+    categories: ["Chat Models", "Search Models", "Coding Models"],
+  },
+  {
+    id: "meta-llama/llama-3.3-70b-instruct:free",
+    name: "Llama 3.3 70B",
+    provider: "Meta",
+    type: "Chat",
+    categories: ["Chat Models"],
+    free: true,
+  },
+  {
+    id: "qwen/qwen3-coder:free",
+    name: "Qwen 3 Coder",
+    provider: "Qwen",
+    type: "Coding",
+    categories: ["Coding Models"],
+    free: true,
+  },
+  {
+    id: "nousresearch/hermes-3-llama-3.1-405b:free",
+    name: "Hermes 3 405B",
+    provider: "Nous Research",
+    type: "Chat",
+    categories: ["Chat Models"],
+    free: true,
+  },
+  {
+    id: "arcee-ai/trinity-large-thinking",
+    name: "Trinity Large Thinking",
+    provider: "Arcee AI",
+    type: "Reasoning",
+    categories: ["Chat Models", "Search Models"],
+  },
+  {
+    id: "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+    name: "Dolphin Mistral 24B Venice",
+    provider: "Cognitive Computations",
+    type: "Chat",
+    categories: ["Chat Models"],
+    free: true,
+  },
+  {
+    id: "google/gemini-2.5-flash",
+    name: "Gemini 2.5 Flash",
+    provider: "Google",
+    type: "Chat",
+    categories: ["Chat Models", "Search Models"],
+  },
+  {
+    id: "google/gemini-2.5-flash-image",
+    name: "Gemini 2.5 Flash Image",
+    provider: "Google",
+    type: "Image",
+    categories: ["Image Models"],
+  },
+  {
+    id: "openai/gpt-5-image-mini",
+    name: "GPT-5 Image Mini",
+    provider: "OpenAI",
+    type: "Image",
+    categories: ["Image Models"],
+  },
+  {
+    id: "black-forest-labs/flux.2-pro",
+    name: "FLUX.2 Pro",
+    provider: "Black Forest Labs",
+    type: "Image",
+    categories: ["Image Models"],
+  },
+  {
+    id: "black-forest-labs/flux.2-flex",
+    name: "FLUX.2 Flex",
+    provider: "Black Forest Labs",
+    type: "Image",
+    categories: ["Image Models"],
+  },
+];
+
+export const DEFAULT_SELECTED_OPENROUTER_MODEL = "moonshotai/kimi-k2.6:free";
+export const SELECTED_MODEL_STORAGE_KEY = "lokoai:selected-openrouter-model";
+
+export function getOpenRouterModelById(id: string | null | undefined) {
+  if (!id) return null;
+  return OPENROUTER_MODEL_OPTIONS.find((model) => model.id === id) ?? null;
+}
+
+export function isSupportedOpenRouterModel(id: string | null | undefined) {
+  return Boolean(getOpenRouterModelById(id));
+}
