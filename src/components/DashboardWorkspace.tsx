@@ -1274,6 +1274,7 @@ function Composer({
 }) {
   const { displayText, hasStarted, placeholderIndex } = useTypewriterPlaceholder();
   const shouldShowAnimatedPlaceholder = !prompt.trim() && !isSubmitting;
+  const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
     <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all focus-within:border-slate-300">
@@ -1338,7 +1339,7 @@ function Composer({
         <button 
           type="button" 
           onClick={onSubmit} 
-          disabled={!prompt.trim() || isSubmitting} 
+          disabled={!canSubmit}
           className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" 
           aria-label="Send prompt"
         >

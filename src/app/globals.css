@@ -315,3 +315,10 @@ body.app-shell-active {
 
 
 
+ .quick-actions {
+  scrollbar-width: none;
+}
+
+.quick-actions::-webkit-scrollbar {
+  display: none;
+}
