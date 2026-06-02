@@ -1368,7 +1368,9 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
     await saveToProject(title, html, files);
 
     let responseText: string;
-    if (hasExistingDesign) {
+    if (state.description) {
+      responseText = state.description;
+    } else if (hasExistingDesign) {
       const short = trimmed.length > 60 ? `${trimmed.slice(0, 57)}…` : trimmed;
       responseText = `Done! I've applied "${short}" to your design.\n\nThe live preview updates automatically. Want to tweak anything else?`;
     } else {
@@ -1932,8 +1934,9 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
 
           <div className="flex-1 sm:hidden" />
 
-          <div className="hidden items-center gap-2 text-xs font-medium text-slate-400 lg:flex">
-            <span className="max-w-[200px] truncate">{projectLabel}</span>
+          <div className="hidden items-center gap-1.5 text-[13px] font-semibold text-slate-100 lg:flex">
+            <span className="max-w-[280px] truncate">{projectLabel}</span>
+            <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-1.5">

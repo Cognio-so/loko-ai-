@@ -26,6 +26,7 @@ interface GenerationState {
   previewHtml: string | null;
   projectTitle: string;
   currentPrompt: string;
+  description: string;
 
   workflowLogs: AgentLog[];
   activeAgentIndex: number;
@@ -82,6 +83,7 @@ type GeneratedProjectPayload = {
   files?: GeneratedFile[];
   previewHtml?: string | null;
   projectTitle?: string;
+  description?: string;
   workflowLogs?: AgentLog[];
 };
 
@@ -123,6 +125,7 @@ function buildGeneratedState(data: GeneratedProjectPayload): Partial<GenerationS
     generatedFiles: normalized,
     previewHtml,
     projectTitle: typeof data.projectTitle === "string" ? data.projectTitle : "",
+    description: typeof data.description === "string" ? data.description : "",
     isGenerating: false,
     activeAgentIndex: -1,
     view: "preview",
@@ -141,6 +144,7 @@ export const useGeneratorStore = create<GenerationState>((set, get) => ({
   previewHtml: null,
   projectTitle: "",
   currentPrompt: "",
+  description: "",
 
   workflowLogs: [],
   activeAgentIndex: -1,

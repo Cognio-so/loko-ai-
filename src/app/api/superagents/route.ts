@@ -432,6 +432,7 @@ ${designDocs}
 ## OUTPUT FORMAT (strict JSON — no markdown wrapper)
 {
   "projectTitle": "Short descriptive name (3-6 words)",
+  "description": "A detailed Design Highlights summary in Hinglish/English including: Celebrating opening, Visual Style, Key Sections, Interactive Elements, and Next Steps.",
   "previewHtml": "<!DOCTYPE html>...(complete self-contained HTML document)...",
   "files": [
     { "path": "package.json",                    "content": "..." },
@@ -568,6 +569,7 @@ The previewHtml is an iframe preview of the main generated experience, not a rou
 ## OUTPUT FORMAT (strict JSON — no markdown wrapper)
 {
   "projectTitle": "KEEP EXACTLY THE SAME TITLE — do not change it",
+  "description": "A brief summary of what was changed and the impact on the design.",
   "previewHtml": "<!DOCTYPE html>...(FULL PRIMARY EXPERIENCE with all required sections/views represented)...",
   "changedFiles": [
     { "path": "src/components/Hero.tsx", "content": "...complete file content..." }
