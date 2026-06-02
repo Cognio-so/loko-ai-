@@ -24,10 +24,11 @@ const DEFAULT_CODER_MODELS = [
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 const DEFAULT_IMAGE_MODELS = [
-  "black-forest-labs/flux-pro",
-  "black-forest-labs/flux-1-dev",
-  "openai/dall-e-3",
-  "black-forest-labs/flux-schnell",
+  "google/gemini-2.5-flash-image",
+  "openai/gpt-5-image-mini",
+  "black-forest-labs/flux.2-pro",
+  "black-forest-labs/flux.2-flex",
+  "black-forest-labs/flux.2-klein-4b",
 ];
 const DEFAULT_SEARCH_MODELS = [
   "openai/gpt-4o-mini-search-preview",
@@ -40,6 +41,20 @@ const DEFAULT_SMART_MODEL = "moonshotai/kimi-k2.6:free";
 const DEFAULT_REASONING_MODEL = "arcee-ai/trinity-large-thinking";
 const DEFAULT_BIG_CONTEXT_MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
 const CHAT_COMPLETIONS_SUFFIX = "/chat/completions";
+
+const MODEL_ID_ALIASES: Record<string, string> = {
+  "black-forest-labs/flux-pro": "black-forest-labs/flux.2-pro",
+  "black-forest-labs/flux-1-dev": "black-forest-labs/flux.2-flex",
+  "black-forest-labs/flux-schnell": "google/gemini-2.5-flash-image",
+  "google/gemini-2.5-flash-image-preview": "google/gemini-2.5-flash-image",
+  "google/gemini-3.5-flash": "google/gemini-2.5-flash",
+  "openai/dall-e-3": "openai/gpt-5-image-mini",
+};
+
+export function normalizeOpenRouterModelId(model: string) {
+  const trimmed = model.trim();
+  return MODEL_ID_ALIASES[trimmed] ?? trimmed;
+}
 
 function normalizeBaseUrl(value: string) {
   const trimmed = value.trim().replace(/\/+$/, "");
@@ -60,7 +75,8 @@ function parseModelList(value: string | undefined, fallback: string[]) {
     ?.split(/[,\n]/)
     .map((model) => model.trim())
     .filter(Boolean)
-    .filter((model) => !isHttpUrl(model));
+    .filter((model) => !isHttpUrl(model))
+    .map(normalizeOpenRouterModelId);
 
   return models?.length ? models : fallback;
 }
@@ -106,7 +122,9 @@ export function getOpenRouterConfig() {
   
   const configuredModels = parseModelList(process.env.OPENROUTER_MODELS, DEFAULT_OPENROUTER_MODELS);
   const model =
-    configuredModel && !isHttpUrl(configuredModel) ? configuredModel : configuredModels[0] ?? DEFAULT_OPENROUTER_MODEL;
+    configuredModel && !isHttpUrl(configuredModel)
+      ? normalizeOpenRouterModelId(configuredModel)
+      : configuredModels[0] ?? DEFAULT_OPENROUTER_MODEL;
 
   // If useFreeModel flag is used, it will use the same model as configured in OPENROUTER_MODEL
   // or the default free model if OPENROUTER_MODEL is not set.
@@ -124,10 +142,10 @@ export function getOpenRouterConfig() {
   const searchModels = uniqueModels(
     parseModelList(process.env.OPENROUTER_SEARCH_MODELS, DEFAULT_SEARCH_MODELS)
   );
-  const fastModel = process.env.FAST_MODEL?.trim() || DEFAULT_FAST_MODEL;
-  const smartModel = process.env.SMART_MODEL?.trim() || DEFAULT_SMART_MODEL;
-  const reasoningModel = process.env.REASONING_MODEL?.trim() || DEFAULT_REASONING_MODEL;
-  const bigContextModel = process.env.BIG_CONTEXT_MODEL?.trim() || DEFAULT_BIG_CONTEXT_MODEL;
+  const fastModel = normalizeOpenRouterModelId(process.env.FAST_MODEL?.trim() || DEFAULT_FAST_MODEL);
+  const smartModel = normalizeOpenRouterModelId(process.env.SMART_MODEL?.trim() || DEFAULT_SMART_MODEL);
+  const reasoningModel = normalizeOpenRouterModelId(process.env.REASONING_MODEL?.trim() || DEFAULT_REASONING_MODEL);
+  const bigContextModel = normalizeOpenRouterModelId(process.env.BIG_CONTEXT_MODEL?.trim() || DEFAULT_BIG_CONTEXT_MODEL);
   const imageSize = parseImageSize(process.env.IMAGE_SIZE);
 
   return {

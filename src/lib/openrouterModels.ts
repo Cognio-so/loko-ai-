@@ -1,3 +1,5 @@
+import { normalizeOpenRouterModelId } from "@/lib/openrouterConfig";
+
 export const MODEL_CATEGORIES = ["Chat Models", "Coding Models", "Search Models", "Image Models"] as const;
 
 export type ModelCategory = (typeof MODEL_CATEGORIES)[number];
@@ -93,29 +95,36 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     categories: ["Chat Models", "Search Models"],
   },
   {
-    id: "black-forest-labs/flux-schnell",
+    id: "google/gemini-2.5-flash-image",
     name: "Gemini 2.5 Flash Image",
     provider: "Google",
     type: "Image",
     categories: ["Image Models"],
   },
   {
-    id: "openai/dall-e-3",
+    id: "openai/gpt-5-image-mini",
     name: "GPT-5 Image Mini",
     provider: "OpenAI",
     type: "Image",
     categories: ["Image Models"],
   },
   {
-    id: "black-forest-labs/flux-pro",
+    id: "black-forest-labs/flux.2-pro",
     name: "FLUX.2 Pro",
     provider: "Black Forest Labs",
     type: "Image",
     categories: ["Image Models"],
   },
   {
-    id: "black-forest-labs/flux-1-dev",
+    id: "black-forest-labs/flux.2-flex",
     name: "FLUX.2 Flex",
+    provider: "Black Forest Labs",
+    type: "Image",
+    categories: ["Image Models"],
+  },
+  {
+    id: "black-forest-labs/flux.2-klein-4b",
+    name: "FLUX.2 Klein 4B",
     provider: "Black Forest Labs",
     type: "Image",
     categories: ["Image Models"],
@@ -127,7 +136,8 @@ export const SELECTED_MODEL_STORAGE_KEY = "lokoai:selected-openrouter-model";
 
 export function getOpenRouterModelById(id: string | null | undefined) {
   if (!id) return null;
-  return OPENROUTER_MODEL_OPTIONS.find((model) => model.id === id) ?? null;
+  const normalizedId = normalizeOpenRouterModelId(id);
+  return OPENROUTER_MODEL_OPTIONS.find((model) => model.id === normalizedId) ?? null;
 }
 
 export function isSupportedOpenRouterModel(id: string | null | undefined) {
