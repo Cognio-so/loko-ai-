@@ -225,7 +225,8 @@ function buildOpenRouterPayload(
   model: string,
   messagesBeforeAi: ChatMessage[],
   userText: string,
-  config: ReturnType<typeof getOpenRouterConfig>
+  config: ReturnType<typeof getOpenRouterConfig>,
+  processedFile?: ProcessedChatFile | null
 ) {
   const searchInstruction = isSearchPrompt(userText)
     ? ` For current, latest, sports, news, price, weather, or web-search questions: ${config.enableWebSearch ? "use web search before answering" : "web search is disabled, so do not invent live facts"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing.`
@@ -240,15 +241,31 @@ function buildOpenRouterPayload(
     ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as a senior product designer and frontend engineer. Produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML: no blue underlined nav links, bullet lists as navigation, Times New Roman defaults, broken images, empty placeholders, or black blob icons. Use inline CSS, modern typography, gradients sparingly, realistic sections, polished components, accessible contrast, and responsive breakpoints."
     : "";
   const tools = getOpenRouterTools(userText, config);
-  const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => ({
-    role: message.role,
-    content:
-      isImagePrompt(userText) && index === items.length - 1 && message.role === "user"
-        ? enhanceImagePrompt(message.content)
-        : isWebsitePrompt(userText) && index === items.length - 1 && message.role === "user"
-          ? enhanceWebsitePrompt(message.content)
-        : message.content,
-  }));
+  const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => {
+    const isLatestUser = index === items.length - 1 && message.role === "user";
+    let content: OpenRouterMessageContent = message.content;
+
+    if (isLatestUser) {
+      const fileInstruction = processedFile
+        ? `\n\nUploaded file:\n${processedFile.fileSummary}\n\nExtracted file content:\n${processedFile.extractedText}\n\nAnswer based on the uploaded file. If extraction is incomplete, clearly mention the limitation.`
+        : "";
+      const text = `${message.content}${fileInstruction}`;
+      content = isImagePrompt(userText)
+        ? enhanceImagePrompt(text)
+        : isWebsitePrompt(userText)
+          ? enhanceWebsitePrompt(text)
+          : text;
+
+      if (processedFile?.imageDataUrl) {
+        content = [
+          { type: "text", text: content },
+          { type: "image_url", image_url: { url: processedFile.imageDataUrl } },
+        ];
+      }
+    }
+
+    return { role: message.role, content };
+  });
 
   return {
     model,
@@ -395,7 +412,8 @@ async function requestOpenRouterStream(
   models: string[],
   messagesBeforeAi: ChatMessage[],
   userText: string,
-  config: ReturnType<typeof getOpenRouterConfig>
+  config: ReturnType<typeof getOpenRouterConfig>,
+  processedFile?: ProcessedChatFile | null
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -414,7 +432,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
