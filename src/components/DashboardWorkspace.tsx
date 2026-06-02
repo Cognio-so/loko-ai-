@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Bot,
   Check,
+  ChevronRight,
   Compass,
   Copy,
   FileText,
@@ -19,6 +20,8 @@ import {
   Mic,
   Moon,
   Notebook,
+  Package,
+  Paperclip,
   Plus,
   RefreshCw,
   Rocket,
@@ -30,9 +33,17 @@ import {
   Trash2,
   Trophy,
   Users,
+  Globe,
+  Database,
   X,
   Zap,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
 import LandingPage from "@/app/page";
@@ -1589,20 +1600,50 @@ function Composer({
       </div>
       
       <div className="flex items-center justify-between px-3 pb-3 pt-2">
-        <div className="flex items-center gap-1.5">
-          <button 
-            type="button" 
-            onClick={onAddContent} 
-            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
-            aria-label="Add content"
-            title="Add content"
-          >
-            <Plus className="size-5 overflow-visible" />
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                type="button" 
+                className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-slate-800" 
+                aria-label="Add content"
+                title="Add content"
+              >
+                <Plus className="size-5 overflow-visible" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-64 rounded-[24px] border border-slate-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:border-white/10 dark:bg-slate-900">
+              <DropdownMenuItem onClick={onAddContent} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                <Paperclip className="h-4.5 w-4.5 text-slate-500" />
+                <span className="font-medium text-slate-700 dark:text-slate-200">Add files & photos</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                <Package className="h-4.5 w-4.5 text-slate-500" />
+                <span className="font-medium text-slate-700 dark:text-slate-200">Presets</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                <Database className="h-4.5 w-4.5 text-slate-500" />
+                <span className="font-medium text-slate-700 dark:text-slate-200">Professional data</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex items-center justify-between gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-4.5 w-4.5 text-slate-500" />
+                  <span className="font-medium text-slate-700 dark:text-slate-200">Web search</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button type="button" className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5">
+            <Bot className="h-4.5 w-4.5 text-slate-500" />
+            <span className="text-[14.5px] font-medium text-slate-700 dark:text-slate-300">Agent</span>
           </button>
+
           <button 
             type="button" 
             onClick={onVoiceInput} 
-            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
+            className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
             aria-label="Voice input"
             title="Voice input"
           >
