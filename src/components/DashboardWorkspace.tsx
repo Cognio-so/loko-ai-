@@ -120,7 +120,7 @@ const quickActions = [
       "Create a premium modern responsive website as a complete self-contained HTML preview with polished inline CSS, navbar, hero, dashboard/product preview, features, pricing, testimonials, CTA, footer, animations, mobile layout, and no broken images or unstyled default browser UI.",
   },
   {
-    title: "Develop desktop app",
+    title: "Desktop app",
     prompt:
       "Create a modern desktop application with sidebar, dashboard, analytics cards, responsive layout, and clean professional UI.",
   },
@@ -1200,9 +1200,9 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="quick-action-btn inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.22),0_8px_18px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
-              <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
+              <Plus className="size-3.5 shrink-0 overflow-visible text-slate-400" />
               Explore More
             </button>
           ) : (
@@ -1210,9 +1210,9 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="quick-action-btn inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.22),0_8px_18px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
-              <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
+              <Sparkles className="size-3.5 shrink-0 overflow-visible text-sky-400" />
               {item.title}
             </button>
           )

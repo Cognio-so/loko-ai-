@@ -315,10 +315,16 @@ body.app-shell-active {
 
 
 
- .quick-actions {
+.quick-actions {
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .quick-actions::-webkit-scrollbar {
   display: none;
+}
+
+.quick-action-btn {
+  flex: 0 0 auto;
+  min-width: fit-content;
 }
