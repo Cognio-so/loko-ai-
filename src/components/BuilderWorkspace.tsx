@@ -94,15 +94,17 @@ type SpeechRecognitionWindow = Window &
   };
 
 const GENERATION_TASK_BLUEPRINT: Array<Omit<GenerationTask, "status">> = [
-  { id: "analysis", label: "Analyzing requirements", kind: "plan", agent: "Design Architect" },
+  { id: "research", label: "Searching for modern SaaS & UI trends 2026", kind: "plan", agent: "Research Agent" },
+  { id: "code", label: "Executing Python code for design analysis", kind: "plan", agent: "System Agent" },
+  { id: "analysis", label: "Analyzing requirements & structural plan", kind: "plan", agent: "Design Architect" },
   { id: "palette", label: "Establishing color palette & typography", kind: "design", agent: "Visual Designer" },
   { id: "layout", label: "Building responsive layout structure", kind: "code", agent: "Layout Engineer" },
-  { id: "hero", label: "Crafting hero section", kind: "design", agent: "UI Designer", filePath: "index.html" },
-  { id: "features", label: "Designing feature cards", kind: "design", agent: "UI Designer" },
+  { id: "hero", label: "Crafting hero section & dashboard mockup", kind: "design", agent: "UI Designer", filePath: "index.html" },
+  { id: "features", label: "Designing feature cards & visual assets", kind: "design", agent: "UI Designer" },
   { id: "social-proof", label: "Adding testimonials & social proof", kind: "design", agent: "Conversion Expert" },
-  { id: "animations", label: "Adding CSS animations", kind: "code", agent: "Motion Designer" },
+  { id: "animations", label: "Adding CSS & Framer Motion animations", kind: "code", agent: "Motion Designer" },
   { id: "responsive", label: "Ensuring mobile responsiveness", kind: "debug", agent: "QA Engineer" },
-  { id: "optimize", label: "Optimizing for conversion", kind: "deploy", agent: "Growth Engineer" },
+  { id: "optimize", label: "Optimizing for conversion & SEO", kind: "deploy", agent: "Growth Engineer" },
   { id: "finalize", label: "Final polish & review", kind: "deploy", agent: "QA Engineer" },
 ];
 
@@ -1600,33 +1602,74 @@ export default function BuilderWorkspace({ projectId }: BuilderWorkspaceProps = 
                   </div>
                   <div className="space-y-1 px-3 py-3">
                     <AnimatePresence initial={false}>
-                      {generationTasks.map((task) => (
-                        <motion.div
-                          key={task.id}
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          className={cn("flex gap-3 rounded-xl px-2.5 py-2", task.status === "active" && "bg-indigo-500/10")}
-                        >
-                          <div className="mt-0.5 shrink-0">
-                            <TaskStatusIcon status={task.status} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p
+                      {generationTasks.map((task) => {
+                        const isKimiStyle = task.id === "research" || task.id === "code";
+                        
+                        if (isKimiStyle) {
+                          return (
+                            <motion.div
+                              key={task.id}
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
                               className={cn(
-                                "truncate text-xs font-semibold",
-                                task.status === "completed"
-                                  ? "text-slate-400"
-                                  : task.status === "active"
-                                    ? "text-indigo-200"
-                                    : "text-slate-600"
+                                "flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2.5 transition-all hover:bg-white/[0.08]",
+                                task.status === "active" && "border-indigo-500/30 ring-1 ring-indigo-500/20"
                               )}
                             >
-                              {task.label}
-                            </p>
-                            <p className="mt-0.5 text-[10px] text-slate-600">{task.agent}</p>
-                          </div>
-                        </motion.div>
-                      ))}
+                              <div className="flex items-center gap-3">
+                                {task.id === "research" ? (
+                                  <Search className="h-3.5 w-3.5 text-slate-400" />
+                                ) : (
+                                  <Bot className="h-3.5 w-3.5 text-slate-400" />
+                                )}
+                                <p className="text-[13px] font-medium text-slate-300">
+                                  {task.id === "research" ? "Search" : "Executing"}
+                                  <span className="mx-2 text-slate-600">|</span>
+                                  <span className={cn(task.status === "active" ? "text-indigo-300" : "text-slate-500")}>
+                                    {task.label}
+                                  </span>
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {task.status === "active" ? (
+                                  <Loader2 className="h-3 w-3 animate-spin text-indigo-400" />
+                                ) : (
+                                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                                )}
+                                <ChevronRight className="h-3.5 w-3.5 text-slate-600" />
+                              </div>
+                            </motion.div>
+                          );
+                        }
+
+                        return (
+                          <motion.div
+                            key={task.id}
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            className={cn("flex gap-3 rounded-xl px-2.5 py-2", task.status === "active" && "bg-indigo-500/10")}
+                          >
+                            <div className="mt-0.5 shrink-0">
+                              <TaskStatusIcon status={task.status} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p
+                                className={cn(
+                                  "truncate text-xs font-semibold",
+                                  task.status === "completed"
+                                    ? "text-slate-400"
+                                    : task.status === "active"
+                                      ? "text-indigo-200"
+                                      : "text-slate-600"
+                                )}
+                              >
+                                {task.label}
+                              </p>
+                              <p className="mt-0.5 text-[10px] text-slate-600">{task.agent}</p>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </AnimatePresence>
                     {generationTasks.length === 0 && (
                       <div className="flex items-center gap-3 px-2.5 py-2 text-xs text-slate-500">
