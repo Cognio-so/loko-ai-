@@ -714,7 +714,8 @@ async function requestOpenRouterStream(
   messagesBeforeAi: ChatMessage[],
   userText: string,
   config: ReturnType<typeof getOpenRouterConfig>,
-  processedFile?: ProcessedChatFile | null
+  processedFile?: ProcessedChatFile | null,
+  agentSlug?: string
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -733,7 +734,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile, agentSlug)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
@@ -914,7 +915,8 @@ export async function POST(req: Request) {
     messagesBeforeAi,
     userText,
     config,
-    processedFile
+    processedFile,
+    body.agent
   );
 
   if ("error" in streamResult) {
