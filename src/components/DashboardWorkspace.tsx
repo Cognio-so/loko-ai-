@@ -167,7 +167,7 @@ const quickActions = [
   {
     title: "Build website",
     prompt:
-      "Create a premium modern responsive website as a complete self-contained HTML preview with polished inline CSS, navbar, hero, dashboard/product preview, features, pricing, testimonials, CTA, footer, animations, mobile layout, and no broken images or unstyled default browser UI.",
+      "Create a premium Lovable-style responsive website with a complete self-contained HTML preview, polished inline CSS, hero, social proof, product showcase, features, benefits, pricing, testimonials, FAQ, CTA, footer, smooth animations, mobile-first layout, refined typography, tasteful gradients, professional shadows, and startup-quality visual design.",
   },
   {
     title: "Desktop app",
