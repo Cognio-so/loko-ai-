@@ -283,7 +283,8 @@ function buildOpenRouterPayload(
   messagesBeforeAi: ChatMessage[],
   userText: string,
   config: ReturnType<typeof getOpenRouterConfig>,
-  processedFile?: ProcessedChatFile | null
+  processedFile?: ProcessedChatFile | null,
+  agentSlug?: string
 ) {
   const searchInstruction = isSearchPrompt(userText)
     ? ` For current, latest, sports, news, price, weather, or web-search questions: ${config.enableWebSearch ? "use web search before answering" : "web search is disabled, so do not invent live facts"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing.`
@@ -375,6 +376,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
     : "";
   const tools = getOpenRouterTools(userText, config);
   const languageInstruction = getResponseLanguageInstruction(userText);
+  const agentInstruction = agentSlug ? `\n\n${getAgentSystemPrompt(agentSlug)}` : "";
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => {
     const isLatestUser = index === items.length - 1 && message.role === "user";
     let content: OpenRouterMessageContent = message.content;
@@ -413,7 +415,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         content:
           `${LOKO_AI_CORE_STANDARD}
 
-You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
+You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${agentInstruction}${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],
