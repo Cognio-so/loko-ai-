@@ -1002,6 +1002,13 @@ export default function DashboardWorkspace() {
         {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
 
         <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_ATTACHMENT_TYPES}
+            className="hidden"
+            onChange={handleFileInputChange}
+          />
           <header className="z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-50 bg-white/80 px-4 backdrop-blur-md sm:px-8">
             <div className="flex items-center gap-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
@@ -1029,7 +1036,17 @@ export default function DashboardWorkspace() {
             </div>
           </header>
 
-          <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          <section
+            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden transition ${isDraggingFile ? "bg-sky-50/60" : ""}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
+            {isDraggingFile && (
+              <div className="pointer-events-none absolute inset-4 z-30 flex items-center justify-center rounded-3xl border-2 border-dashed border-sky-300 bg-sky-50/80 text-sm font-semibold text-sky-700 shadow-inner backdrop-blur-sm">
+                Drop file to attach it to this chat
+              </div>
+            )}
             {activeView === "chat" ? (
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
