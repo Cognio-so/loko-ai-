@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  OPENROUTER_MODEL_OPTIONS,
+  DEFAULT_SELECTED_OPENROUTER_MODEL,
+  SELECTED_MODEL_STORAGE_KEY,
+  getOpenRouterModelById,
+} from "@/lib/openrouterModels";
 import {
   Bot,
   FolderOpen,
@@ -79,6 +85,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     { role: "assistant", content: assistant.welcome },
   ]);
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
@@ -93,19 +102,84 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
     setIsSidebarOpen(false);
   }
 
-  function sendMessage() {
-    const text = prompt.trim();
-    if (!text) return;
+  useEffect(() => {
+    try {
+      const storageKey = `${SELECTED_MODEL_STORAGE_KEY}:${slug}`;
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) setSelectedModelId(stored);
+      else setSelectedModelId(DEFAULT_SELECTED_OPENROUTER_MODEL);
+    } catch (e) {
+      setSelectedModelId(DEFAULT_SELECTED_OPENROUTER_MODEL);
+    }
+  }, [slug]);
 
-    setMessages((current) => [
-      ...current,
-      { role: "user", content: text },
-      {
-        role: "assistant",
-        content: `${assistant.name} is ready. I will help with this: ${text}`,
-      },
-    ]);
+  useEffect(() => {
+    try {
+      if (selectedModelId) {
+        const storageKey = `${SELECTED_MODEL_STORAGE_KEY}:${slug}`;
+        window.localStorage.setItem(storageKey, selectedModelId);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [selectedModelId, slug]);
+
+  async function sendMessage() {
+    const text = prompt.trim();
+    if (!text || isSubmitting) return;
+
+    setIsSubmitting(true);
+    // add user message and a placeholder assistant message
+    setMessages((current) => [...current, { role: "user", content: text }, { role: "assistant", content: "" }]);
     setPrompt("");
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          messages,
+          selectedModel: selectedModelId,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        const errText = await response.text();
+        throw new Error(errText || "AI response failed");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setMessages((current) => {
+          const lastIndex = current.length - 1;
+          const updated = [...current];
+          const last = updated[lastIndex];
+          if (last && last.role === "assistant") {
+            updated[lastIndex] = { ...last, content: last.content + chunk };
+          }
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.warn("Chat send failed:", error);
+      setMessages((current) => {
+        const lastIndex = current.length - 1;
+        const updated = [...current];
+        const last = updated[lastIndex];
+        if (last && last.role === "assistant") {
+          updated[lastIndex] = { ...last, content: "Something went wrong. Please try again." };
+        }
+        return updated;
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function handleVoiceInput() {
@@ -370,6 +444,40 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                     </div>
                     
                     <div className="flex items-end gap-2 px-4 pb-4">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setIsModelMenuOpen((s) => !s)}
+                          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                        >
+                          <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
+                            {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
+                          </span>
+                          <span className="max-w-[120px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
+                        </button>
+                        {isModelMenuOpen && (
+                          <div className="absolute bottom-10 left-0 z-50 w-64 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
+                            <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+                              {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
+                                <button
+                                  key={model.id}
+                                  onClick={() => {
+                                    setSelectedModelId(model.id);
+                                    setIsModelMenuOpen(false);
+                                  }}
+                                  className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50" : ""}`}
+                                >
+                                  <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">{model.provider[0]}</span>
+                                  <div className="min-w-0 text-left">
+                                    <div className="truncate font-medium">{model.name}</div>
+                                    <div className="truncate text-xs text-slate-400">{model.provider}</div>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       <textarea
                         value={prompt}
                         onChange={(event) => setPrompt(event.target.value)}
