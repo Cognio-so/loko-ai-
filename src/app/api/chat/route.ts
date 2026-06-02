@@ -67,6 +67,9 @@ const IMAGE_PATTERN =
 const PROMPT_REQUEST_PATTERN =
   /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
 
+const WORKFLOW_PATTERN =
+  /\b(create|build|generate|explain|design).{0,40}\b(workflow|process flow|sop|step by step|business workflow|ai workflow|automation workflow|system architecture|user journey|customer flow|app workflow|website workflow)\b|\b(workflow|process flow|sop|step by step|system architecture|user journey|customer flow)\b/i;
+
 const IMAGE_CAPABLE_MODELS = [
   "google/gemini-2.5-flash-image",
   "google/gemini-2.5-flash-image-preview",
@@ -130,6 +133,7 @@ function selectModelsForPrompt(
   if (!config.enableSmartRouting) return config.fallbackModels;
   if (isSearchPrompt(prompt)) return config.searchModels;
   if (isImagePrompt(prompt)) return [...IMAGE_CAPABLE_MODELS, ...config.imageModels];
+  if (isWorkflowPrompt(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
   if (CODE_PATTERN.test(prompt)) return config.coderModels;
   if (REASONING_PATTERN.test(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
   if (WEBSITE_PATTERN.test(prompt)) return config.websiteModels;
@@ -146,6 +150,10 @@ function isImagePrompt(prompt: string) {
 
 function isWebsitePrompt(prompt: string) {
   return WEBSITE_PATTERN.test(prompt);
+}
+
+function isWorkflowPrompt(prompt: string) {
+  return WORKFLOW_PATTERN.test(prompt);
 }
 
 function isPromptRequest(prompt: string) {
@@ -240,6 +248,82 @@ function buildOpenRouterPayload(
   const websiteInstruction = isWebsitePrompt(userText)
     ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as a senior product designer and frontend engineer. Produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML: no blue underlined nav links, bullet lists as navigation, Times New Roman defaults, broken images, empty placeholders, or black blob icons. Use inline CSS, modern typography, gradients sparingly, realistic sections, polished components, accessible contrast, and responsive breakpoints."
     : "";
+  const workflowInstruction = isWorkflowPrompt(userText)
+    ? ` If the user asks for any workflow, SOP, process flow, step-by-step explanation, user journey, customer flow, system architecture, business workflow, AI workflow, automation workflow, app workflow, or website workflow, NEVER provide a short answer. Automatically create a complete professional workflow document similar to a consultant, business analyst, system architect, and project manager.
+
+Use this exact structure with clean markdown headings, arrows, tables where useful, and detailed explanations:
+
+# PROJECT OVERVIEW
+Explain the workflow, purpose, goals, expected outcome, target users, benefits, and business/system context.
+
+# WORKFLOW SUMMARY
+Give a concise overview of the entire process before detailed steps.
+
+# STEP-BY-STEP WORKFLOW
+For every step, include:
+- Objective
+- Why this step exists
+- Inputs
+- Actions
+- Outputs
+- Success Criteria
+Continue until the workflow is fully complete. Never skip steps.
+
+# VISUAL FLOW DIAGRAM
+Use arrow flow format with branching when needed:
+START
+↓
+User Action
+↓
+System Process
+↓
+Validation
+↓
+Decision
+├─ If approved → Next Process
+└─ If rejected → Correction / Retry
+↓
+Output
+↓
+END
+
+# USER JOURNEY
+Show exactly:
+User Opens System
+↓
+User Performs Action
+↓
+System Response
+↓
+User Decision
+↓
+Final Result
+
+# SYSTEM WORKFLOW
+Explain:
+- Frontend Process
+- Backend Process
+- Database Process
+- API Process
+- AI Process, if applicable
+
+# AUTOMATION OPPORTUNITIES
+Suggest tasks that can be automated, AI integrations, time-saving improvements, and cost-saving improvements.
+
+# REQUIRED TOOLS
+List software, APIs, platforms, services, and integrations.
+
+# RISKS & SOLUTIONS
+For every relevant risk, include Possible Problem, Reason, Solution, and Prevention Method.
+
+# BEST PRACTICES
+Provide professional recommendations for efficiency, speed, scalability, reliability, and user experience.
+
+# FINAL EXECUTION PLAN
+Create a numbered roadmap from start to finish.
+
+If an uploaded file is present, analyze the uploaded file first and base the workflow on that file content.`
+    : "";
   const tools = getOpenRouterTools(userText, config);
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => {
     const isLatestUser = index === items.length - 1 && message.role === "user";
@@ -277,7 +361,7 @@ function buildOpenRouterPayload(
       {
         role: "system",
         content:
-          `You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}`,
+          `You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],

@@ -71,7 +71,8 @@ async function extractZipInspection(buffer: Buffer) {
 
 async function extractExcelText(buffer: Buffer) {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer);
+  const loadInput = buffer as unknown as Parameters<typeof workbook.xlsx.load>[0];
+  await workbook.xlsx.load(loadInput);
   const chunks: string[] = [];
 
   workbook.worksheets.forEach((sheet) => {
