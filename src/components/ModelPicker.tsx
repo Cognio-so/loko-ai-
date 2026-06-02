@@ -152,7 +152,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="inline-flex h-9 max-w-[220px] items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
+        className="inline-flex h-9 max-w-[210px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -163,7 +163,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-11 z-50 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] ring-1 ring-slate-100">
+        <div className="absolute left-0 top-11 z-50 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] ring-1 ring-slate-100">
           <div className="border-b border-slate-100 p-3">
             <div className="mb-3 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-sky-500">

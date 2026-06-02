@@ -908,7 +908,6 @@ export default function DashboardWorkspace() {
             </div>
 
             <div className="flex items-center gap-3">
-              <ModelPicker selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
               <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-normal text-sky-600 transition hover:bg-sky-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Upgrade Pro
@@ -943,6 +942,8 @@ export default function DashboardWorkspace() {
                           onVoiceInput={handleVoiceInput}
                           isSubmitting={isSubmitting}
                           notice={composerNotice}
+                          selectedModelId={selectedModelId}
+                          onModelChange={setSelectedModelId}
                         />
                         <PromptChips setPrompt={setPrompt} />
                       </div>
@@ -983,6 +984,8 @@ export default function DashboardWorkspace() {
                             onVoiceInput={handleVoiceInput}
                             isSubmitting={isSubmitting}
                             notice={composerNotice}
+                            selectedModelId={selectedModelId}
+                            onModelChange={setSelectedModelId}
                           />
                           <PromptChips setPrompt={setPrompt} />
                         </div>
@@ -1072,6 +1075,8 @@ function Composer({
   onVoiceInput,
   isSubmitting,
   notice,
+  selectedModelId,
+  onModelChange,
 }: {
   prompt: string;
   setPrompt: (value: string) => void;
@@ -1082,6 +1087,8 @@ function Composer({
   onVoiceInput: () => void;
   isSubmitting: boolean;
   notice: string;
+  selectedModelId: string;
+  onModelChange: (modelId: string) => void;
 }) {
   const { displayText, hasStarted, placeholderIndex } = useTypewriterPlaceholder();
   const shouldShowAnimatedPlaceholder = !prompt.trim() && !isSubmitting;
@@ -1140,6 +1147,7 @@ function Composer({
           >
             <Mic className="size-5 overflow-visible" />
           </button>
+          <ModelPicker selectedModelId={selectedModelId} onModelChange={onModelChange} />
         </div>
         
         <button 
