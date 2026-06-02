@@ -1,36 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, DragEvent as ReactDragEvent } from "react";
 import {
-  OPENROUTER_MODEL_OPTIONS,
   DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
-  getOpenRouterModelById,
   isSupportedOpenRouterModel,
 } from "@/lib/openrouterModels";
 import { useAuth } from "@/hooks/useAuth";
-import { getAssistant, type CollectionAssistant } from "@/app/collection/collection-data";
+import { getAssistant } from "@/app/collection/collection-data";
+import { ModelPicker } from "@/components/ModelPicker";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   ArrowLeft,
-  Bot,
-  ChevronDown,
-  File,
   FileText,
+  ChevronRight,
+  Database,
+  Globe,
   Grid3X3,
   Home,
-  Library,
-  Lightbulb,
-  Menu,
+  Loader2,
   Mic,
+  Package,
+  Paperclip,
   Plus,
   Rocket,
-  Search,
   Send,
   Settings,
   Sparkles,
-  Trash2,
   Trophy,
   Upload,
   Users,
@@ -52,7 +54,6 @@ type Attachment = {
 
 export default function UniversalChatInterface({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
-  const router = useRouter();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,7 +63,6 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   ]);
   const [prompt, setPrompt] = useState("");
   const [selectedModelId, setSelectedModelId] = useState<string>(assistant.modelId || DEFAULT_SELECTED_OPENROUTER_MODEL);
-  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -90,8 +90,6 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
       // ignore
     }
   }, [selectedModelId, slug]);
-
-  const selectedModel = getOpenRouterModelById(selectedModelId);
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
@@ -342,7 +340,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <div className="mx-auto max-w-2xl">
+            <div className="mx-auto max-w-3xl">
             {/* Attachments */}
             {attachments.length > 0 && (
               <div className="mb-4 flex flex-wrap gap-2">
@@ -373,53 +371,8 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
             )}
 
             {/* Input Box */}
-            <div className="relative flex flex-col rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50 dark:focus-within:ring-sky-900/50">
-              {/* Top Toolbar */}
-              <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 p-4">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
-                  aria-label="Add file"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.gif,.zip"
-                  onChange={(e) => handleFileSelect(e.target.files)}
-                  className="hidden"
-                />
-
-                <button
-                  onClick={handleVoiceInput}
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
-                  aria-label="Voice input"
-                >
-                  <Mic className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Main Input Area */}
-              <div className="flex items-end gap-3 p-5">
-                {/* Model Selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => setIsModelMenuOpen((s) => !s)}
-                    className="flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition"
-                  >
-                    <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-600 text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                      {selectedModel?.provider?.[0] ?? "A"}
-                    </span>
-                    <span className="max-w-[140px] truncate text-sm">{selectedModel?.name ?? assistant.model}</span>
-                    <ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                  </button>
-
-                  {isModelMenuOpen && <ModelSelectorModal selectedModelId={selectedModelId} onSelect={(id) => { setSelectedModelId(id); setIsModelMenuOpen(false); }} onClose={() => setIsModelMenuOpen(false)} />}
-                </div>
-
-                {/* Textarea */}
+            <div className="relative flex flex-col rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
+              <div className="relative px-5 pt-5">
                 <textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -429,19 +382,78 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
                       sendMessage();
                     }
                   }}
-                  placeholder="Ask LokoAI anything..."
+                  placeholder={isSubmitting ? "Generating..." : "Ask LokoAI anything..."}
                   rows={2}
-                  className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-2 text-base text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
+              </div>
 
-                {/* Send Button */}
+              <div className="flex items-center justify-between px-3 pb-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-slate-800"
+                        aria-label="Add content"
+                        title="Add content"
+                      >
+                        <Plus className="size-5 overflow-visible" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-64 rounded-[24px] border border-slate-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:border-white/10 dark:bg-slate-900">
+                      <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                        <Paperclip className="h-4.5 w-4.5 text-slate-500" />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">Add files & photos</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                        <Package className="h-4.5 w-4.5 text-slate-500" />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">Presets</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                        <Database className="h-4.5 w-4.5 text-slate-500" />
+                        <span className="font-medium text-slate-700 dark:text-slate-200">Professional data</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center justify-between gap-3 rounded-[14px] px-3.5 py-3 text-[14.5px] cursor-pointer focus:bg-slate-50 dark:focus:bg-slate-800">
+                        <div className="flex items-center gap-3">
+                          <Globe className="h-4.5 w-4.5 text-slate-500" />
+                          <span className="font-medium text-slate-700 dark:text-slate-200">Web search</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-400" />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.docx,.txt,.csv,.xlsx,.png,.jpg,.jpeg,.gif,.zip"
+                    onChange={(e) => handleFileSelect(e.target.files)}
+                    className="hidden"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleVoiceInput}
+                    className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                    aria-label="Voice input"
+                    title="Voice input"
+                  >
+                    <Mic className="size-5 overflow-visible" />
+                  </button>
+
+                  <ModelPicker selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
+                </div>
+
                 <button
+                  type="button"
                   onClick={sendMessage}
-                  disabled={!prompt.trim() || isSubmitting}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 disabled:opacity-40 disabled:grayscale"
+                  disabled={(!prompt.trim() && attachments.length === 0) || isSubmitting}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95 dark:bg-sky-500 dark:hover:bg-sky-400"
                   aria-label="Send message"
                 >
-                  <Send className="h-4 w-4" />
+                  {isSubmitting ? <Loader2 className="size-4 animate-spin overflow-visible" /> : <Send className="size-4 overflow-visible" />}
                 </button>
               </div>
             </div>
@@ -453,110 +465,5 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         </div>
       </main>
     </div>
-  );
-}
-
-function ModelSelectorModal({
-  selectedModelId,
-  onSelect,
-  onClose,
-}: {
-  selectedModelId: string;
-  onSelect: (id: string) => void;
-  onClose: () => void;
-}) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTab, setSelectedTab] = useState<"All" | "Chat" | "Coding" | "Reasoning" | "Search" | "Image" | "Free" | "Paid">("All");
-
-  const tabs = ["All", "Chat", "Coding", "Reasoning", "Search", "Image", "Free", "Paid"] as const;
-
-  const filteredModels = OPENROUTER_MODEL_OPTIONS.filter((model) => {
-    const matchesSearch = model.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      model.provider.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (selectedTab === "All") return matchesSearch;
-    if (selectedTab === "Chat" && model.type === "Chat") return matchesSearch;
-    if (selectedTab === "Coding" && model.type === "Coding") return matchesSearch;
-    if (selectedTab === "Reasoning" && model.type === "Reasoning") return matchesSearch;
-    if (selectedTab === "Search" && model.categories.includes("Search Models")) return matchesSearch;
-    if (selectedTab === "Image" && model.type === "Image") return matchesSearch;
-    if (selectedTab === "Free" && model.free) return matchesSearch;
-    if (selectedTab === "Paid" && !model.free) return matchesSearch;
-    
-    return false;
-  });
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40 bg-black/50 dark:bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed inset-4 z-50 flex items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl max-h-[80vh] flex flex-col rounded-3xl bg-white dark:bg-slate-900 shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 p-6">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Select Model</h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="border-b border-slate-100 dark:border-slate-700 p-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search models..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-50 dark:focus:ring-sky-900/50"
-              />
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-2 border-b border-slate-100 dark:border-slate-700 px-6 pt-4 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={`whitespace-nowrap px-4 py-2 text-sm font-medium rounded-lg transition ${
-                  selectedTab === tab
-                    ? "bg-sky-500 text-white"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-
-          {/* Models Grid */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredModels.map((model) => (
-                <button
-                  key={model.id}
-                  onClick={() => onSelect(model.id)}
-                  className={`flex items-center gap-3 rounded-lg border-2 p-4 text-left transition ${
-                    selectedModelId === model.id
-                      ? "border-sky-500 bg-sky-50 dark:bg-sky-900/20"
-                      : "border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-700"
-                  }`}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {model.provider[0]}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 dark:text-white truncate">{model.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{model.provider}</p>
-                  </div>
-                  {selectedModelId === model.id && <div className="h-5 w-5 rounded-full bg-sky-500" />}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
   );
 }
