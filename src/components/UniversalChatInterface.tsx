@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState, DragEvent as ReactDragEvent } fro
 import {
   DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
+  getOpenRouterModelById,
   isSupportedOpenRouterModel,
 } from "@/lib/openrouterModels";
 import { useAuth } from "@/hooks/useAuth";
@@ -141,6 +142,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   const [prompt, setPrompt] = useState("");
   const [selectedModelId, setSelectedModelId] = useState<string>(assistant.modelId || DEFAULT_SELECTED_OPENROUTER_MODEL);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -204,6 +206,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   const userEmail = user?.email || "Sign in to sync chats";
   const userInitial = userName.trim().charAt(0).toUpperCase() || "A";
   const isDarkMode = theme === "dark";
+  const selectedModelName = getOpenRouterModelById(selectedModelId)?.name ?? "selected model";
   const visibleHistory = chatHistory.filter((session) => {
     const query = historySearch.trim().toLowerCase();
     if (!query) return true;
@@ -217,6 +220,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
     setMessages([]);
     setPrompt("");
     setAttachments([]);
+    setGenerationStatus("");
     setActiveChatId(null);
     setIsSidebarOpen(false);
   }
@@ -343,6 +347,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
     setActiveChatId(chatId);
     setIsSubmitting(true);
+    setGenerationStatus(`Connecting to ${selectedModelName}...`);
     setMessages(pendingMessages);
     saveChatSession(pendingMessages, chatId);
     setPrompt("");
@@ -365,6 +370,10 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         throw new Error(extractApiErrorMessage(errText) || "AI response failed");
       }
 
+      const upstreamModelId = response.headers.get("X-AI-Model");
+      const upstreamModelName = getOpenRouterModelById(upstreamModelId)?.name ?? selectedModelName;
+      setGenerationStatus(`Generating with ${upstreamModelName}...`);
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantText = "";
@@ -374,6 +383,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         assistantText += chunk;
+        setGenerationStatus(`Streaming response from ${upstreamModelName}...`);
         setMessages((current) => {
           const lastIndex = current.length - 1;
           const updated = [...current];
@@ -394,6 +404,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
       ];
       setMessages(completedMessages);
       saveChatSession(completedMessages, chatId);
+      setGenerationStatus("");
     } catch (error) {
       console.warn("Chat send failed:", error);
       const failedMessages = [
@@ -405,6 +416,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
       ];
       setMessages(failedMessages);
       saveChatSession(failedMessages, chatId);
+      setGenerationStatus("");
     } finally {
       setIsSubmitting(false);
     }
@@ -636,22 +648,34 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         {/* Chat Messages */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto max-w-2xl space-y-6">
-            {messages.map((message, index) => (
-              <div
-                key={`${message.role}-${index}`}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+            {messages.map((message, index) => {
+              if (!message.content.trim()) return null;
+
+              return (
                 <div
-                  className={`max-w-[78%] whitespace-pre-wrap text-[15px] font-normal leading-7 ${
-                    message.role === "user"
-                      ? "text-slate-700 dark:text-slate-200"
-                      : "text-slate-600 dark:text-slate-300"
-                  }`}
+                  key={`${message.role}-${index}`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {message.content}
+                  <div
+                    className={`max-w-[78%] whitespace-pre-wrap text-[15px] font-normal leading-7 ${
+                      message.role === "user"
+                        ? "text-slate-700 dark:text-slate-200"
+                        : "text-slate-600 dark:text-slate-300"
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              );
+            })}
+            {isSubmitting && generationStatus && (
+              <div className="flex justify-start">
+                <div className="inline-flex items-center gap-2 text-[15px] font-normal leading-7 text-slate-500 dark:text-slate-400">
+                  <Loader2 className="h-4 w-4 animate-spin text-sky-500" />
+                  <span>{generationStatus}</span>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
