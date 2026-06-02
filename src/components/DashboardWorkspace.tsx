@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -535,6 +535,7 @@ export default function DashboardWorkspace() {
   const { theme, setTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user, isLoading, signOut } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -550,6 +551,9 @@ export default function DashboardWorkspace() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [composerNotice, setComposerNotice] = useState("");
   const [selectedModelId, setSelectedModelId] = useState(DEFAULT_SELECTED_OPENROUTER_MODEL);
+  const [uploadedAttachment, setUploadedAttachment] = useState<UploadedAttachment | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
 
   const userName = useMemo(() => {
     return getFirstDisplayName(user);
@@ -635,17 +639,73 @@ export default function DashboardWorkspace() {
     }
   }
 
+  function isAcceptedFile(file: File) {
+    const extension = `.${file.name.split(".").pop()?.toLowerCase() ?? ""}`;
+    return ACCEPTED_ATTACHMENT_TYPES.split(",").includes(extension);
+  }
+
+  function handleSelectedFile(file: File) {
+    setComposerNotice("");
+    if (!isAcceptedFile(file)) {
+      setComposerNotice("This file type is not supported yet.");
+      return;
+    }
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      setComposerNotice("Please upload a file smaller than 15 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    setUploadProgress(8);
+    reader.onprogress = (event) => {
+      if (event.lengthComputable) {
+        setUploadProgress(Math.max(8, Math.round((event.loaded / event.total) * 100)));
+      }
+    };
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      setUploadedAttachment({
+        name: file.name,
+        type: file.type || `application/${file.name.split(".").pop() ?? "octet-stream"}`,
+        size: file.size,
+        dataUrl,
+      });
+      setUploadProgress(100);
+    };
+    reader.onerror = () => {
+      setUploadProgress(0);
+      setComposerNotice("File upload failed. Please try again.");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (file) handleSelectedFile(file);
+    event.target.value = "";
+  }
+
+  function removeUploadedAttachment() {
+    setUploadedAttachment(null);
+    setUploadProgress(0);
+  }
+
   async function handleSubmit(inputPrompt = prompt) {
     const trimmed = inputPrompt.trim();
-    if (!trimmed || isSubmitting) return;
+    if ((!trimmed && !uploadedAttachment) || isSubmitting) return;
 
     setIsSubmitting(true);
     setComposerNotice("");
+    const attachmentToSend = uploadedAttachment;
+    const userVisibleContent = [
+      trimmed || "Analyze the uploaded file.",
+      attachmentToSend ? `\n\nAttached file: ${attachmentToSend.name}` : "",
+    ].join("");
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: trimmed,
+      content: userVisibleContent,
       createdAt: new Date().toISOString(),
     };
     const assistantId = crypto.randomUUID();
@@ -660,6 +720,8 @@ export default function DashboardWorkspace() {
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
     setPrompt("");
+    setUploadedAttachment(null);
+    setUploadProgress(0);
 
     try {
       const response = await fetch("/api/chat", {
@@ -667,9 +729,10 @@ export default function DashboardWorkspace() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId: activeChatId,
-          message: trimmed,
+          message: trimmed || "Analyze the uploaded file.",
           messages,
           selectedModel: selectedModelId,
+          attachment: attachmentToSend,
         }),
       });
 
@@ -770,7 +833,25 @@ export default function DashboardWorkspace() {
   }
 
   function handleAddContent() {
-    setComposerNotice("File attachments and extra content tools are coming soon.");
+    fileInputRef.current?.click();
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDraggingFile(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setIsDraggingFile(false);
+    }
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
+    setIsDraggingFile(false);
+    const file = event.dataTransfer.files?.[0];
+    if (file) handleSelectedFile(file);
   }
 
   async function handleCopyMessage(message: ChatMessage) {
