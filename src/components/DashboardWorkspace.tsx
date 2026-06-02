@@ -1635,11 +1635,6 @@ function Composer({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <button type="button" className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5">
-            <Bot className="h-4.5 w-4.5 text-slate-500" />
-            <span className="text-[14.5px] font-medium text-slate-700 dark:text-slate-300">Agent</span>
-          </button>
-
           <button 
             type="button" 
             onClick={onVoiceInput} 
