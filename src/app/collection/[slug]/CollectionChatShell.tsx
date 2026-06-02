@@ -423,9 +423,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               </div>
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
-                <div className="mx-auto max-w-3xl">
-                  <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_18px_40px_rgb(2,6,23,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-6 focus-within:ring-sky-50">
-                    <div className="flex items-center gap-2 border-b border-slate-100 p-3">
+                <div className="mx-auto max-w-4xl">
+                  <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl transition-all focus-within:border-sky-400 focus-within:ring-6 focus-within:ring-sky-50">
+                    <div className="flex items-center gap-2 border-b border-slate-100 p-4">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -447,7 +447,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                       </div>
                     </div>
 
-                    <div className="flex items-end gap-3 p-5">
+                    <div className="flex items-end gap-3 p-6">
                       <div className="relative">
                         <button
                           type="button"
@@ -495,7 +495,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         }}
                         placeholder={"Ask LokoAI anything..."}
                         rows={2}
-                        className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-2 text-base text-slate-700 outline-none placeholder:text-slate-400"
+                        className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-4 text-lg text-slate-700 outline-none placeholder:text-slate-400"
                       />
                       <button
                         type="button"
