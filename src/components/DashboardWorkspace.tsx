@@ -1066,6 +1066,9 @@ export default function DashboardWorkspace() {
                           notice={composerNotice}
                           selectedModelId={selectedModelId}
                           onModelChange={setSelectedModelId}
+                          attachment={uploadedAttachment}
+                          uploadProgress={uploadProgress}
+                          onRemoveAttachment={removeUploadedAttachment}
                         />
                         <PromptChips setPrompt={setPrompt} />
                       </div>
@@ -1108,6 +1111,9 @@ export default function DashboardWorkspace() {
                             notice={composerNotice}
                             selectedModelId={selectedModelId}
                             onModelChange={setSelectedModelId}
+                            attachment={uploadedAttachment}
+                            uploadProgress={uploadProgress}
+                            onRemoveAttachment={removeUploadedAttachment}
                           />
                           <PromptChips setPrompt={setPrompt} />
                         </div>
