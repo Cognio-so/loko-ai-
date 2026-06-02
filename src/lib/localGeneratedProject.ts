@@ -1,4 +1,4 @@
-import { buildIntentInstructions, detectGenerationIntent } from "@/lib/generationIntent";
+import { detectGenerationIntent } from "@/lib/generationIntent";
 
 export interface LocalGeneratedFile {
   path: string;
@@ -28,7 +28,7 @@ function buildWebsitePreview(prompt: string) {
           <span class="kicker">0${index + 1}</span>
           <h3>${esc(label)}</h3>
           <p>${esc(
-            `${label} is tuned for ${category.replace(/_/g, " ")} experiences with a more premium, user-loved presentation.`
+            `${label} is shaped around the ${category.replace(/_/g, " ")} brief with crisp copy, useful UI detail, and a focused conversion path.`
           )}</p>
         </article>`
     )
@@ -41,47 +41,54 @@ function buildWebsitePreview(prompt: string) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${esc(title)}</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;background:${palette.bg};color:${palette.text}}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:${palette.bg};color:${palette.text}}
     .shell{position:relative;overflow:hidden;min-height:100vh}
-    .glow{position:absolute;border-radius:999px;filter:blur(90px);opacity:.24}
-    .glow.a{width:320px;height:320px;left:-80px;top:60px;background:${palette.accent}}
-    .glow.b{width:360px;height:360px;right:-120px;top:180px;background:${palette.accent2}}
-    .wrap{max-width:1240px;margin:0 auto;padding:22px 24px 88px;position:relative}
-    .nav{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);backdrop-filter:blur(14px);border-radius:22px}
-    .brand{font-size:20px;font-weight:900;letter-spacing:-.04em}
-    .cta{padding:12px 18px;border-radius:999px;background:linear-gradient(135deg,${palette.accent},${palette.accent2});color:#081121;text-decoration:none;font-weight:900}
-    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;align-items:center;padding:64px 0 36px}
-    .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;color:${palette.accent2}}
-    h1{font-size:clamp(44px,7vw,86px);line-height:.98;letter-spacing:-.07em;margin:18px 0}
-    .sub{font-size:18px;line-height:1.8;color:${palette.muted};max-width:720px}
+    .shell:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 12%,${palette.accent}33,transparent 28%),radial-gradient(circle at 88% 8%,${palette.accent2}2e,transparent 25%),linear-gradient(180deg,rgba(255,255,255,.06),transparent 36%);pointer-events:none}
+    .wrap{max-width:1220px;margin:0 auto;padding:22px 24px 72px;position:relative}
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:12px 14px 12px 18px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);backdrop-filter:blur(18px);border-radius:24px;box-shadow:0 18px 60px rgba(0,0,0,.18)}
+    .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:850;letter-spacing:-.035em}
+    .brand-mark{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,${palette.accent},${palette.accent2});box-shadow:0 12px 30px ${palette.accent}3d}
+    .nav-links{display:flex;gap:18px;color:${palette.muted};font-size:14px}
+    .cta{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:999px;background:linear-gradient(135deg,${palette.accent},${palette.accent2});color:#06111f;text-decoration:none;font-weight:850;box-shadow:0 14px 34px ${palette.accent}35}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,.9fr);gap:34px;align-items:center;padding:70px 0 42px}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:${palette.accent2}}
+    h1{font-size:clamp(46px,7vw,82px);line-height:.95;letter-spacing:-.065em;margin:18px 0 20px;max-width:780px}
+    .sub{font-size:18px;line-height:1.75;color:${palette.muted};max-width:680px}
     .actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
-    .secondary{padding:12px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.1);text-decoration:none;color:${palette.text};font-weight:700;background:rgba(255,255,255,.03)}
-    .panel{border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.03));border-radius:30px;padding:22px;box-shadow:0 28px 80px rgba(0,0,0,.22)}
-    .panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
-    .tile{padding:18px;border-radius:22px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.08)}
-    .tile strong{display:block;font-size:28px;margin-top:6px}
+    .secondary{padding:12px 18px;border-radius:999px;border:1px solid rgba(255,255,255,.14);text-decoration:none;color:${palette.text};font-weight:760;background:rgba(255,255,255,.06)}
+    .stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:34px;color:${palette.muted}}
+    .stats strong{display:block;color:${palette.text};font-size:24px;letter-spacing:-.04em}
+    .mock{border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.05));border-radius:32px;padding:16px;box-shadow:0 32px 90px rgba(0,0,0,.28);overflow:hidden}
+    .mock-top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.1);padding:8px 8px 14px;color:${palette.muted};font-size:13px}
+    .dots{display:flex;gap:7px}.dots span{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.28)}
+    .dashboard{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .wide{grid-column:1/-1}
+    .tile{padding:18px;border-radius:22px;background:rgba(5,12,24,.46);border:1px solid rgba(255,255,255,.1)}
+    .tile span{display:block;color:${palette.muted};font-size:12px}.tile strong{display:block;font-size:26px;margin-top:7px;letter-spacing:-.045em}
+    .chart{height:170px;display:flex;align-items:end;gap:10px}.bar{flex:1;border-radius:999px 999px 10px 10px;background:linear-gradient(180deg,${palette.accent2},${palette.accent});min-height:34px;opacity:.92}
+    .list{display:grid;gap:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.06);color:${palette.muted}}.row b{color:${palette.text}}
     .section{padding-top:26px}
-    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:${palette.accent2};font-weight:800}
+    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:${palette.accent2};font-weight:850}
     .section h2{font-size:clamp(28px,4.5vw,54px);line-height:1.02;letter-spacing:-.05em;margin:12px 0 14px}
     .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:24px}
-    .card{padding:22px;border-radius:26px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
-    .kicker{display:inline-flex;min-width:40px;height:40px;align-items:center;justify-content:center;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px;font-weight:900;color:${palette.accent2}}
+    .card{padding:22px;border-radius:26px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.055);box-shadow:0 16px 45px rgba(0,0,0,.12)}
+    .kicker{display:inline-flex;min-width:40px;height:40px;align-items:center;justify-content:center;border-radius:14px;background:rgba(255,255,255,.08);font-size:11px;font-weight:900;color:${palette.accent2}}
     .card h3{margin:18px 0 10px;font-size:20px}
-    .card p,.quote p,.panel p{line-height:1.75;color:${palette.muted}}
+    .card p,.quote p,.mock p{line-height:1.75;color:${palette.muted}}
     .quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:26px}
-    .quote{padding:22px;border-radius:26px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+    .quote{padding:22px;border-radius:26px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1)}
+    .final{margin-top:30px;padding:30px;border-radius:30px;border:1px solid rgba(255,255,255,.1);background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.04));display:flex;align-items:center;justify-content:space-between;gap:18px}
     .footer{margin-top:36px;padding-top:24px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;gap:16px;color:${palette.muted};font-size:14px}
-    @media (max-width: 960px){.hero,.grid,.quotes,.panel-grid{grid-template-columns:1fr}.wrap{padding-left:18px;padding-right:18px}h1{font-size:54px}}
+    @media (max-width: 960px){.hero,.grid,.quotes,.dashboard{grid-template-columns:1fr}.hero{padding-top:42px}.wrap{padding-left:18px;padding-right:18px}h1{font-size:52px}.nav-links{display:none}.mock{border-radius:24px}}
   </style>
 </head>
 <body>
   <div class="shell">
-    <div class="glow a"></div>
-    <div class="glow b"></div>
     <div class="wrap">
       <nav class="nav">
-        <div class="brand">${esc(title)}</div>
-        <a class="cta" href="#contact">Build Premium</a>
+        <div class="brand"><span class="brand-mark"></span>${esc(title)}</div>
+        <div class="nav-links"><span>Product</span><span>Solutions</span><span>Pricing</span></div>
+        <a class="cta" href="#contact">Start now</a>
       </nav>
       <section class="hero">
         <div>
@@ -89,45 +96,63 @@ function buildWebsitePreview(prompt: string) {
           <h1>${esc(title)}</h1>
           <p class="sub">${esc(summary)}</p>
           <div class="actions">
-            <a class="cta" href="#features">Explore sections</a>
-            <a class="secondary" href="#proof">View proof</a>
+            <a class="cta" href="#features">Explore platform</a>
+            <a class="secondary" href="#proof">See results</a>
+          </div>
+          <div class="stats">
+            <span><strong>3.8x</strong> faster launch</span>
+            <span><strong>92%</strong> cleaner handoff</span>
+            <span><strong>24/7</strong> workflow ready</span>
           </div>
         </div>
-        <div class="panel">
-          <span class="eyebrow">Design direction</span>
-          <h2>${esc(styleDirection)}</h2>
-          <p>${esc(buildIntentInstructions(prompt).replace(/\n/g, " "))}</p>
-          <div class="panel-grid">
-            <div class="tile"><span>Focus</span><strong>${esc(sectionLabels[0] ?? "Hero")}</strong></div>
-            <div class="tile"><span>Accent</span><strong>${esc(palette.accent)}</strong></div>
-            <div class="tile"><span>Surface</span><strong>${esc(category.replace(/_/g, " "))}</strong></div>
-            <div class="tile"><span>Mode</span><strong>Premium</strong></div>
+        <div class="mock">
+          <div class="mock-top">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <strong>Live product preview</strong>
+            <span>Updated today</span>
+          </div>
+          <div class="dashboard">
+            <div class="tile"><span>Revenue pipeline</span><strong>$128k</strong></div>
+            <div class="tile"><span>Active teams</span><strong>48</strong></div>
+            <div class="tile wide">
+              <span>Growth signal</span>
+              <div class="chart">
+                <i class="bar" style="height:46%"></i><i class="bar" style="height:62%"></i><i class="bar" style="height:54%"></i><i class="bar" style="height:78%"></i><i class="bar" style="height:92%"></i>
+              </div>
+            </div>
+            <div class="tile wide list">
+              <div class="row"><b>Onboarding</b><span>Ready</span></div>
+              <div class="row"><b>Analytics</b><span>Live</span></div>
+              <div class="row"><b>Automation</b><span>Synced</span></div>
+            </div>
           </div>
         </div>
       </section>
       <section id="features" class="section">
-        <span class="eyebrow">Structured output</span>
-        <h2>Fallback is now category-aware, not one repeated SaaS page.</h2>
+        <span class="eyebrow">Product system</span>
+        <h2>${esc(styleDirection)}</h2>
         <div class="grid">${featureCards}</div>
       </section>
       <section id="proof" class="section">
         <span class="eyebrow">Premium proof</span>
-        <h2>Built to feel deliberate even when AI or network fallback kicks in.</h2>
+        <h2>Every section is designed to feel intentional, useful, and ready to refine.</h2>
         <div class="quotes">
-          <div class="quote"><p>Prompt-specific structure means the preview now respects the requested niche instead of flattening everything into one generic layout.</p></div>
-          <div class="quote"><p>Category modules, palette direction, and stronger section labeling help the generated draft feel much closer to the brief.</p></div>
-          <div class="quote"><p>This fallback is intentionally more useful for refinement, edits, and premium-first iteration inside LokoAI.</p></div>
+          <div class="quote"><p>The hero leads with a real product promise, not placeholder marketing copy.</p></div>
+          <div class="quote"><p>The preview includes dashboard-style UI detail so the page feels like a product, not only a poster.</p></div>
+          <div class="quote"><p>Cards, stats, and proof blocks are tuned for quick iteration inside LokoAI.</p></div>
         </div>
       </section>
       <section id="contact" class="section">
-        <div class="panel">
-          <span class="eyebrow">Next action</span>
-          <h2>Keep generating, editing, and upgrading this concept inside your builder.</h2>
-          <p>${esc(summary)}</p>
+        <div class="final">
+          <div>
+            <span class="eyebrow">Next action</span>
+            <h2>Launch a sharper first draft and keep improving it from chat.</h2>
+          </div>
+          <a class="cta" href="#top">Upgrade this design</a>
         </div>
       </section>
       <footer class="footer">
-        <span>Generated by LokoAI fallback engine</span>
+        <span>Generated by LokoAI</span>
         <span>${esc(category.replace(/_/g, " "))} experience</span>
       </footer>
     </div>
