@@ -1037,18 +1037,23 @@ export default function DashboardWorkspace() {
           </header>
 
           <section
-            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent transition-colors duration-300 ${isDraggingFile ? "bg-sky-50/60 dark:bg-sky-950/20" : ""}`}
+            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent transition-colors duration-300 dark:workspace-dark-bg dark:workspace-dark-grid dark:workspace-dark-noise ${isDraggingFile ? "bg-sky-50/60 dark:bg-sky-950/20" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
+            <div className="pointer-events-none absolute inset-0 hidden dark:block">
+              <div className="absolute left-[12%] top-[10%] h-56 w-56 rounded-full bg-sky-500/10 blur-3xl" />
+              <div className="absolute bottom-[14%] right-[12%] h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
+              <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/6 blur-3xl" />
+            </div>
             {isDraggingFile && (
               <div className="pointer-events-none absolute inset-4 z-30 flex items-center justify-center rounded-3xl border-2 border-dashed border-sky-300 bg-sky-50/80 text-sm font-semibold text-sky-700 shadow-inner backdrop-blur-sm">
                 Drop file to attach it to this chat
               </div>
             )}
             {activeView === "chat" ? (
-              <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
                   {messages.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:py-8">
