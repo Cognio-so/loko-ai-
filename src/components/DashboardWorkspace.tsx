@@ -777,6 +777,68 @@ export default function DashboardWorkspace() {
     setUploadProgress(0);
 
     try {
+      if (trimmed && isBuildRequestPrompt(trimmed) && !attachmentToSend) {
+        const generateResponse = await fetch("/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: trimmed }),
+        });
+
+        if (!generateResponse.ok) {
+          const errorText = await generateResponse.text();
+          throw new Error(errorText || "Project generation failed");
+        }
+
+        const generated = (await generateResponse.json()) as GeneratedProjectResponse;
+        const generatedFiles = normalizeGeneratedFiles(generated.files);
+        const assistantFinal: ChatMessage = {
+          ...assistantMessage,
+          isStreaming: false,
+          content: `Build ready: ${generated.projectTitle || "Generated project"}\n\nI opened the workspace on the right with live preview, code, and files. Keep chatting here to update this same project.`,
+        };
+        const finalMessages = [...messages, userMessage, assistantFinal];
+        const projectPayload = {
+          title: generated.projectTitle || trimmed.slice(0, 64) || "Generated Project",
+          description: generated.description || "AI generated project",
+          prompt: trimmed,
+          preview_html: generated.previewHtml || null,
+          generated_code: generatedFiles,
+          chat_messages: finalMessages,
+        };
+        const shouldUpdateCurrentBuild = Boolean(activeBuildProject?.id && activeChatId === activeBuildProject.id);
+        const saveResponse = await fetch(
+          shouldUpdateCurrentBuild ? `/api/projects/${activeBuildProject!.id}` : "/api/projects",
+          {
+            method: shouldUpdateCurrentBuild ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(projectPayload),
+          }
+        );
+
+        if (!saveResponse.ok) {
+          const errorText = await saveResponse.text();
+          throw new Error(errorText || "Project save failed");
+        }
+
+        const savedData = (await saveResponse.json()) as { project?: Project };
+        const savedProject = savedData.project;
+        if (!savedProject) throw new Error("Generated project was not returned.");
+
+        const hydratedProject: Project = {
+          ...savedProject,
+          generated_code: normalizeGeneratedFiles(savedProject.generated_code),
+          chat_messages: normalizeMessages(savedProject.chat_messages),
+        };
+
+        setMessages(finalMessages);
+        setActiveChatId(hydratedProject.id);
+        setActiveBuildProject(hydratedProject);
+        setSelectedBuilderFile(getDefaultGeneratedFile(hydratedProject));
+        setBuilderTab(hydratedProject.preview_html ? "preview" : "code");
+        loadProjects();
+        return;
+      }
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
