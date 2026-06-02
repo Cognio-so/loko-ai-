@@ -1001,7 +1001,7 @@ export default function DashboardWorkspace() {
 
         {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
 
-        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
           <input
             ref={fileInputRef}
             type="file"
@@ -1009,7 +1009,7 @@ export default function DashboardWorkspace() {
             className="hidden"
             onChange={handleFileInputChange}
           />
-          <header className="z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-50 bg-white/80 px-4 backdrop-blur-md sm:px-8">
+          <header className="z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-100 bg-white/80 px-4 backdrop-blur-md transition-colors duration-300 sm:px-8 dark:border-white/10 dark:bg-slate-950/80">
             <div className="flex items-center gap-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
@@ -1037,7 +1037,7 @@ export default function DashboardWorkspace() {
           </header>
 
           <section
-            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden transition ${isDraggingFile ? "bg-sky-50/60" : ""}`}
+            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent transition-colors duration-300 ${isDraggingFile ? "bg-sky-50/60 dark:bg-sky-950/20" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -1097,7 +1097,7 @@ export default function DashboardWorkspace() {
                           <div ref={messagesEndRef} />
                         </div>
                       </div>
-                      <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md sm:pb-10">
+                      <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md transition-colors duration-300 sm:pb-10 dark:bg-slate-950/80">
                         <div className="mx-auto max-w-2xl">
                           <Composer
                             prompt={prompt}
@@ -1200,7 +1200,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <Plus className="size-3.5 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -1210,7 +1210,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <Sparkles className="size-3.5 shrink-0 overflow-visible text-sky-400" />
               {item.title}
@@ -1219,8 +1219,8 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
         )}
       </div>
       {isMoreOpen && (
-        <div className="absolute bottom-12 right-0 z-30 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200 sm:left-1/2 sm:right-auto sm:-translate-x-1/2">
-          <div className="mb-2 px-3 py-1 text-[10px] font-normal uppercase tracking-widest text-slate-400">Templates</div>
+        <div className="absolute bottom-12 right-0 z-30 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 dark:border-white/10 dark:bg-slate-900 dark:ring-white/10">
+          <div className="mb-2 px-3 py-1 text-[10px] font-normal uppercase tracking-widest text-slate-400 dark:text-slate-500">Templates</div>
           {moreQuickActions.map((moreItem) => (
             <button
               key={moreItem.title}
@@ -1229,7 +1229,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
                 setPrompt(moreItem.prompt);
                 setIsMoreOpen(false);
               }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-normal text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-normal text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {moreItem.title}
@@ -1277,7 +1277,7 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all focus-within:border-slate-300">
+    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900 dark:focus-within:border-slate-600">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
@@ -1292,7 +1292,7 @@ function Composer({
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
               className="pointer-events-none absolute left-5 right-5 top-5 z-10 flex min-h-[44px] items-center overflow-hidden py-2.5"
             >
-              <span className="line-clamp-2 text-[0.95rem] font-normal leading-relaxed text-slate-600 sm:text-base">
+              <span className="line-clamp-2 text-[0.95rem] font-normal leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
                 {displayText}
               </span>
               <motion.span
@@ -1309,7 +1309,7 @@ function Composer({
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder={isSubmitting ? "Generating..." : ""}
-          className="relative z-0 max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400"
+          className="relative z-0 max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
       </div>
       
@@ -1318,7 +1318,7 @@ function Composer({
           <button 
             type="button" 
             onClick={onAddContent} 
-            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
             aria-label="Add content"
             title="Add content"
           >
@@ -1327,7 +1327,7 @@ function Composer({
           <button 
             type="button" 
             onClick={onVoiceInput} 
-            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900" 
+            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-xl text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
             aria-label="Voice input"
             title="Voice input"
           >
@@ -1340,13 +1340,13 @@ function Composer({
           type="button" 
           onClick={onSubmit} 
           disabled={!canSubmit}
-          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95" 
+          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95 dark:bg-sky-500 dark:hover:bg-sky-400" 
           aria-label="Send prompt"
         >
           {isSubmitting ? <Loader2 className="size-4 animate-spin overflow-visible" /> : <Send className="size-4 overflow-visible" />}
         </button>
       </div>
-      {notice && <p className="px-5 pb-3 text-xs font-medium text-slate-500">{notice}</p>}
+      {notice && <p className="px-5 pb-3 text-xs font-medium text-slate-500 dark:text-slate-400">{notice}</p>}
     </div>
   );
 }
