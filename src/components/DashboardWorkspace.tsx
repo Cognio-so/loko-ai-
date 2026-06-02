@@ -1140,19 +1140,67 @@ export default function DashboardWorkspace() {
   );
 }
 
+function formatAttachmentSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function AttachmentPreview({
+  attachment,
+  progress,
+  onRemove,
+}: {
+  attachment: UploadedAttachment;
+  progress: number;
+  onRemove: () => void;
+}) {
+  const extension = attachment.name.split(".").pop()?.toUpperCase() || "FILE";
+
+  return (
+    <div className="mx-3 mt-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-sky-500 shadow-sm ring-1 ring-slate-200">
+          <FileText className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-slate-900">{attachment.name}</p>
+          <p className="mt-0.5 text-xs font-medium text-slate-500">
+            {extension} · {formatAttachmentSize(attachment.size)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-white hover:text-red-500"
+          aria-label="Remove uploaded file"
+          title="Remove file"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      {progress < 100 && (
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full rounded-full bg-sky-500 transition-all" style={{ width: `${progress}%` }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
     <div className="relative mt-6 w-full">
-      <div className="flex w-full flex-wrap justify-center gap-3 overflow-visible pb-1">
+      <div className="quick-actions flex w-full justify-start gap-2 overflow-x-auto whitespace-nowrap px-1 pb-2 sm:justify-center">
         {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
           item.title === "Explore More" ? (
             <button
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.22),0_8px_18px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Plus className="size-4 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -1162,7 +1210,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.28),0_8px_18px_rgba(15,23,42,0.10)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
+              className="quick-action-btn inline-flex h-10 shrink-0 items-center gap-2 rounded-full border border-slate-300 bg-white px-4 text-sm font-normal text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.22),0_8px_18px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm"
             >
               <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
               {item.title}
@@ -1205,6 +1253,9 @@ function Composer({
   notice,
   selectedModelId,
   onModelChange,
+  attachment,
+  uploadProgress,
+  onRemoveAttachment,
 }: {
   prompt: string;
   setPrompt: (value: string) => void;
@@ -1217,12 +1268,18 @@ function Composer({
   notice: string;
   selectedModelId: string;
   onModelChange: (modelId: string) => void;
+  attachment: UploadedAttachment | null;
+  uploadProgress: number;
+  onRemoveAttachment: () => void;
 }) {
   const { displayText, hasStarted, placeholderIndex } = useTypewriterPlaceholder();
   const shouldShowAnimatedPlaceholder = !prompt.trim() && !isSubmitting;
 
   return (
     <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all focus-within:border-slate-300">
+      {attachment && (
+        <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
+      )}
       <div className="relative px-5 pt-5">
         <AnimatePresence mode="wait">
           {shouldShowAnimatedPlaceholder && hasStarted && (
