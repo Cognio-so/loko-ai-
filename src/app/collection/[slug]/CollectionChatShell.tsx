@@ -423,97 +423,90 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               </div>
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
-                <div className="mx-auto max-w-4xl">
-                  <div className="relative flex flex-col rounded-[32px] border border-slate-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all focus-within:border-slate-200">
-                    <div className="flex px-6 pt-4">
-                      <span className="text-[16.5px] font-medium text-slate-400">Ask LokoAI anything...</span>
-                    </div>
-                    <textarea
-                      value={prompt}
-                      onChange={(event) => setPrompt(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      className="max-h-72 min-h-[50px] w-full resize-none bg-transparent px-6 pb-2 pt-1 text-[16.5px] text-slate-700 outline-none"
-                    />
-
-                    <div className="flex items-center justify-between px-3 pb-3">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setPrompt((p) => p + "\n")}
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
-                          aria-label="Add newline"
-                        >
-                          <Plus className="h-4.5 w-4.5" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handleVoiceInput}
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
-                          aria-label="Voice input"
-                        >
-                          <Mic className="h-4.5 w-4.5" />
-                        </button>
-
-                        <div className="relative ml-1">
-                          <button
-                            type="button"
-                            onClick={() => setIsModelMenuOpen((s) => !s)}
-                            className="flex items-center gap-2.5 rounded-full border border-slate-100 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-                          >
-                            <div className="flex h-5 w-5 items-center justify-center rounded bg-sky-500 text-[10px] font-bold text-white">
-                              {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
-                            </div>
-                            <span className="max-w-[150px] truncate text-[13.5px] font-medium text-slate-600">
-                              {getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}
-                            </span>
-                            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
-                          </button>
-                          {isModelMenuOpen && (
-                            <div className="absolute bottom-12 left-0 z-50 w-72 rounded-2xl border border-slate-100 bg-white p-2 shadow-2xl ring-1 ring-slate-200/5">
-                              <div className="flex max-h-64 flex-col gap-1 overflow-y-auto p-1">
-                                {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
-                                  <button
-                                    key={model.id}
-                                    onClick={() => {
-                                      setSelectedModelId(model.id);
-                                      setIsModelMenuOpen(false);
-                                    }}
-                                    className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-slate-600 transition hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50/50 text-sky-600" : ""}`}
-                                  >
-                                    <div className="flex h-6 w-6 items-center justify-center rounded bg-sky-500 text-[11px] font-bold text-white">
-                                      {model.provider[0]}
-                                    </div>
-                                    <div className="min-w-0 text-left">
-                                      <div className="truncate font-semibold">{model.name}</div>
-                                      <div className="truncate text-[10px] uppercase tracking-wider text-slate-400">{model.provider}</div>
-                                    </div>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                <div className="mx-auto max-w-2xl px-4">
+                  <div className="relative flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white shadow-lg transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50 p-6">
+                    {/* Top toolbar: Plus and Mic */}
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setPrompt((p) => p + "\n")}
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600 hover:border-slate-300"
+                        aria-label="Add file"
+                      >
+                        <Plus className="h-5 w-5" />
+                      </button>
 
                       <button
                         type="button"
+                        onClick={handleVoiceInput}
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:bg-slate-50 hover:text-slate-600 hover:border-slate-300"
+                        aria-label="Voice input"
+                      >
+                        <Mic className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    {/* Main input area */}
+                    <div className="flex items-end gap-4">
+                      <textarea
+                        value={prompt}
+                        onChange={(event) => setPrompt(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" && !event.shiftKey) {
+                            event.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder="Ask LokoAI anything..."
+                        rows={3}
+                        className="flex-1 resize-none bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
+                      />
+                      <button
+                        type="button"
                         onClick={sendMessage}
-                        disabled={!prompt.trim() || isSubmitting}
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all active:scale-95 ${
-                          prompt.trim() && !isSubmitting
-                            ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
-                            : "bg-slate-200 text-slate-400 opacity-50"
-                        }`}
+                        disabled={!prompt.trim()}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition-all hover:bg-slate-300 active:scale-95 disabled:opacity-40 disabled:grayscale"
                         aria-label="Send message"
                       >
-                        <Send className="h-4 w-4" />
+                        <Send className="h-5 w-5" />
                       </button>
+                    </div>
+
+                    {/* Model selector */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsModelMenuOpen((s) => !s)}
+                        className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
+                      >
+                        <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
+                          {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
+                        </span>
+                        <span className="max-w-[140px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
+                        <ChevronDown className="h-4 w-4 text-slate-400" />
+                      </button>
+                      {isModelMenuOpen && (
+                        <div className="absolute bottom-12 left-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
+                          <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
+                            {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
+                              <button
+                                key={model.id}
+                                onClick={() => {
+                                  setSelectedModelId(model.id);
+                                  setIsModelMenuOpen(false);
+                                }}
+                                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50" : ""}`}
+                              >
+                                <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">{model.provider[0]}</span>
+                                <div className="min-w-0 text-left">
+                                  <div className="truncate font-medium">{model.name}</div>
+                                  <div className="truncate text-xs text-slate-400">{model.provider}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <p className="mt-3 text-center text-xs text-slate-400">
