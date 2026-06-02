@@ -424,36 +424,30 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
                 <div className="mx-auto max-w-2xl">
-                  <div className="relative flex flex-col rounded-2xl border border-slate-200 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50">
-                    <div className="flex items-center gap-1.5 p-2">
-                      <button
-                        type="button"
-                        onClick={() => setPrompt(p => p + "\n")}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
-                        aria-label="New line"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPrompt("Can you help me brainstorm some creative ideas?")}
-                        className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold text-slate-500 transition hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
-                        Get ideas
-                      </button>
-                    </div>
-                    
-                    <div className="flex items-end gap-2 px-4 pb-4">
-                      <button
-                        type="button"
-                        onClick={handleVoiceInput}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
-                        aria-label="Voice input"
-                      >
-                        <Mic className="h-4 w-4" />
-                      </button>
+                  <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_18px_40px_rgb(2,6,23,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-6 focus-within:ring-sky-50">
+                    <div className="flex items-center gap-1.5 p-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPrompt((p) => p + "\n")}
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                          aria-label="Add newline"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
 
+                        <button
+                          type="button"
+                          onClick={handleVoiceInput}
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                          aria-label="Voice input"
+                        >
+                          <Mic className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-end gap-3 px-5 pb-5">
                       <div className="relative">
                         <button
                           type="button"
@@ -463,11 +457,11 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
                             {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
                           </span>
-                          <span className="max-w-[120px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
+                          <span className="max-w-[160px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
                           <ChevronDown className="h-4 w-4 text-slate-400" />
                         </button>
                         {isModelMenuOpen && (
-                          <div className="absolute bottom-10 left-0 z-50 w-64 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
+                          <div className="absolute bottom-12 left-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
                             <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                               {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
                                 <button
@@ -489,6 +483,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           </div>
                         )}
                       </div>
+
                       <textarea
                         value={prompt}
                         onChange={(event) => setPrompt(event.target.value)}
@@ -499,14 +494,14 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           }
                         }}
                         placeholder={`Message ${assistant.name}...`}
-                        rows={1}
-                        className="max-h-60 min-h-[44px] flex-1 resize-none bg-transparent py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400"
+                        rows={2}
+                        className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-3 text-lg text-slate-700 outline-none placeholder:text-slate-400"
                       />
                       <button
                         type="button"
                         onClick={sendMessage}
                         disabled={!prompt.trim()}
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:grayscale`}
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:grayscale`}
                         aria-label="Send message"
                       >
                         <Send className="h-4 w-4" />
