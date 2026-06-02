@@ -39,6 +39,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Trash2,
   Trophy,
   Upload,
   Users,
@@ -47,8 +48,10 @@ import {
 } from "lucide-react";
 
 type ChatMessage = {
+  id?: string;
   role: "assistant" | "user";
   content: string;
+  createdAt?: string;
 };
 
 type Attachment = {
@@ -57,6 +60,37 @@ type Attachment = {
   size: number;
   type: string;
 };
+
+type SavedChatSession = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+const COLLECTION_HISTORY_STORAGE_KEY = "lokoai:collection-chat-history";
+
+function createChatId() {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function createMessage(role: ChatMessage["role"], content: string): ChatMessage {
+  return {
+    id: createChatId(),
+    role,
+    content,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function getChatTitle(messages: ChatMessage[]) {
+  return messages.find((message) => message.role === "user" && message.content.trim())?.content.slice(0, 48) || "New chat";
+}
+
+function getHistoryStorageKey(slug: string) {
+  return `${COLLECTION_HISTORY_STORAGE_KEY}:${slug}`;
+}
 
 function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
   const Icon = assistant.icon;
@@ -98,6 +132,9 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [historySearch, setHistorySearch] = useState("");
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<SavedChatSession[]>([]);
 
   // Persist model selection per-collection
   useEffect(() => {
@@ -123,18 +160,93 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
     }
   }, [selectedModelId, slug]);
 
+  useEffect(() => {
+    try {
+      const rawHistory = window.localStorage.getItem(getHistoryStorageKey(slug));
+      const parsed = rawHistory ? (JSON.parse(rawHistory) as SavedChatSession[]) : [];
+      const validHistory = Array.isArray(parsed)
+        ? parsed.filter((session) => session?.id && Array.isArray(session.messages))
+        : [];
+      setChatHistory(validHistory);
+
+      const latestSession = validHistory[0];
+      if (latestSession) {
+        setActiveChatId(latestSession.id);
+        setMessages(latestSession.messages);
+      } else {
+        setActiveChatId(null);
+        setMessages([]);
+      }
+    } catch {
+      setChatHistory([]);
+      setActiveChatId(null);
+      setMessages([]);
+    }
+  }, [slug]);
+
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
   }, [user]);
 
   const userEmail = user?.email || "Sign in to sync chats";
   const userInitial = userName.trim().charAt(0).toUpperCase() || "A";
+  const visibleHistory = chatHistory.filter((session) => {
+    const query = historySearch.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      session.title.toLowerCase().includes(query) ||
+      session.messages.some((message) => message.content.toLowerCase().includes(query))
+    );
+  });
 
   function startNewChat() {
     setMessages([]);
     setPrompt("");
     setAttachments([]);
+    setActiveChatId(null);
     setIsSidebarOpen(false);
+  }
+
+  function saveChatSession(nextMessages: ChatMessage[], chatId: string) {
+    if (!nextMessages.some((message) => message.role === "user" && message.content.trim())) return;
+
+    const now = new Date().toISOString();
+    setChatHistory((current) => {
+      const existing = current.find((session) => session.id === chatId);
+      const nextSession: SavedChatSession = {
+        id: chatId,
+        title: getChatTitle(nextMessages),
+        messages: nextMessages,
+        createdAt: existing?.createdAt ?? now,
+        updatedAt: now,
+      };
+      const nextHistory = [nextSession, ...current.filter((session) => session.id !== chatId)].slice(0, 30);
+      window.localStorage.setItem(getHistoryStorageKey(slug), JSON.stringify(nextHistory));
+      return nextHistory;
+    });
+  }
+
+  function loadChatSession(session: SavedChatSession) {
+    setActiveChatId(session.id);
+    setMessages(session.messages);
+    setPrompt("");
+    setAttachments([]);
+    setIsSidebarOpen(false);
+  }
+
+  function deleteChatSession(sessionId: string) {
+    setChatHistory((current) => {
+      const nextHistory = current.filter((session) => session.id !== sessionId);
+      window.localStorage.setItem(getHistoryStorageKey(slug), JSON.stringify(nextHistory));
+
+      if (activeChatId === sessionId) {
+        const nextActive = nextHistory[0] ?? null;
+        setActiveChatId(nextActive?.id ?? null);
+        setMessages(nextActive?.messages ?? []);
+      }
+
+      return nextHistory;
+    });
   }
 
   const handleFileSelect = (files: FileList | null) => {
@@ -209,8 +321,16 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
     const text = prompt.trim();
     if (!text || isSubmitting) return;
 
+    const chatId = activeChatId ?? createChatId();
+    const userMessage = createMessage("user", text);
+    const assistantMessage = createMessage("assistant", "");
+    const messagesBeforeSend = [...messages, userMessage];
+    const pendingMessages = [...messagesBeforeSend, assistantMessage];
+
+    setActiveChatId(chatId);
     setIsSubmitting(true);
-    setMessages((current) => [...current, { role: "user", content: text }, { role: "assistant", content: "" }]);
+    setMessages(pendingMessages);
+    saveChatSession(pendingMessages, chatId);
     setPrompt("");
     setAttachments([]);
 
@@ -220,7 +340,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          messages,
+          messages: messagesBeforeSend,
           selectedModel: selectedModelId,
           agent: slug,
         }),
@@ -233,11 +353,13 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let assistantText = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        assistantText += chunk;
         setMessages((current) => {
           const lastIndex = current.length - 1;
           const updated = [...current];
@@ -248,17 +370,27 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
           return updated;
         });
       }
+
+      const completedMessages = [
+        ...messagesBeforeSend,
+        {
+          ...assistantMessage,
+          content: assistantText || "I could not generate a response. Please try again.",
+        },
+      ];
+      setMessages(completedMessages);
+      saveChatSession(completedMessages, chatId);
     } catch (error) {
       console.warn("Chat send failed:", error);
-      setMessages((current) => {
-        const lastIndex = current.length - 1;
-        const updated = [...current];
-        const last = updated[lastIndex];
-        if (last && last.role === "assistant") {
-          updated[lastIndex] = { ...last, content: "Something went wrong. Please try again." };
-        }
-        return updated;
-      });
+      const failedMessages = [
+        ...messagesBeforeSend,
+        {
+          ...assistantMessage,
+          content: "Something went wrong. Please try again.",
+        },
+      ];
+      setMessages(failedMessages);
+      saveChatSession(failedMessages, chatId);
     } finally {
       setIsSubmitting(false);
     }
@@ -318,6 +450,8 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
                 <Search className="h-4 w-4 text-slate-400" />
                 <input
                   placeholder="Search messages..."
+                  value={historySearch}
+                  onChange={(event) => setHistorySearch(event.target.value)}
                   className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
                   autoFocus
                 />
@@ -358,19 +492,56 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
               <span>Recent History</span>
               <History className="h-3.5 w-3.5 opacity-50" />
             </div>
-            <Link
-              href={`/collection/${assistant.slug}`}
-              className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:border-slate-200 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:ring-white/10 dark:hover:border-white/15"
-            >
-              <AssistantLogo assistant={assistant} size="sm" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{assistant.name}</p>
-                <p className="truncate text-[11px] text-slate-400">Currently active</p>
-              </div>
-            </Link>
+            <div className="space-y-2">
+              {visibleHistory.length ? (
+                visibleHistory.map((session) => (
+                  <div
+                    key={session.id}
+                    className={`group flex items-center gap-2 rounded-xl border px-3 py-3 shadow-sm ring-1 transition ${
+                      activeChatId === session.id
+                        ? "border-sky-100 bg-white ring-sky-100 dark:border-sky-400/20 dark:bg-slate-900 dark:ring-sky-400/10"
+                        : "border-slate-100 bg-white/70 ring-slate-100 hover:border-slate-200 hover:bg-white dark:border-white/10 dark:bg-slate-900/70 dark:ring-white/10 dark:hover:border-white/15"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => loadChatSession(session)}
+                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                    >
+                      <AssistantLogo assistant={assistant} size="sm" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{session.title}</p>
+                        <p className="truncate text-[11px] text-slate-400">{assistant.name}</p>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteChatSession(session.id)}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-300 opacity-100 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 sm:opacity-0 sm:group-hover:opacity-100"
+                      aria-label="Delete chat"
+                      title="Delete chat"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-xl border border-dashed border-slate-200 px-3 py-4 text-xs font-medium text-slate-400 dark:border-white/10">
+                  No saved chats yet.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 space-y-3 border-t border-slate-100 pt-6 dark:border-white/10">
+            <button
+              type="button"
+              onClick={() => router.push("/pricing")}
+              className="flex h-11 w-full items-center gap-3 rounded-xl bg-gradient-to-r from-slate-950 to-sky-600 px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.98] dark:from-sky-500 dark:to-cyan-500"
+            >
+              <Zap className="h-4 w-4" />
+              Upgrade
+            </button>
             <div className="flex flex-col gap-1">
               <button
                 type="button"
