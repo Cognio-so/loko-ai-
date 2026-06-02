@@ -1,4 +1,4 @@
-import { normalizeOpenRouterModelId } from "@/lib/openrouterConfig";
+import { normalizeOpenRouterModelId } from "@/lib/openrouterModelAliases";
 
 export const MODEL_CATEGORIES = ["Chat Models", "Coding Models", "Search Models", "Image Models"] as const;
 
