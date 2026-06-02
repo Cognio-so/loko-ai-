@@ -486,7 +486,7 @@ function MarkdownText({ content }: { content: string }) {
         if (index % 3 === 2) {
           const alt = segments[index - 1] || "Generated image";
           return (
-            <span key={index} className="my-3 block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm">
+            <span key={index} className="my-3 block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm dark:border-white/10 dark:bg-slate-900/70">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={segment} alt={alt} className="block max-h-[520px] w-full object-contain" />
             </span>
@@ -521,7 +521,7 @@ function FormattedMarkdownText({ content }: { content: string }) {
         if (!cleaned) return <div key={index} className="h-3" />;
 
         return (
-          <p key={index} className="mb-2 text-[0.95rem] font-normal leading-7 text-slate-700">
+          <p key={index} className="mb-2 text-[0.95rem] font-normal leading-7 text-slate-700 dark:text-slate-200">
             {cleaned}
           </p>
         );
@@ -1378,26 +1378,30 @@ function MessageBubble({
           </div>
         )}
         
-        <div className="group relative">
+        <div className={`group relative rounded-[24px] px-5 py-4 transition-colors duration-300 ${
+          isUser
+            ? "bg-slate-100/90 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:bg-slate-900/80 dark:shadow-[0_16px_36px_rgba(2,8,23,0.35)]"
+            : "bg-transparent dark:bg-white/[0.02]"
+        }`}>
           {isUser && (
             <div className="absolute -top-6 right-1 text-[10px] font-normal uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
               You
             </div>
           )}
-          <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium" : "text-slate-700"} ${message.isError ? "text-red-500 font-medium" : ""}`}>
-            <div className={!isUser ? "prose prose-slate max-w-none text-slate-700" : ""}>
+          <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium dark:text-slate-100" : "text-slate-700 dark:text-slate-200"} ${message.isError ? "text-red-500 font-medium dark:text-red-400" : ""}`}>
+            <div className={!isUser ? "prose prose-slate max-w-none text-slate-700 dark:prose-invert dark:text-slate-200" : ""}>
               <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
             </div>
           </div>
 
-          <div className={`mt-2 flex items-center gap-3 text-[10px] font-normal uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 ${isUser ? "justify-end" : "justify-start"}`}>
+          <div className={`mt-2 flex items-center gap-3 text-[10px] font-normal uppercase tracking-wider text-slate-400 opacity-0 transition group-hover:opacity-100 dark:text-slate-500 ${isUser ? "justify-end" : "justify-start"}`}>
             <span>{formatTime(message.createdAt)}</span>
-            <button type="button" onClick={onCopy} className="hover:text-slate-900 transition flex items-center gap-1">
+            <button type="button" onClick={onCopy} className="transition flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
               {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
               {copied ? "Copied" : "Copy"}
             </button>
             {!isUser && (
-              <button type="button" onClick={onRetry} className="hover:text-slate-900 transition flex items-center gap-1">
+              <button type="button" onClick={onRetry} className="transition flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-200">
                 <RefreshCw className="h-3 w-3" />
                 Retry
               </button>
