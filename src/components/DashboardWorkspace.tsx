@@ -595,6 +595,9 @@ export default function DashboardWorkspace() {
   const [uploadedAttachment, setUploadedAttachment] = useState<UploadedAttachment | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [activeBuildProject, setActiveBuildProject] = useState<Project | null>(null);
+  const [builderTab, setBuilderTab] = useState<BuilderTab>("preview");
+  const [selectedBuilderFile, setSelectedBuilderFile] = useState("");
 
   const userName = useMemo(() => {
     return getFirstDisplayName(user);
@@ -611,6 +614,7 @@ export default function DashboardWorkspace() {
       .then((data: { projects?: Project[] } | null) => {
         const nextProjects = (data?.projects ?? []).map((project) => ({
           ...project,
+          generated_code: normalizeGeneratedFiles(project.generated_code),
           chat_messages: normalizeMessages(project.chat_messages),
         }));
         setProjects(nextProjects);
@@ -648,6 +652,8 @@ export default function DashboardWorkspace() {
   function startNewChat() {
     setActiveChatId(null);
     setMessages([]);
+    setActiveBuildProject(null);
+    setSelectedBuilderFile("");
     setPrompt("");
     setActiveView("chat");
     setIsSidebarOpen(false);
@@ -657,6 +663,11 @@ export default function DashboardWorkspace() {
   function openProject(project: Project) {
     setActiveChatId(project.id);
     setMessages(normalizeMessages(project.chat_messages));
+    const generatedCode = normalizeGeneratedFiles(project.generated_code);
+    const hydratedProject = { ...project, generated_code: generatedCode };
+    setActiveBuildProject(project.preview_html || generatedCode.length ? hydratedProject : null);
+    setSelectedBuilderFile(generatedCode[0]?.path ?? "");
+    setBuilderTab(project.preview_html ? "preview" : "code");
     setPrompt("");
     setActiveView("chat");
     setIsSidebarOpen(false);
@@ -668,6 +679,7 @@ export default function DashboardWorkspace() {
     const previousProjects = projects;
     setProjects((current) => current.filter((project) => project.id !== projectId));
     if (activeChatId === projectId) startNewChat();
+    if (activeBuildProject?.id === projectId) setActiveBuildProject(null);
 
     try {
       const response = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
