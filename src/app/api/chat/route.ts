@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { dbCreateProject, dbGetProject, dbUpdateProject } from "@/lib/db";
+import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 
 type ChatRole = "user" | "assistant";
@@ -414,11 +415,6 @@ export async function POST(req: Request) {
     return jsonError("Invalid JSON request body.");
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
-  if (!apiKey) {
-    return jsonError("OPENROUTER_API_KEY is missing in .env.local.", 500);
-  }
-
   const userText = body.message?.trim();
   if (!userText) {
     return jsonError("Message is required.");
@@ -454,6 +450,47 @@ export async function POST(req: Request) {
       prompt: userText,
       chat_messages: messagesBeforeAi,
     });
+  }
+
+  const fileIntent = getFileIntent(userText);
+  if (fileIntent.isFileRequest) {
+    try {
+      const generatedFile = await createGeneratedFileFromPrompt(userText);
+      if (!generatedFile) {
+        return jsonError("I could not detect a supported file type. Try asking for PDF, DOCX, XLSX, PPTX, CSV, TXT, MD, or JSON.");
+      }
+
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: createFileMessage(generatedFile),
+        createdAt: new Date().toISOString(),
+      };
+
+      dbUpdateProject(chatId, {
+        chat_messages: [...messagesBeforeAi, assistantMessage],
+      });
+
+      return new Response(assistantMessage.content, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Chat-Id": chatId,
+          "X-Generated-File": generatedFile.fileName,
+        },
+      });
+    } catch (error) {
+      console.error("File generation failed:", error);
+      return jsonError(
+        error instanceof Error ? `File generation failed: ${error.message}` : "File generation failed.",
+        500
+      );
+    }
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  if (!apiKey) {
+    return jsonError("OPENROUTER_API_KEY is missing in .env.local.", 500);
   }
 
   const config = getOpenRouterConfig();

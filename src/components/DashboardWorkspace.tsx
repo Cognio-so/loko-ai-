@@ -42,6 +42,7 @@ import LaunchpadPage from "@/app/launchpad/page";
 import CollectionPage from "@/app/collection/page";
 import AffiliatePage from "@/app/affiliate/page";
 import PricingPage from "@/app/pricing/page";
+import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
 
 type ChatRole = "user" | "assistant";
 
@@ -269,7 +270,27 @@ function AnimatedChatHero() {
   );
 }
 
-function MarkdownContent({ content }: { content: string }) {
+function parseFileCardData(value: string): FileCardData | null {
+  try {
+    const parsed = JSON.parse(value) as Partial<FileCardData>;
+    if (
+      parsed.success === true &&
+      typeof parsed.fileType === "string" &&
+      typeof parsed.fileName === "string" &&
+      typeof parsed.downloadUrl === "string" &&
+      typeof parsed.title === "string" &&
+      typeof parsed.size === "number"
+    ) {
+      return parsed as FileCardData;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function MarkdownTextContent({ content }: { content: string }) {
   const parts = content.split(/```([\w-]*)\n([\s\S]*?)```/g);
 
   return (
@@ -287,6 +308,23 @@ function MarkdownContent({ content }: { content: string }) {
             <MarkdownText content={part} />
           </div>
         );
+      })}
+    </div>
+  );
+}
+
+function MarkdownContent({ content }: { content: string }) {
+  const segments = content.split(/<loko-file>([\s\S]*?)<\/loko-file>/g);
+
+  return (
+    <div>
+      {segments.map((segment, index) => {
+        if (index % 2 === 1) {
+          const file = parseFileCardData(segment);
+          return file ? <FileCard key={index} file={file} /> : null;
+        }
+
+        return segment.trim() ? <MarkdownTextContent key={index} content={segment} /> : null;
       })}
     </div>
   );
