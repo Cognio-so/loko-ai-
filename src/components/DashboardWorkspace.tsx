@@ -74,6 +74,30 @@ type Project = {
 
 type View = "chat" | "home" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
 
+type UploadedAttachment = {
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
+};
+
+const ACCEPTED_ATTACHMENT_TYPES = [
+  ".pdf",
+  ".docx",
+  ".txt",
+  ".csv",
+  ".xlsx",
+  ".pptx",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+  ".zip",
+  ".json",
+].join(",");
+
+const MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024;
+
 const navItems = [
   { label: "Home", href: "/", icon: Home, view: "home" as View },
   { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
