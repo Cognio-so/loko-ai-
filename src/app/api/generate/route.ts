@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from "next/server";
 import { getAIResponse } from "@/lib/ai";
 import { getErrorMessage } from "@/lib/api";
+import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOfflineGeneratedProject } from "@/lib/openrouter";
 
 const GENERATION_TIMEOUT_MS = 28000;
@@ -161,6 +162,8 @@ export async function POST(req: Request) {
     const systemPrompt = `
       You are an advanced AI Website Builder and AI IDE similar to Lovable, V0, and Bolt.
       Your job is to generate complete modern websites and web applications from user prompts.
+
+      ${LOKO_AI_CORE_STANDARD}
 
       ${PREMIUM_UI_DESIGN_STANDARD}
 

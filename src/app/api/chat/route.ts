@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dbCreateProject, dbGetProject, dbUpdateProject } from "@/lib/db";
 import { processUploadedChatFile, type ProcessedChatFile, type UploadedChatFile } from "@/lib/file-analysis";
 import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
+import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 
@@ -226,6 +227,8 @@ function enhanceWebsitePrompt(userText: string) {
   const cleaned = userText.trim().replace(/\s+/g, " ");
   return `${cleaned}
 
+${LOKO_AI_CORE_STANDARD}
+
 Generate a premium, production-quality UI comparable to OpenAI, Apple, Linear, Notion, Stripe, Vercel, Claude, Gemini, Perplexity, Airbnb, Framer, Raycast, and Lovable/v0 quality.
 
 Before writing code, first provide a concise but complete UI/UX plan:
@@ -388,7 +391,9 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
       {
         role: "system",
         content:
-          `You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
+          `${LOKO_AI_CORE_STANDARD}
+
+You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],
