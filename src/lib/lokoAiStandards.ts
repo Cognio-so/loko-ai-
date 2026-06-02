@@ -39,4 +39,4 @@ Before generating any result, silently:
 5. Verify quality
 
 Never provide unfinished work. Always deliver complete, premium-quality results suitable for real-world deployment.
-`;`;
+`;
