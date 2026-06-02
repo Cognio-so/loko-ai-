@@ -397,10 +397,10 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-white dark:bg-slate-950">
+    <div className="flex h-dvh overflow-hidden bg-white dark:bg-slate-950">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform dark:border-white/10 dark:bg-slate-900/60 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform dark:border-white/10 dark:bg-slate-900/60 lg:static lg:h-dvh lg:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -594,7 +594,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
       )}
 
       {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 px-4 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/80 lg:hidden">
           <button
             type="button"
@@ -612,7 +612,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
           </Link>
         </div>
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto max-w-2xl space-y-6">
             {messages.map((message, index) => (
               <div
@@ -635,7 +635,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
         {/* Input Area */}
         <div
-          className="border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 sm:px-8 py-6"
+          className="shrink-0 border-t border-slate-200 bg-white px-4 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] dark:border-slate-700 dark:bg-slate-900 sm:px-8 sm:py-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
