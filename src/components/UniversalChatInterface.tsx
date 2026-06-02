@@ -9,6 +9,7 @@ import {
   isSupportedOpenRouterModel,
 } from "@/lib/openrouterModels";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/components/ThemeProvider";
 import { getAssistant, type CollectionAssistant } from "@/app/collection/collection-data";
 import { ModelPicker } from "@/components/ModelPicker";
 import {
@@ -31,6 +32,7 @@ import {
   Loader2,
   Menu,
   Mic,
+  Moon,
   Package,
   Paperclip,
   Plus,
@@ -39,6 +41,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Sun,
   Trash2,
   Trophy,
   Upload,
@@ -121,6 +124,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
   const router = useRouter();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State
@@ -190,6 +194,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
   const userEmail = user?.email || "Sign in to sync chats";
   const userInitial = userName.trim().charAt(0).toUpperCase() || "A";
+  const isDarkMode = theme === "dark";
   const visibleHistory = chatHistory.filter((session) => {
     const query = historySearch.trim().toLowerCase();
     if (!query) return true;
@@ -534,14 +539,6 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
           </div>
 
           <div className="mt-6 space-y-3 border-t border-slate-100 pt-6 dark:border-white/10">
-            <button
-              type="button"
-              onClick={() => router.push("/pricing")}
-              className="flex h-11 w-full items-center gap-3 rounded-xl bg-gradient-to-r from-slate-950 to-sky-600 px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-95 active:scale-[0.98] dark:from-sky-500 dark:to-cyan-500"
-            >
-              <Zap className="h-4 w-4" />
-              Upgrade
-            </button>
             <div className="flex flex-col gap-1">
               <button
                 type="button"
@@ -595,21 +592,37 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
       {/* Main Chat Area */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 px-4 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/80 lg:hidden">
+        <div className="sticky top-0 z-20 flex h-16 items-center justify-between bg-white/80 px-4 backdrop-blur-md dark:bg-slate-950/80">
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white lg:hidden"
             aria-label="Open sidebar"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link
-            href="/collection"
-            className="rounded-full bg-slate-50 px-5 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-          >
-            All assistants
-          </Link>
+          <div className="hidden lg:block" />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => router.push("/pricing")}
+              className="inline-flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              aria-label="Upgrade"
+              title="Upgrade"
+            >
+              <Zap className="h-4 w-4 text-sky-500" />
+              Upgrade
+            </button>
+            <button
+              type="button"
+              onClick={() => setTheme(isDarkMode ? "light" : "dark")}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDarkMode ? "Light mode" : "Dark mode"}
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         {/* Chat Messages */}
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-8">
@@ -620,13 +633,13 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
                 className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-lg rounded-lg px-4 py-3 ${
+                  className={`max-w-[78%] whitespace-pre-wrap text-[15px] font-normal leading-7 ${
                     message.role === "user"
-                      ? "bg-sky-500 text-white rounded-br-none"
-                      : "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none"
+                      ? "text-slate-700 dark:text-slate-200"
+                      : "text-slate-600 dark:text-slate-300"
                   }`}
                 >
-                  <p className="leading-relaxed">{message.content}</p>
+                  {message.content}
                 </div>
               </div>
             ))}
@@ -635,7 +648,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
         {/* Input Area */}
         <div
-          className="shrink-0 border-t border-slate-200 bg-white px-4 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] dark:border-slate-700 dark:bg-slate-900 sm:px-8 sm:py-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
+          className="shrink-0 bg-white px-4 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] dark:bg-slate-950 sm:px-8 sm:py-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))]"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
