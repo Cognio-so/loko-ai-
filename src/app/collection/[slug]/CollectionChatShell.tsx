@@ -142,6 +142,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
           message: text,
           messages,
           selectedModel: selectedModelId,
+          agent: slug,
         }),
       });
 
