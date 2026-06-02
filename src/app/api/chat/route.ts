@@ -226,15 +226,28 @@ function enhanceWebsitePrompt(userText: string) {
   const cleaned = userText.trim().replace(/\s+/g, " ");
   return `${cleaned}
 
-Generate a premium, production-quality UI. If you provide code, provide one complete self-contained HTML document in a fenced html code block so the preview renders beautifully immediately.
+Generate a premium, production-quality UI comparable to OpenAI, Apple, Linear, Notion, Stripe, Vercel, Claude, Gemini, Perplexity, Airbnb, Framer, Raycast, and Lovable/v0 quality.
+
+Before writing code, first provide a concise but complete UI/UX plan:
+- Layout strategy
+- Component hierarchy
+- Color system
+- Spacing system
+- Typography system
+- Responsive strategy
+- Visual design direction
+
+Then provide the final code. If you provide code, provide one complete self-contained HTML document in a fenced html code block so the preview renders beautifully immediately.
 
 Hard requirements:
 - Never output bare/default browser HTML with blue links, bullet nav, Times New Roman, broken image tags, black placeholder blobs, or unstyled forms.
-- Use inline CSS with a reset, modern system font stack, responsive layout, polished spacing, strong hierarchy, button states, card grids, and mobile breakpoints.
-- Include real sections appropriate to the request: navigation, hero, product/dashboard preview, features, pricing or metrics when relevant, testimonials/social proof, CTA, and footer.
+- Never create basic layouts, beginner-level UI, raw Bootstrap-like pages, boring templates, debug boards, image concept boards for website requests, or generic placeholder copy.
+- Use inline CSS with a reset, modern system font stack, responsive layout, polished spacing, strong hierarchy, button states, card grids, tasteful gradients, premium shadows, loading states, and mobile breakpoints.
+- Include real sections appropriate to the request: navigation, hero, social proof, product/dashboard preview, features, benefits, pricing or metrics when relevant, testimonials, FAQ, CTA, and footer.
+- For dashboard/admin/app UI requests, include modern sidebar, top navigation, stats cards, analytics charts, activity feed, settings/account surfaces, dark mode support, and responsive behavior when relevant.
 - Use CSS gradients, CSS shapes, inline SVG/data URI placeholders, or styled UI mockups instead of external image URLs that may break.
 - Keep text readable, professional, and aligned. No overlapping content. No giant decorative cards around the whole page.
-- Make the first viewport look like a finished app/site, not a wireframe.`;
+- Make the first viewport look like a funded startup product, not a wireframe.`;
 }
 
 function getTemperatureForPrompt(userText: string, config: ReturnType<typeof getOpenRouterConfig>) {
@@ -260,7 +273,7 @@ function buildOpenRouterPayload(
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
   const websiteInstruction = isWebsitePrompt(userText)
-    ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as a senior product designer and frontend engineer. Produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML: no blue underlined nav links, bullet lists as navigation, Times New Roman defaults, broken images, empty placeholders, or black blob icons. Use inline CSS, modern typography, gradients sparingly, realistic sections, polished components, accessible contrast, and responsive breakpoints."
+    ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as an elite senior UI/UX designer, product designer, frontend architect, and full-stack engineer. First provide a concise UI/UX plan, component hierarchy, color system, spacing system, typography strategy, responsive strategy, and visual design direction. Then produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML, beginner UI, boring templates, debug boards, generic placeholder screens, or image concept boards for website requests. Use modern typography, polished spacing, realistic sections, premium cards, tasteful gradients, accessible contrast, smooth interactions, production shadows, and responsive breakpoints."
     : "";
   const workflowInstruction = isWorkflowPrompt(userText)
     ? ` If the user asks for any workflow, SOP, process flow, step-by-step explanation, user journey, customer flow, system architecture, business workflow, AI workflow, automation workflow, app workflow, or website workflow, NEVER provide a short answer. Automatically create a complete professional workflow document similar to a consultant, business analyst, system architect, and project manager.
