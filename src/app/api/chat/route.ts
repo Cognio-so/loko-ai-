@@ -5,6 +5,7 @@ import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from 
 import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
+import { normalizeOpenRouterModelId } from "@/lib/openrouterModelAliases";
 
 type ChatRole = "user" | "assistant";
 
@@ -204,10 +205,11 @@ function getOpenRouterTools(
 
   if (isImagePrompt(userText) && !isVideoPrompt(userText)) {
     const imageModel = process.env.OPENROUTER_IMAGE_GENERATION_MODEL?.trim();
+    const normalizedImageModel = imageModel ? normalizeOpenRouterModelId(imageModel) : "";
     tools.push({
       type: "openrouter:image_generation",
       parameters: {
-        ...(imageModel ? { model: imageModel } : {}),
+        ...(normalizedImageModel ? { model: normalizedImageModel } : {}),
         quality: config.imageQuality === "hd" ? "high" : "medium",
         aspect_ratio: config.imageSize.aspectRatio,
         output_format: "png",
