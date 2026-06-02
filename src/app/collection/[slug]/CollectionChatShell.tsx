@@ -425,6 +425,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
                 <div className="mx-auto max-w-4xl">
                   <div className="relative flex flex-col rounded-[32px] border border-slate-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all focus-within:border-slate-200">
+                    <div className="flex px-6 pt-4">
+                      <span className="text-[16.5px] font-medium text-slate-400">Ask LokoAI anything...</span>
+                    </div>
                     <textarea
                       value={prompt}
                       onChange={(event) => setPrompt(event.target.value)}
@@ -434,16 +437,15 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           sendMessage();
                         }
                       }}
-                      placeholder={"Ask LokoAI anything..."}
-                      className="max-h-72 min-h-[60px] w-full resize-none bg-transparent px-6 py-4 text-[16.5px] text-slate-700 outline-none placeholder:text-slate-400"
+                      className="max-h-72 min-h-[50px] w-full resize-none bg-transparent px-6 pb-2 pt-1 text-[16.5px] text-slate-700 outline-none"
                     />
 
-                    <div className="flex items-center justify-between px-3 pb-3 pt-1">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between px-3 pb-3">
+                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() => setPrompt((p) => p + "\n")}
-                          className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
                           aria-label="Add newline"
                         >
                           <Plus className="h-4.5 w-4.5" />
@@ -458,7 +460,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           <Mic className="h-4.5 w-4.5" />
                         </button>
 
-                        <div className="relative">
+                        <div className="relative ml-1">
                           <button
                             type="button"
                             onClick={() => setIsModelMenuOpen((s) => !s)}
