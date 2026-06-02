@@ -20,6 +20,7 @@ import {
   Menu,
   MessageCircle,
   Mic,
+  ChevronDown,
   Notebook,
   Plus,
   Rocket,
@@ -444,6 +445,15 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                     </div>
                     
                     <div className="flex items-end gap-2 px-4 pb-4">
+                      <button
+                        type="button"
+                        onClick={handleVoiceInput}
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                        aria-label="Voice input"
+                      >
+                        <Mic className="h-4 w-4" />
+                      </button>
+
                       <div className="relative">
                         <button
                           type="button"
@@ -454,6 +464,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                             {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
                           </span>
                           <span className="max-w-[120px] truncate text-sm">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Select model"}</span>
+                          <ChevronDown className="h-4 w-4 text-slate-400" />
                         </button>
                         {isModelMenuOpen && (
                           <div className="absolute bottom-10 left-0 z-50 w-64 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
