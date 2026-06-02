@@ -34,11 +34,11 @@ const PROVIDER_LOGO_MAP: Record<OpenRouterProvider, string> = {
 
 function ProviderLogo({ provider, size = "md" }: { provider: OpenRouterProvider; size?: "sm" | "md" }) {
   const src = PROVIDER_LOGO_MAP[provider];
-  const shellSize = size === "sm" ? "h-6 w-6" : "h-8 w-8";
-  const imageSize = size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const shellSize = size === "sm" ? "h-7 w-7" : "h-8 w-8";
+  const imageSize = size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
 
   return (
-    <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200`}>
+    <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_4px_rgba(15,23,42,0.12)] ring-1 ring-slate-200`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={`${provider} logo`} className={`${imageSize} object-contain`} />
     </span>
@@ -127,7 +127,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex h-8 max-w-[172px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
+        className="inline-flex h-[34px] max-w-[190px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
