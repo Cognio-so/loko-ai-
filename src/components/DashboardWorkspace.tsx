@@ -1168,8 +1168,12 @@ export default function DashboardWorkspace() {
               </div>
             )}
             {activeView === "chat" ? (
-              <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
-                <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col overflow-hidden">
+              <div className={`relative z-10 flex min-h-0 flex-1 overflow-hidden ${activeBuildProject ? "flex-col lg:flex-row" : "flex-col"}`}>
+                <div className={`relative flex min-h-0 w-full flex-col overflow-hidden ${
+                  activeBuildProject
+                    ? "mx-0 flex-[0_0_42%] border-r border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-slate-950/35 lg:max-w-[520px]"
+                    : "mx-auto max-w-[860px] flex-1"
+                }`}>
                   {messages.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:py-8">
                       <AnimatedChatHero />
@@ -1241,6 +1245,16 @@ export default function DashboardWorkspace() {
                     </>
                   )}
                 </div>
+                {activeBuildProject && (
+                  <BuildSidePanel
+                    project={activeBuildProject}
+                    activeTab={builderTab}
+                    selectedFile={selectedBuilderFile}
+                    onTabChange={setBuilderTab}
+                    onFileChange={setSelectedBuilderFile}
+                    onClose={() => setActiveBuildProject(null)}
+                  />
+                )}
               </div>
             ) : (
               <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -1257,6 +1271,138 @@ export default function DashboardWorkspace() {
         </main>
       </div>
     </div>
+  );
+}
+
+function BuildSidePanel({
+  project,
+  activeTab,
+  selectedFile,
+  onTabChange,
+  onFileChange,
+  onClose,
+}: {
+  project: Project;
+  activeTab: BuilderTab;
+  selectedFile: string;
+  onTabChange: (tab: BuilderTab) => void;
+  onFileChange: (path: string) => void;
+  onClose: () => void;
+}) {
+  const files = project.generated_code ?? [];
+  const currentFile = files.find((file) => file.path === selectedFile) ?? files[0] ?? null;
+  const previewHtml = project.preview_html || "";
+
+  return (
+    <aside className="flex min-h-0 flex-1 flex-col border-t border-slate-200 bg-white/95 shadow-[inset_1px_0_0_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-slate-950/88 lg:border-t-0">
+      <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-3 dark:border-white/10">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{project.title}</p>
+          <p className="truncate text-xs text-slate-500 dark:text-slate-400">{files.length} files generated</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-slate-900">
+            <button
+              type="button"
+              onClick={() => onTabChange("preview")}
+              className={`h-8 rounded-lg px-3 text-xs font-semibold transition ${
+                activeTab === "preview"
+                  ? "bg-white text-sky-600 shadow-sm dark:bg-sky-500 dark:text-white"
+                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              }`}
+            >
+              Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => onTabChange("code")}
+              className={`h-8 rounded-lg px-3 text-xs font-semibold transition ${
+                activeTab === "code"
+                  ? "bg-white text-sky-600 shadow-sm dark:bg-sky-500 dark:text-white"
+                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              }`}
+            >
+              Code
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white"
+            aria-label="Close builder panel"
+            title="Close builder"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {activeTab === "preview" ? (
+        <div className="min-h-0 flex-1 bg-slate-100 p-3 dark:bg-slate-900/80">
+          {previewHtml ? (
+            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10">
+              <iframe
+                title={`${project.title} preview`}
+                srcDoc={previewHtml}
+                sandbox="allow-scripts allow-forms allow-popups allow-modals"
+                className="h-full w-full bg-white"
+              />
+            </div>
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+              Preview will appear when generated HTML is available.
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid min-h-0 flex-1 grid-cols-1 bg-white dark:bg-slate-950 md:grid-cols-[260px_1fr]">
+          <div className="min-h-0 border-b border-slate-200 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-slate-900/60 md:border-b-0 md:border-r">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
+              <FolderOpen className="h-3.5 w-3.5" />
+              Files
+            </div>
+            <div className="scrollbar-soft max-h-48 space-y-1 overflow-auto md:max-h-none">
+              {files.map((file) => (
+                <button
+                  key={file.path}
+                  type="button"
+                  onClick={() => onFileChange(file.path)}
+                  className={`flex h-9 w-full min-w-0 items-center gap-2 rounded-lg px-2 text-left text-xs transition ${
+                    currentFile?.path === file.path
+                      ? "bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-200"
+                      : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                  }`}
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{file.path}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="min-h-0 overflow-hidden">
+            <div className="flex h-10 items-center justify-between border-b border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950">
+              <p className="truncate text-xs font-semibold text-slate-700 dark:text-slate-200">
+                {currentFile?.path || "No file selected"}
+              </p>
+              {currentFile && (
+                <button
+                  type="button"
+                  onClick={() => void navigator.clipboard.writeText(currentFile.content)}
+                  className="inline-flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copy
+                </button>
+              )}
+            </div>
+            <pre className="scrollbar-soft h-[calc(100%-2.5rem)] overflow-auto bg-white p-4 text-[12px] leading-6 text-slate-800 dark:bg-slate-950 dark:text-slate-200">
+              <code>{currentFile?.content || "Generated files will appear here."}</code>
+            </pre>
+          </div>
+        </div>
+      )}
+    </aside>
   );
 }
 
