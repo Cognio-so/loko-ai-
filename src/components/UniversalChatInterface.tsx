@@ -9,7 +9,7 @@ import {
   isSupportedOpenRouterModel,
 } from "@/lib/openrouterModels";
 import { useAuth } from "@/hooks/useAuth";
-import { getAssistant } from "@/app/collection/collection-data";
+import { getAssistant, type CollectionAssistant } from "@/app/collection/collection-data";
 import { ModelPicker } from "@/components/ModelPicker";
 import {
   DropdownMenu,
@@ -57,6 +57,31 @@ type Attachment = {
   size: number;
   type: string;
 };
+
+function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
+  const Icon = assistant.icon;
+  const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-12 w-12";
+  const iconClass = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5";
+  const shellRadius = size === "sm" ? "rounded-xl" : "rounded-2xl";
+  const innerRadius = size === "sm" ? "rounded-[10px]" : "rounded-[14px]";
+
+  return (
+    <div
+      className={`relative flex ${sizeClass} shrink-0 items-center justify-center ${shellRadius} bg-gradient-to-br ${assistant.accent} p-[2px] shadow-lg shadow-slate-200/70 dark:shadow-black/30`}
+    >
+      <div className={`relative flex h-full w-full items-center justify-center overflow-hidden ${innerRadius} bg-white text-slate-950 dark:bg-slate-950 dark:text-white`}>
+        <div className={`absolute inset-0 bg-gradient-to-br ${assistant.accent} opacity-15`} />
+        <div className="absolute -right-3 -top-3 h-8 w-8 rounded-full bg-white/60 blur-sm dark:bg-white/20" />
+        <Icon className={`relative ${iconClass}`} />
+      </div>
+      <span
+        className={`absolute -bottom-1 -right-1 rounded-md bg-gradient-to-br ${assistant.accent} px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide text-white shadow-sm ring-2 ring-white dark:ring-slate-900 ${size === "sm" ? "hidden" : ""}`}
+      >
+        {assistant.logoText}
+      </span>
+    </div>
+  );
+}
 
 export default function UniversalChatInterface({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
