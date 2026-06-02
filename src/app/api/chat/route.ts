@@ -64,6 +64,9 @@ const REASONING_PATTERN =
 const IMAGE_PATTERN =
   /\b(image|photo|picture|poster|banner|thumbnail|logo|illustration|avatar|wallpaper|visual|generate image|create image|image bana|photo bana|tasveer|taseer|chitra|चित्र|तस्वीर)\b/i;
 
+const VIDEO_PATTERN =
+  /\b(video|clip|movie|animation|animate|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao)\b/i;
+
 const PROMPT_REQUEST_PATTERN =
   /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
 
@@ -77,6 +80,10 @@ const IMAGE_CAPABLE_MODELS = [
   "black-forest-labs/flux.2-pro",
   "black-forest-labs/flux.2-flex",
 ];
+
+const VIDEO_GENERATION_MODEL = "x-ai/grok-imagine-video";
+const VIDEO_GENERATION_URL = "https://openrouter.ai/api/v1/videos";
+const MAX_GROK_VIDEO_SECONDS = 15;
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -132,7 +139,10 @@ function selectModelsForPrompt(
 ) {
   if (!config.enableSmartRouting) return config.fallbackModels;
   if (isSearchPrompt(prompt)) return config.searchModels;
-  if (isImagePrompt(prompt)) return [...IMAGE_CAPABLE_MODELS, ...config.imageModels];
+  if (isVideoPrompt(prompt)) return [VIDEO_GENERATION_MODEL, ...config.fallbackModels];
+  if (isImagePrompt(prompt)) {
+    return Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
+  }
   if (isWorkflowPrompt(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
   if (CODE_PATTERN.test(prompt)) return config.coderModels;
   if (REASONING_PATTERN.test(prompt)) return [config.reasoningModel, config.smartModel, ...config.fallbackModels];
@@ -146,6 +156,10 @@ function isSearchPrompt(prompt: string) {
 
 function isImagePrompt(prompt: string) {
   return IMAGE_PATTERN.test(prompt);
+}
+
+function isVideoPrompt(prompt: string) {
+  return VIDEO_PATTERN.test(prompt);
 }
 
 function isWebsitePrompt(prompt: string) {
@@ -187,7 +201,7 @@ function getOpenRouterTools(
     });
   }
 
-  if (isImagePrompt(userText)) {
+  if (isImagePrompt(userText) && !isVideoPrompt(userText)) {
     const imageModel = process.env.OPENROUTER_IMAGE_GENERATION_MODEL?.trim();
     tools.push({
       type: "openrouter:image_generation",
@@ -242,7 +256,7 @@ function buildOpenRouterPayload(
   const promptInstruction = isPromptRequest(userText)
     ? " If the user asks for a prompt, provide a clean copy-ready prompt in the user's language and include useful details without asking unnecessary follow-up questions."
     : "";
-  const imageInstruction = isImagePrompt(userText)
+  const imageInstruction = isImagePrompt(userText) && !isVideoPrompt(userText)
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
   const websiteInstruction = isWebsitePrompt(userText)
@@ -334,7 +348,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         ? `\n\nUploaded file:\n${processedFile.fileSummary}\n\nExtracted file content:\n${processedFile.extractedText}\n\nAnswer based on the uploaded file. If extraction is incomplete, clearly mention the limitation.`
         : "";
       const text = `${message.content}${fileInstruction}`;
-      content = isImagePrompt(userText)
+      content = isImagePrompt(userText) && !isVideoPrompt(userText)
         ? enhanceImagePrompt(text)
         : isWebsitePrompt(userText)
           ? enhanceWebsitePrompt(text)
@@ -397,6 +411,169 @@ function extractImageMarkdown(value: unknown) {
   return Array.from(new Set(urls))
     .map((url, index) => `![Generated image ${index + 1}](${url})`)
     .join("\n\n");
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function enhanceVideoPrompt(userText: string, processedFile?: ProcessedChatFile | null) {
+  const fileContext = processedFile
+    ? `\n\nUse this uploaded file context when relevant:\n${processedFile.fileSummary}\n${processedFile.extractedText.slice(0, 3000)}`
+    : "";
+
+  return `${userText.trim().replace(/\s+/g, " ")}${fileContext}
+
+Create a polished professional AI video with cinematic composition, smooth motion, realistic lighting, clean subject framing, detailed environment, no watermark, no distorted text, and no broken artifacts. Use the maximum supported duration for this model.`;
+}
+
+function extractVideoUrl(value: unknown): string | null {
+  const urls: string[] = [];
+
+  function visit(item: unknown) {
+    if (!item) return;
+    if (typeof item === "string") {
+      if (/^https?:\/\/.+\.(mp4|webm|mov)(\?|$)/i.test(item) || /^https?:\/\/.+/i.test(item)) {
+        urls.push(item);
+      }
+      return;
+    }
+    if (Array.isArray(item)) {
+      item.forEach(visit);
+      return;
+    }
+    if (typeof item !== "object") return;
+
+    const record = item as Record<string, unknown>;
+    const candidates = [
+      record.url,
+      record.video_url,
+      record.videoUrl,
+      record.download_url,
+      record.downloadUrl,
+    ];
+    candidates.forEach(visit);
+    visit(record.output);
+    visit(record.outputs);
+    visit(record.data);
+    visit(record.video);
+    visit(record.videos);
+  }
+
+  visit(value);
+  return Array.from(new Set(urls))[0] ?? null;
+}
+
+function extractVideoGenerationId(value: unknown): string | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const data = record.data && typeof record.data === "object" ? (record.data as Record<string, unknown>) : null;
+  const id = record.id ?? record.generation_id ?? record.generationId ?? data?.id;
+  return typeof id === "string" && id.trim() ? id : null;
+}
+
+function formatLimitAwareError(errorText: string, status: number, model: string) {
+  const providerMessage = getProviderErrorMessage(errorText, status);
+  if (status === 402 || status === 429 || /limit|quota|credit|rate/i.test(providerMessage)) {
+    return `${model} ki limit/credits abhi khatam ya rate-limited lag rahi hai: ${providerMessage} Main baaki normal chat/image/file work ko block nahi karunga. Thodi der baad retry karein ya doosra available model use karein.`;
+  }
+
+  return providerMessage;
+}
+
+async function requestOpenRouterVideo(
+  apiKey: string,
+  userText: string,
+  processedFile?: ProcessedChatFile | null
+): Promise<{ content: string; model: string } | { error: string; status: number }> {
+  let lastStatus = 500;
+  let lastErrorText = "";
+
+  try {
+    const createResponse = await fetch(VIDEO_GENERATION_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
+        "X-Title": "LokoAI",
+      },
+      body: JSON.stringify({
+        model: VIDEO_GENERATION_MODEL,
+        prompt: enhanceVideoPrompt(userText, processedFile),
+        duration: MAX_GROK_VIDEO_SECONDS,
+        resolution: "720p",
+        aspect_ratio: "16:9",
+        ...(processedFile?.imageDataUrl ? { image_url: processedFile.imageDataUrl } : {}),
+      }),
+    });
+
+    if (!createResponse.ok) {
+      lastStatus = createResponse.status || 500;
+      lastErrorText = await createResponse.text().catch(() => "");
+      return {
+        error: formatLimitAwareError(lastErrorText, lastStatus, VIDEO_GENERATION_MODEL),
+        status: lastStatus,
+      };
+    }
+
+    let videoData = (await createResponse.json()) as unknown;
+    let videoUrl = extractVideoUrl(videoData);
+    const generationId = extractVideoGenerationId(videoData);
+
+    for (let attempt = 0; !videoUrl && generationId && attempt < 8; attempt += 1) {
+      await delay(5000);
+      const statusResponse = await fetch(`${VIDEO_GENERATION_URL}/${encodeURIComponent(generationId)}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
+          "X-Title": "LokoAI",
+        },
+      });
+
+      if (!statusResponse.ok) {
+        lastStatus = statusResponse.status || 500;
+        lastErrorText = await statusResponse.text().catch(() => "");
+        if (lastStatus === 402 || lastStatus === 429) {
+          return {
+            error: formatLimitAwareError(lastErrorText, lastStatus, VIDEO_GENERATION_MODEL),
+            status: lastStatus,
+          };
+        }
+        break;
+      }
+
+      videoData = (await statusResponse.json()) as unknown;
+      videoUrl = extractVideoUrl(videoData);
+    }
+
+    if (videoUrl) {
+      return {
+        model: VIDEO_GENERATION_MODEL,
+        content: `Video ready ho gaya.\n\n[Download / watch video](${videoUrl})\n\nModel: ${VIDEO_GENERATION_MODEL}\nDuration requested: ${MAX_GROK_VIDEO_SECONDS}s (maximum supported).`,
+      };
+    }
+
+    if (generationId) {
+      return {
+        model: VIDEO_GENERATION_MODEL,
+        content: `Video generation start ho gayi hai, lekin abhi processing complete nahi hui.\n\nGeneration ID: \`${generationId}\`\nModel: ${VIDEO_GENERATION_MODEL}\nDuration requested: ${MAX_GROK_VIDEO_SECONDS}s\n\nThodi der baad same prompt retry karein. Agar model limit/credits khatam honge to clear error dikhega aur baaki tools/chats block nahi honge.`,
+      };
+    }
+
+    return {
+      error: "Video generation response mein video URL ya generation ID nahi mila. Please prompt thoda specific karke retry karein.",
+      status: 502,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Video generation failed.",
+      status: 502,
+    };
+  }
 }
 
 async function requestOpenRouterImage(
@@ -646,11 +823,40 @@ export async function POST(req: Request) {
     new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config)])
   );
 
+  if (isVideoPrompt(userText)) {
+    const videoResult = await requestOpenRouterVideo(apiKey, userText, processedFile);
+
+    if ("error" in videoResult) {
+      return jsonError(videoResult.error, videoResult.status);
+    }
+
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: videoResult.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    dbUpdateProject(chatId, {
+      chat_messages: [...messagesBeforeAi, assistantMessage],
+    });
+
+    return new Response(videoResult.content, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Chat-Id": chatId,
+        "X-AI-Model": videoResult.model,
+      },
+    });
+  }
+
   if (isImagePrompt(userText)) {
+    const imageModels = Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
     const imageResult = await requestOpenRouterImage(
       config.chatCompletionsUrl,
       apiKey,
-      selectedModels,
+      imageModels,
       messagesBeforeAi,
       userText,
       config
