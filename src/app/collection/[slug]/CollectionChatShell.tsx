@@ -46,20 +46,22 @@ const navItems = [
 
 function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
   const Icon = assistant.icon;
-  const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-9 w-9" : "h-12 w-12";
-  const iconClass = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-4 w-4" : "h-5 w-5";
+  const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-12 w-12";
+  const iconClass = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5";
+  const shellRadius = size === "sm" ? "rounded-xl" : "rounded-2xl";
+  const innerRadius = size === "sm" ? "rounded-[10px]" : "rounded-[14px]";
 
   return (
     <div
-      className={`relative flex ${sizeClass} shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${assistant.accent} p-[2px] shadow-lg shadow-slate-200/70 dark:shadow-black/30`}
+      className={`relative flex ${sizeClass} shrink-0 items-center justify-center ${shellRadius} bg-gradient-to-br ${assistant.accent} p-[2px] shadow-lg shadow-slate-200/70 dark:shadow-black/30`}
     >
-      <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[14px] bg-white text-slate-950 dark:bg-slate-950 dark:text-white">
+      <div className={`relative flex h-full w-full items-center justify-center overflow-hidden ${innerRadius} bg-white text-slate-950 dark:bg-slate-950 dark:text-white`}>
         <div className={`absolute inset-0 bg-gradient-to-br ${assistant.accent} opacity-15`} />
         <div className="absolute -right-3 -top-3 h-8 w-8 rounded-full bg-white/60 blur-sm dark:bg-white/20" />
         <Icon className={`relative ${iconClass}`} />
       </div>
       <span
-        className={`absolute -bottom-1 -right-1 rounded-md bg-gradient-to-br ${assistant.accent} px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide text-white shadow-sm ring-2 ring-white dark:ring-slate-900`}
+        className={`absolute -bottom-1 -right-1 rounded-md bg-gradient-to-br ${assistant.accent} px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide text-white shadow-sm ring-2 ring-white dark:ring-slate-900 ${size === "sm" ? "hidden" : ""}`}
       >
         {assistant.logoText}
       </span>
@@ -294,11 +296,10 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm">
                 <AssistantLogo assistant={assistant} size="sm" />
                 <div>
                   <h1 className="text-sm font-bold tracking-tight text-slate-900">{assistant.name}</h1>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-500">{assistant.model}</p>
                 </div>
               </div>
             </div>
