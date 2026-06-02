@@ -281,7 +281,7 @@ function AnimatedChatHero() {
             y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
             filter: { duration: 0.8 },
           }}
-          className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm sm:h-10 sm:w-10"
+          className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm sm:h-10 sm:w-10 dark:border-sky-400/20 dark:bg-white dark:shadow-[0_10px_30px_rgba(56,189,248,0.2)]"
         >
           <Sparkles className="relative h-5 w-5 sm:h-5 sm:w-5" />
         </motion.div>
@@ -291,7 +291,7 @@ function AnimatedChatHero() {
           transition={{ duration: 1.05, delay: 0.85, ease: [0.16, 1, 0.3, 1] }}
           className="ml-2.5 overflow-hidden sm:ml-3"
         >
-          <span className="block whitespace-nowrap bg-gradient-to-r from-slate-800 via-slate-700 to-sky-600 bg-clip-text text-[clamp(1.2rem,3vw,1.75rem)] font-medium leading-none tracking-normal text-transparent">
+          <span className="block whitespace-nowrap bg-gradient-to-r from-slate-800 via-slate-700 to-sky-600 bg-clip-text text-[clamp(1.2rem,3vw,1.75rem)] font-medium leading-none tracking-normal text-transparent dark:from-white dark:via-slate-200 dark:to-sky-300">
             LokoAI
           </span>
         </motion.div>
