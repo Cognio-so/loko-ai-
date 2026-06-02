@@ -506,7 +506,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         type="button"
                         onClick={sendMessage}
                         disabled={!prompt.trim()}
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-20 disabled:grayscale`}
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition-all hover:bg-slate-200 active:scale-95 disabled:opacity-40 disabled:grayscale`}
                         aria-label="Send message"
                       >
                         <Send className="h-4 w-4" />
