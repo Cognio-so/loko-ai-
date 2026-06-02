@@ -423,9 +423,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
               </div>
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
-                <div className="mx-auto max-w-2xl">
+                <div className="mx-auto max-w-3xl">
                   <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white shadow-[0_18px_40px_rgb(2,6,23,0.04)] transition-all focus-within:border-sky-400 focus-within:ring-6 focus-within:ring-sky-50">
-                    <div className="flex items-center gap-1.5 p-3">
+                    <div className="flex items-center gap-2 border-b border-slate-100 p-3">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -447,7 +447,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                       </div>
                     </div>
 
-                    <div className="flex items-end gap-3 px-5 pb-5">
+                    <div className="flex items-end gap-3 p-5">
                       <div className="relative">
                         <button
                           type="button"
@@ -493,9 +493,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                             sendMessage();
                           }
                         }}
-                        placeholder={`Message ${assistant.name}...`}
+                        placeholder={"Ask LokoAI anything..."}
                         rows={2}
-                        className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-3 text-lg text-slate-700 outline-none placeholder:text-slate-400"
+                        className="max-h-72 min-h-[72px] flex-1 resize-none bg-transparent py-2 text-base text-slate-700 outline-none placeholder:text-slate-400"
                       />
                       <button
                         type="button"
@@ -508,7 +508,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                       </button>
                     </div>
                   </div>
-                  <p className="mt-3 text-center text-[11px] font-medium text-slate-400">
+                  <p className="mt-3 text-center text-xs text-slate-400">
                     AI can make mistakes. Check important info.
                   </p>
                 </div>
