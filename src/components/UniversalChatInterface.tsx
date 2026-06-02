@@ -24,6 +24,7 @@ import {
   Globe,
   Grid3X3,
   Home,
+  Library,
   Loader2,
   Mic,
   Package,
