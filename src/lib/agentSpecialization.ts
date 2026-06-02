@@ -62,6 +62,14 @@ export function checkAgentSpecialization(agentSlug: string, userMessage: string)
     };
   }
 
+  const keywordPattern = AGENT_PATTERNS[agentSlug]?.keywords;
+  if (keywordPattern && !keywordPattern.test(userMessage)) {
+    return {
+      isAllowed: false,
+      reason: `This request is outside my specialization. I focus on: ${agent.specializations.join(", ")}. Please use a more suitable LokoAI agent for this task.`,
+    };
+  }
+
   return { isAllowed: true };
 }
 
