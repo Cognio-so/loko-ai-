@@ -19,6 +19,7 @@ import {
   ArrowUp,
   Check,
   Search,
+  ChevronRight,
   ChevronDown,
   Circle,
   Download,
