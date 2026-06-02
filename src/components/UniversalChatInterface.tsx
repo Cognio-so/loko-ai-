@@ -95,6 +95,15 @@ function getHistoryStorageKey(slug: string) {
   return `${COLLECTION_HISTORY_STORAGE_KEY}:${slug}`;
 }
 
+function extractApiErrorMessage(value: string) {
+  try {
+    const parsed = JSON.parse(value) as { error?: unknown };
+    return typeof parsed.error === "string" && parsed.error.trim() ? parsed.error : value;
+  } catch {
+    return value;
+  }
+}
+
 function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
   const Icon = assistant.icon;
   const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-12 w-12";
@@ -345,7 +354,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          messages: messagesBeforeSend,
+          messages,
           selectedModel: selectedModelId,
           agent: slug,
         }),
@@ -353,7 +362,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
 
       if (!response.ok || !response.body) {
         const errText = await response.text();
-        throw new Error(errText || "AI response failed");
+        throw new Error(extractApiErrorMessage(errText) || "AI response failed");
       }
 
       const reader = response.body.getReader();
@@ -391,7 +400,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         ...messagesBeforeSend,
         {
           ...assistantMessage,
-          content: "Something went wrong. Please try again.",
+          content: error instanceof Error && error.message ? error.message : "Something went wrong. Please try again.",
         },
       ];
       setMessages(failedMessages);

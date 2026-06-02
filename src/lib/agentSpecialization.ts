@@ -44,9 +44,16 @@ const AGENT_PATTERNS: Record<string, { keywords: RegExp; restrictions: RegExp }>
   },
 };
 
+const GREETING_PATTERN =
+  /^\s*(hi|hello|hey|hii|helo|namaste|salam|assalam|kaise ho|kese ho|kya haal|good morning|good afternoon|good evening)\s*[!.?]*\s*$/i;
+
 export function checkAgentSpecialization(agentSlug: string, userMessage: string): { isAllowed: boolean; reason?: string } {
   const agent = getAssistant(agentSlug);
   if (!agent) return { isAllowed: true }; // fallback: allow if agent not found
+
+  if (GREETING_PATTERN.test(userMessage)) {
+    return { isAllowed: true };
+  }
 
   // LokoAI Assistant (formerly Daily Druid) has no restrictions
   if (agentSlug === "daily-druid") {
