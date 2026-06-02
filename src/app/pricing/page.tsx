@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -19,12 +20,14 @@ import {
 const plans = [
   {
     name: "Starter",
-    price: "19",
+    price: "9",
     credits: "120",
     integCredits: "3k",
     cta: "Get Starter",
     highlight: "Best for trying LokoAI",
     features: [
+      "120 monthly credits",
+      "3k integration credits",
       "Unlimited apps and superagents",
       "Built-in integrations",
       "2-way GitHub sync",
@@ -35,33 +38,34 @@ const plans = [
   },
   {
     name: "Builder",
-    price: "39",
+    price: "29",
     credits: "300",
     integCredits: "12k",
     cta: "Get Builder",
     highlight: "Best for solo founders",
     features: [
-      "Unlimited apps and superagents",
+      "Everything in Starter",
+      "300 monthly credits",
+      "12k integration credits",
       "Unlimited collaborators with shared credits",
-      "Custom domain",
-      "Remove LokoAI branding",
-      "Built-in integrations",
-      "Automations",
-      "Choose your AI model",
-      "In-app code editing",
+      "Custom domain & remove branding",
+      "Automations & in-app code editing",
+      "Choose your favorite AI model",
     ],
     icon: Rocket,
     popular: true,
   },
   {
     name: "Pro",
-    price: "79",
+    price: "59",
     credits: "650",
     integCredits: "25k",
     cta: "Get Pro",
     highlight: "Best for growing product teams",
     features: [
       "Everything in Builder",
+      "650 monthly credits",
+      "25k integration credits",
       "Private templates",
       "Priority generations",
       "Advanced workflow automations",
@@ -73,13 +77,15 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "149",
+    price: "99",
     credits: "1.5k",
     integCredits: "60k",
     cta: "Get Elite",
     highlight: "Best for agencies and scale-ups",
     features: [
       "Everything in Pro",
+      "1.5k monthly credits",
+      "60k integration credits",
       "Dedicated onboarding",
       "Early feature access",
       "Premium support",
@@ -161,10 +167,21 @@ const faqs = [
       "This keeps your app-building workflow smooth without blocking growth as your product usage increases.",
     ],
   },
+  {
+    question: "Will I get only the features in my selected plan?",
+    answer: [
+      "Yes. Each plan unlocks the credits and features listed on its card, and higher plans include the plan directly below them.",
+      "For example, Pro includes Builder features, while Elite includes Pro features plus onboarding, premium support, and high-volume capacity.",
+    ],
+  },
 ];
 
 export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState(0);
+  const router = useRouter();
+  const goToPlan = (planName: string) => {
+    router.push(`/dashboard?plan=${encodeURIComponent(planName.toLowerCase())}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#fcfcfd] px-4 py-10 text-slate-950 dark:bg-[#050505] dark:text-white sm:px-6 lg:px-8">
@@ -179,7 +196,7 @@ export default function PricingPage() {
             Plans that feel easy to start and strong enough to scale
           </h1>
           <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-gray-400">
-            Clear monthly pricing for creators, builders, and teams who want to launch faster with LokoAI.
+            Clear monthly pricing for creators, builders, and teams. Choose a plan and you get exactly the credits, integrations, support, and workspace access listed below.
           </p>
         </div>
 
@@ -235,6 +252,8 @@ export default function PricingPage() {
                 </div>
 
                 <button
+                  type="button"
+                  onClick={() => goToPlan(plan.name)}
                   className={`mt-5 rounded-xl py-2.5 text-sm font-semibold transition ${
                     plan.popular
                       ? "bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-lg shadow-sky-200 dark:shadow-none hover:from-sky-600 hover:to-cyan-500"
@@ -245,7 +264,7 @@ export default function PricingPage() {
                 </button>
 
                 <div className="mt-5 border-t border-slate-200/80 dark:border-white/10 pt-4">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-gray-500">Highlights</p>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-gray-500">Included in this plan</p>
                   <div className="space-y-2.5">
                     {plan.features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">

@@ -1,10 +1,10 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Sparkles, Check, Star, ArrowRight, Plus, Mic, Send
+  Sparkles, Check, Star, ArrowRight
 } from "lucide-react";
 
 // Custom Brand SVG Icons (Since trademark brands are removed/unsupported in some lucide-react versions)
@@ -327,17 +327,6 @@ const pricingPlans = [
   }
 ];
 
-const heroPlaceholders = [
-  "Ask LokoAI anything...",
-  "Build a modern website...",
-  "Create AI images instantly...",
-  "Generate React apps...",
-  "Design futuristic UI...",
-  "Fix my code errors...",
-  "Create viral content ideas...",
-  "Search latest IPL news...",
-];
-
 const heroParticles = [
   { left: "14%", top: "30%", size: "h-1.5 w-1.5", delay: 0.2, duration: 5.8 },
   { left: "23%", top: "62%", size: "h-2 w-2", delay: 1.1, duration: 6.4 },
@@ -349,37 +338,8 @@ const heroParticles = [
 
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [typedPlaceholder, setTypedPlaceholder] = useState("");
-  const [isDeletingPlaceholder, setIsDeletingPlaceholder] = useState(false);
   const router = useRouter();
   const goToLogin = () => router.push("/dashboard");
-
-  useEffect(() => {
-    const currentPlaceholder = heroPlaceholders[placeholderIndex];
-    const isComplete = typedPlaceholder === currentPlaceholder;
-    const isEmpty = typedPlaceholder.length === 0;
-    const timeout = window.setTimeout(() => {
-      if (!isDeletingPlaceholder && isComplete) {
-        setIsDeletingPlaceholder(true);
-        return;
-      }
-
-      if (isDeletingPlaceholder && isEmpty) {
-        setIsDeletingPlaceholder(false);
-        setPlaceholderIndex((current) => (current + 1) % heroPlaceholders.length);
-        return;
-      }
-
-      setTypedPlaceholder((current) =>
-        isDeletingPlaceholder
-          ? currentPlaceholder.slice(0, Math.max(current.length - 1, 0))
-          : currentPlaceholder.slice(0, current.length + 1)
-      );
-    }, isComplete ? 1300 : isDeletingPlaceholder ? 32 : 58);
-
-    return () => window.clearTimeout(timeout);
-  }, [isDeletingPlaceholder, placeholderIndex, typedPlaceholder]);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
@@ -452,28 +412,14 @@ export default function Home() {
             initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.78, ease: "easeOut", delay: 1.85 }}
-            className="relative mt-10 w-full max-w-3xl sm:mt-12"
+            className="relative mt-8 w-full max-w-3xl sm:mt-10"
           >
-            <div className="absolute inset-0 rounded-[1.75rem] bg-sky-300/25 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/78 p-4 text-left shadow-[0_28px_90px_rgba(15,23,42,0.09)] backdrop-blur-2xl transition-all duration-300 hover:border-sky-200 hover:shadow-[0_32px_100px_rgba(14,165,233,0.14)] dark:border-white/10 dark:bg-white/8 sm:p-5">
-              <div className="min-h-[58px] px-1 text-[clamp(1rem,2.5vw,1.18rem)] font-medium leading-relaxed text-slate-500 dark:text-slate-300">
-                <span>{typedPlaceholder}</span>
-                <span className="typewriter-cursor ml-0.5 inline-block h-5 w-[2px] translate-y-1 rounded-full bg-sky-500" />
-              </div>
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-white/10">
-                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-300">
-                  <button type="button" aria-label="Add attachment" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 transition-colors hover:border-sky-200 hover:text-sky-500 dark:border-white/10 dark:bg-white/10">
-                    <Plus className="h-4 w-4" />
-                  </button>
-                  <button type="button" aria-label="Use voice input" className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/70 transition-colors hover:border-sky-200 hover:text-sky-500 dark:border-white/10 dark:bg-white/10">
-                    <Mic className="h-4 w-4" />
-                  </button>
-                </div>
-                <button type="button" aria-label="Start with LokoAI" onClick={goToLogin} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-white shadow-lg shadow-sky-500/15 transition-all hover:-translate-y-0.5 hover:bg-sky-500 active:scale-95 dark:bg-white dark:text-slate-950 dark:hover:bg-sky-200">
-                  <Send className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+            <p className="mx-auto max-w-2xl text-[clamp(1.2rem,3vw,2rem)] font-semibold leading-snug text-slate-700 dark:text-slate-200">
+              Your friendly AI partner for building, creating, and growing ideas faster.
+            </p>
+            <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-slate-500 dark:text-slate-400 sm:text-lg">
+              LokoAI turns your imagination into beautiful digital experiences with clarity, speed, and a little everyday magic.
+            </p>
           </motion.div>
         </motion.div>
       </section>
@@ -634,7 +580,7 @@ export default function Home() {
             Simple Pricing for Powerful AI
           </h2>
           <p className="mx-auto max-w-2xl text-slate-500 dark:text-gray-400 text-base sm:text-lg mb-8">
-            Scale your AI workflow with flexible plans built for creators, teams, and growing businesses.
+            Choose a plan and get exactly the credits, integrations, support, and workspace access listed on that plan.
           </p>
           <div className="inline-flex max-w-full items-center gap-1 border border-slate-200 bg-slate-100 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
             <button onClick={() => setIsYearly(false)} className={`rounded-full px-5 py-2 text-xs font-bold transition-all cursor-pointer ${!isYearly ? "bg-white dark:bg-white/10 text-slate-950 dark:text-white shadow-sm" : "text-slate-500"}`}>
@@ -673,7 +619,7 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="space-y-3.5 mb-8">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">Highlights</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">Included in this plan</p>
                       {plan.features.map((feature, fIdx) => (
                         <div key={fIdx} className="flex items-start gap-3">
                           <div className="h-4.5 w-4.5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-emerald-500/20">
