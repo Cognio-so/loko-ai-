@@ -117,7 +117,16 @@ const BUILD_REQUEST_PATTERN =
   /\b(create|build|make|design|generate|develop|bna|banao|bnao).{0,60}\b(website|web app|landing page|page|dashboard|app|desktop app|ui|ux|component|saas)\b|\b(website|landing page|web app|dashboard|desktop app|saas page)\b/i;
 
 function isBuildRequestPrompt(value: string) {
-  return BUILD_REQUEST_PATTERN.test(value) && !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(value);
+  const normalized = value.trim();
+  const wantsBuilderWorkspace =
+    /\b(open|launch|show|create|generate|build)\b.{0,40}\b(builder|workspace|live preview|preview panel|project files|right side|right panel)\b/i.test(normalized) ||
+    /\b(build mode|builder mode|generate project|create project|open preview)\b/i.test(normalized);
+
+  return (
+    wantsBuilderWorkspace &&
+    BUILD_REQUEST_PATTERN.test(normalized) &&
+    !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(normalized)
+  );
 }
 
 function normalizeGeneratedFiles(value: unknown): GeneratedCodeFile[] {
