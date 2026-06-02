@@ -22,6 +22,8 @@ export type CollectionAssistant = {
   logoText: string;
   icon: LucideIcon;
   welcome: string;
+  specializations: string[];
+  restrictions: string[];
 };
 
 export const assistants: CollectionAssistant[] = [
@@ -35,17 +37,21 @@ export const assistants: CollectionAssistant[] = [
     logoText: "BB",
     icon: Bot,
     welcome: "Send me a rough idea and I will turn it into a clean brief, prompt, or task note.",
+    specializations: ["Prompt writing", "Task notes", "Instructions", "Brief creation"],
+    restrictions: ["Coding", "SEO", "Sales", "UI Reviews", "Image generation"],
   },
   {
     slug: "daily-druid",
-    name: "Daily Druid",
-    description: "A calm workflow helper for quick planning, reminders, and everyday decisions.",
+    name: "LokoAI Assistant",
+    description: "General AI assistant for planning, research, writing, and productivity support.",
     date: "30/12/2025",
     model: "GLM 4.7",
     accent: "from-emerald-500 to-teal-400",
-    logoText: "DD",
+    logoText: "LA",
     icon: WandSparkles,
-    welcome: "Tell me what you need to organize today and I will help you make a simple plan.",
+    welcome: "Tell me anything and I will help with planning, research, writing, or productivity.",
+    specializations: ["General assistance", "Planning", "Research", "Writing", "Productivity"],
+    restrictions: [],
   },
   {
     slug: "stacksmith-pro",
@@ -57,6 +63,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "SP",
     icon: Code2,
     welcome: "Describe the product you want to build and I will shape the stack, pages, and core flow.",
+    specializations: ["Next.js", "React", "Node.js", "TypeScript", "APIs", "Databases", "Full-stack architecture"],
+    restrictions: ["UI/UX Design", "SEO", "Sales", "Image generation", "Video editing"],
   },
   {
     slug: "prospect-pilot",
@@ -68,6 +76,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "PP",
     icon: Target,
     welcome: "Share your target customer and I will draft outreach angles and lead qualification notes.",
+    specializations: ["Lead generation", "Outreach", "Cold emails", "Sales qualification"],
+    restrictions: ["Coding", "UI Design", "SEO", "Image generation", "Product development"],
   },
   {
     slug: "pixel-planner",
@@ -79,6 +89,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "PX",
     icon: Palette,
     welcome: "Tell me the page or product style and I will plan sections, layout, and visual direction.",
+    specializations: ["UI Design", "UX Design", "Landing Pages", "Wireframes", "Design Systems"],
+    restrictions: ["Coding", "SEO", "Sales", "Full-stack development", "Database design"],
   },
   {
     slug: "lens-prompt-lab",
@@ -90,6 +102,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "LP",
     icon: Camera,
     welcome: "Give me the image or video idea and I will create a strong prompt with camera and style details.",
+    specializations: ["Image prompts", "Video prompts", "Camera prompts", "Midjourney prompts", "Flux prompts"],
+    restrictions: ["Coding", "SEO", "Sales", "Full-stack development", "Actual image generation"],
   },
   {
     slug: "tosh-companion",
@@ -101,6 +115,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "TC",
     icon: Sparkles,
     welcome: "I can help with drafts, quick answers, and creative support. What should we work on?",
+    specializations: ["Drafts", "Creative support", "Brainstorming", "Personal productivity"],
+    restrictions: ["Coding", "SEO", "Sales", "Legal advice"],
   },
   {
     slug: "interface-inspector",
@@ -112,6 +128,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "II",
     icon: BrainCircuit,
     welcome: "Send a UI issue or describe a screen and I will point out improvements clearly.",
+    specializations: ["Screenshot review", "UI audits", "UX reviews", "Accessibility audits", "Conversion analysis"],
+    restrictions: ["Coding implementation", "Backend design", "SEO", "Sales"],
   },
   {
     slug: "commerce-studio",
@@ -123,6 +141,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "CS",
     icon: ShoppingBag,
     welcome: "Share your product and audience and I will create ecommerce ad concepts and asset ideas.",
+    specializations: ["Ecommerce", "Product ads", "Marketing creatives", "Store content"],
+    restrictions: ["Coding", "Backend development", "SEO strategy", "Legal/compliance"],
   },
   {
     slug: "search-signal",
@@ -134,6 +154,8 @@ export const assistants: CollectionAssistant[] = [
     logoText: "SS",
     icon: SearchCheck,
     welcome: "Tell me the topic or URL goal and I will draft an SEO brief with keywords and outline.",
+    specializations: ["SEO", "Keyword research", "Topic clusters", "Meta descriptions", "Content strategy"],
+    restrictions: ["Coding", "UI Design", "Paid ads", "Sales outreach"],
   },
 ];
 

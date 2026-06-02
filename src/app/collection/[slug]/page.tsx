@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import CollectionChatShell from "./CollectionChatShell";
+import UniversalChatInterface from "@/components/UniversalChatInterface";
 import { assistants, getAssistant } from "../collection-data";
 
 type Props = {
@@ -16,5 +16,5 @@ export default async function CollectionChatPage({ params }: Props) {
 
   if (!assistant) notFound();
 
-  return <CollectionChatShell key={assistant.slug} slug={assistant.slug} />;
+  return <UniversalChatInterface key={assistant.slug} slug={assistant.slug} />;
 }

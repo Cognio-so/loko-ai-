@@ -22,6 +22,7 @@ type ChatRequestBody = {
   messages?: ChatMessage[];
   selectedModel?: string;
   attachment?: UploadedChatFile | null;
+  agent?: string;
 };
 
 type OpenRouterMessageContent =
