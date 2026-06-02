@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, DragEvent as ReactDragEvent } from "react";
 import {
   DEFAULT_SELECTED_OPENROUTER_MODEL,
@@ -17,20 +18,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ArrowLeft,
+  Bot,
   FileText,
   ChevronRight,
   Database,
+  FolderOpen,
   Globe,
   Grid3X3,
+  History,
   Home,
   Library,
   Loader2,
+  Menu,
   Mic,
   Package,
   Paperclip,
   Plus,
   Rocket,
+  Search,
   Send,
   Settings,
   Sparkles,
@@ -55,7 +60,8 @@ type Attachment = {
 
 export default function UniversalChatInterface({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // State
@@ -65,6 +71,8 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Persist model selection per-collection
   useEffect(() => {
@@ -89,6 +97,20 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
       // ignore
     }
   }, [selectedModelId, slug]);
+
+  const userName = useMemo(() => {
+    return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
+  }, [user]);
+
+  const userEmail = user?.email || "Sign in to sync chats";
+  const userInitial = userName.trim().charAt(0).toUpperCase() || "A";
+
+  function startNewChat() {
+    setMessages([]);
+    setPrompt("");
+    setAttachments([]);
+    setIsSidebarOpen(false);
+  }
 
   const handleFileSelect = (files: FileList | null) => {
     if (!files) return;
@@ -220,83 +242,179 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
   return (
     <div className="flex min-h-screen bg-white dark:bg-slate-950">
       {/* Sidebar */}
-      <aside className="hidden w-64 border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 lg:flex flex-col p-4">
-        <Link href="/collection" className="mb-8 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
-            <Sparkles className="h-5 w-5" />
-          </span>
-          <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">LokoAI</span>
-        </Link>
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-[280px] border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform dark:border-white/10 dark:bg-slate-900/60 lg:static lg:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          <div className="mb-8 flex items-center justify-between px-2">
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard")}
+              className="flex items-center gap-2.5 rounded-xl px-1 py-1 text-left transition hover:opacity-80"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">LokoAI</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(false)}
+              className="rounded-full p-2 text-slate-400 hover:bg-white hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white lg:hidden"
+              aria-label="Close sidebar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-        <nav className="space-y-2 mb-8">
-          <Link
-            href="/"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
+          <button
+            type="button"
+            onClick={startNewChat}
+            className="group mb-2 flex h-11 w-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-white/10 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
           >
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
-          <Link
-            href="/integrations"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Grid3X3 className="h-4 w-4" />
-            Integrations
-          </Link>
-          <Link
-            href="/partners"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Users className="h-4 w-4" />
-            Partners
-          </Link>
-          <Link
-            href="/launchpad"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Rocket className="h-4 w-4" />
-            Launchpad
-          </Link>
-          <Link
-            href="/collection"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sky-600 dark:text-sky-400 bg-white dark:bg-slate-800"
-          >
-            <Library className="h-4 w-4" />
-            Collection
-          </Link>
-          <Link
-            href="/affiliate"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Trophy className="h-4 w-4" />
-            Affiliate
-          </Link>
-          <Link
-            href="/pricing"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Zap className="h-4 w-4" />
-            Pricing
-          </Link>
-          <Link
-            href="/settings"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800"
-          >
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
-        </nav>
+            <Plus className="h-4 w-4 text-slate-400 transition group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+            New chat
+          </button>
 
-        <div className="mt-auto pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="text-xs text-slate-500 dark:text-slate-400 px-3 py-2">
-            <p className="font-semibold mb-1">{user?.email}</p>
-            <p>Using LokoAI</p>
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen((open) => !open)}
+            className="mb-6 flex h-11 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+          >
+            <Search className="h-4 w-4" />
+            Search chats
+          </button>
+
+          {isSearchOpen && (
+            <div className="mb-4 px-1">
+              <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 shadow-sm ring-2 ring-sky-50 dark:border-white/10 dark:bg-slate-900 dark:ring-sky-500/10">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input
+                  placeholder="Search messages..."
+                  className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
+                  autoFocus
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="mb-6 space-y-1 border-t border-slate-100 pt-6 dark:border-white/10">
+            <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Navigation</p>
+            <div className="space-y-0.5">
+              {[
+                { label: "Home", href: "/", icon: Home },
+                { label: "Integrations", href: "/integrations", icon: Grid3X3 },
+                { label: "Partners", href: "/partners", icon: Users },
+                { label: "Launchpad", href: "/launchpad", icon: Rocket },
+                { label: "Collection", href: "/collection", icon: Library },
+                { label: "Affiliate", href: "/affiliate", icon: Trophy },
+                { label: "Pricing", href: "/pricing", icon: Zap },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
+                    item.href === "/collection"
+                      ? "border border-slate-100 bg-white text-sky-600 shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-sky-400"
+                      : "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                  }`}
+                >
+                  <item.icon className={`h-4 w-4 ${item.href === "/collection" ? "text-sky-500" : ""}`} />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto px-1">
+            <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
+              <span>Recent History</span>
+              <History className="h-3.5 w-3.5 opacity-50" />
+            </div>
+            <Link
+              href={`/collection/${assistant.slug}`}
+              className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:border-slate-200 hover:shadow-md dark:border-white/10 dark:bg-slate-900 dark:ring-white/10 dark:hover:border-white/15"
+            >
+              <AssistantLogo assistant={assistant} size="sm" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{assistant.name}</p>
+                <p className="truncate text-[11px] text-slate-400">Currently active</p>
+              </div>
+            </Link>
+          </div>
+
+          <div className="mt-6 space-y-3 border-t border-slate-100 pt-6 dark:border-white/10">
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => router.push("/projects")}
+                className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Projects
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/settings")}
+                className="flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium text-slate-500 transition hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              >
+                <Settings className="h-4 w-4" />
+                Settings
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm ring-1 ring-slate-100 dark:border-white/10 dark:bg-slate-900 dark:ring-white/10">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm dark:bg-white dark:text-slate-900">
+                  {userInitial}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{userName}</p>
+                  <p className="truncate text-[11px] text-slate-400">{userEmail}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+              >
+                <Bot className="h-3.5 w-3.5" />
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       </aside>
 
+      {isSidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+          aria-label="Close sidebar overlay"
+        />
+      )}
+
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col min-w-0">
+        <div className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-100 bg-white/80 px-4 backdrop-blur-md dark:border-white/10 dark:bg-slate-950/80 lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+            aria-label="Open sidebar"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <Link
+            href="/collection"
+            className="rounded-full bg-slate-50 px-5 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+          >
+            All assistants
+          </Link>
+        </div>
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto max-w-2xl space-y-6">
