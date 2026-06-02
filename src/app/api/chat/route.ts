@@ -261,6 +261,22 @@ function getTemperatureForPrompt(userText: string, config: ReturnType<typeof get
   return config.chatTemperature;
 }
 
+function getResponseLanguageInstruction(userText: string) {
+  const hasDevanagari = /[\u0900-\u097F]/.test(userText);
+  const hinglishPattern =
+    /\b(kya|kyu|kyun|kaise|kese|karo|karna|banao|bana|chahiye|mujhe|mere|mera|meri|nahi|nhi|hai|hain|tha|hoga|wala|wali|sab|jese|jaise|bolte|likhte|mat|sirf)\b/i;
+
+  if (hasDevanagari) {
+    return "Response language: Hindi, because the latest user message uses Devanagari. Do not force Hindi for future English messages.";
+  }
+
+  if (hinglishPattern.test(userText)) {
+    return "Response language: Hinglish, because the latest user message uses Hinglish. Keep technical terms in English. Do not use Devanagari unless the user writes Devanagari.";
+  }
+
+  return "Response language: English. The latest user message is English, so reply fully in English. Ignore older Hindi/Hinglish assistant messages when choosing language. Do not translate headings, labels, plans, or website copy into Hindi unless the user explicitly asks for Hindi.";
+}
+
 function buildOpenRouterPayload(
   model: string,
   messagesBeforeAi: ChatMessage[],
@@ -272,7 +288,7 @@ function buildOpenRouterPayload(
     ? ` For current, latest, sports, news, price, weather, or web-search questions: ${config.enableWebSearch ? "use web search before answering" : "web search is disabled, so do not invent live facts"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing.`
     : "";
   const promptInstruction = isPromptRequest(userText)
-    ? " If the user asks for a prompt, provide a clean copy-ready prompt in the user's language and include useful details without asking unnecessary follow-up questions."
+    ? " If the user asks for a prompt, provide a clean copy-ready prompt in the response language selected from the latest user message and include useful details without asking unnecessary follow-up questions."
     : "";
   const imageInstruction = isImagePrompt(userText) && !isVideoPrompt(userText)
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
@@ -357,6 +373,7 @@ Create a numbered roadmap from start to finish.
 If an uploaded file is present, analyze the uploaded file first and base the workflow on that file content.`
     : "";
   const tools = getOpenRouterTools(userText, config);
+  const languageInstruction = getResponseLanguageInstruction(userText);
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => {
     const isLatestUser = index === items.length - 1 && message.role === "user";
     let content: OpenRouterMessageContent = message.content;
@@ -395,7 +412,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         content:
           `${LOKO_AI_CORE_STANDARD}
 
-You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
+You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],
