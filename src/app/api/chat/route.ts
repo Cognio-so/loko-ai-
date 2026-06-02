@@ -133,6 +133,10 @@ function isImagePrompt(prompt: string) {
   return IMAGE_PATTERN.test(prompt);
 }
 
+function isWebsitePrompt(prompt: string) {
+  return WEBSITE_PATTERN.test(prompt);
+}
+
 function isPromptRequest(prompt: string) {
   return PROMPT_REQUEST_PATTERN.test(prompt);
 }
@@ -185,6 +189,21 @@ function enhanceImagePrompt(userText: string) {
   return `${cleaned}. Create a complete high-quality AI image, photorealistic or cinematic style, ultra HD 4K, highly detailed, visually attractive modern artwork, professional composition, realistic lighting, rich environment, strong camera angle, detailed textures, realistic shadows, depth of field, refined color grading, sharp focus, no text, no watermark, no ASCII art, no code, no sketch placeholder.`;
 }
 
+function enhanceWebsitePrompt(userText: string) {
+  const cleaned = userText.trim().replace(/\s+/g, " ");
+  return `${cleaned}
+
+Generate a premium, production-quality UI. If you provide code, provide one complete self-contained HTML document in a fenced html code block so the preview renders beautifully immediately.
+
+Hard requirements:
+- Never output bare/default browser HTML with blue links, bullet nav, Times New Roman, broken image tags, black placeholder blobs, or unstyled forms.
+- Use inline CSS with a reset, modern system font stack, responsive layout, polished spacing, strong hierarchy, button states, card grids, and mobile breakpoints.
+- Include real sections appropriate to the request: navigation, hero, product/dashboard preview, features, pricing or metrics when relevant, testimonials/social proof, CTA, and footer.
+- Use CSS gradients, CSS shapes, inline SVG/data URI placeholders, or styled UI mockups instead of external image URLs that may break.
+- Keep text readable, professional, and aligned. No overlapping content. No giant decorative cards around the whole page.
+- Make the first viewport look like a finished app/site, not a wireframe.`;
+}
+
 function getTemperatureForPrompt(userText: string, config: ReturnType<typeof getOpenRouterConfig>) {
   if (isSearchPrompt(userText)) return config.searchTemperature;
   if (CODE_PATTERN.test(userText)) return config.coderTemperature;
@@ -206,12 +225,17 @@ function buildOpenRouterPayload(
   const imageInstruction = isImagePrompt(userText)
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
+  const websiteInstruction = isWebsitePrompt(userText)
+    ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as a senior product designer and frontend engineer. Produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML: no blue underlined nav links, bullet lists as navigation, Times New Roman defaults, broken images, empty placeholders, or black blob icons. Use inline CSS, modern typography, gradients sparingly, realistic sections, polished components, accessible contrast, and responsive breakpoints."
+    : "";
   const tools = getOpenRouterTools(userText, config);
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => ({
     role: message.role,
     content:
       isImagePrompt(userText) && index === items.length - 1 && message.role === "user"
         ? enhanceImagePrompt(message.content)
+        : isWebsitePrompt(userText) && index === items.length - 1 && message.role === "user"
+          ? enhanceWebsitePrompt(message.content)
         : message.content,
   }));
 
@@ -225,7 +249,7 @@ function buildOpenRouterPayload(
       {
         role: "system",
         content:
-          `You are LokoAI, a concise and helpful AI assistant. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}`,
+          `You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). Reply in the same language the user uses. Do not switch languages unless the user explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}`,
       },
       ...preparedMessages,
     ],

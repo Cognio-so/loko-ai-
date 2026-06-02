@@ -87,7 +87,7 @@ const quickActions = [
   {
     title: "Build website",
     prompt:
-      "Create a modern responsive website with hero section, navbar, animations, services, pricing, contact form, and premium UI design.",
+      "Create a premium modern responsive website as a complete self-contained HTML preview with polished inline CSS, navbar, hero, dashboard/product preview, features, pricing, testimonials, CTA, footer, animations, mobile layout, and no broken images or unstyled default browser UI.",
   },
   {
     title: "Develop desktop app",
