@@ -560,7 +560,7 @@ export default function DashboardWorkspace() {
 
   useEffect(() => {
     const storedModel = window.localStorage.getItem(SELECTED_MODEL_STORAGE_KEY);
-    if (isSupportedOpenRouterModel(storedModel)) {
+    if (storedModel && isSupportedOpenRouterModel(storedModel)) {
       setSelectedModelId(storedModel);
     }
   }, []);
