@@ -1092,8 +1092,8 @@ export default function DashboardWorkspace() {
                             />
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
-                            <div className="flex items-center gap-3 text-sm font-normal text-slate-400">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm">
+                            <div className="flex items-center gap-3 text-sm font-normal text-slate-400 dark:text-slate-500">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm dark:border-sky-400/20 dark:bg-slate-900/80 dark:text-sky-300">
                                 <Sparkles className="h-4 w-4" />
                               </span>
                               LokoAI is writing...
@@ -1205,7 +1205,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
             >
               <Plus className="size-3.5 shrink-0 overflow-visible text-slate-400" />
               Explore More
@@ -1215,7 +1215,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:hover:text-white"
+              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
             >
               <Sparkles className="size-3.5 shrink-0 overflow-visible text-sky-400" />
               {item.title}
@@ -1282,7 +1282,7 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex flex-col rounded-3xl border border-slate-200 bg-white transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900 dark:focus-within:border-slate-600">
+    <div className="relative flex flex-col rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
