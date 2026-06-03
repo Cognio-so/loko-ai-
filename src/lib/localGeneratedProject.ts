@@ -1,4 +1,7 @@
 import { detectGenerationIntent } from "@/lib/generationIntent";
+import { buildMotionCss } from "@/lib/animations";
+import { buildFeatureGridHtml, buildLogosHtml, buildStatsHtml, buildTestimonialsHtml } from "@/sections";
+import { getTemplateProfile } from "@/templates";
 
 export interface LocalGeneratedFile {
   path: string;
@@ -180,24 +183,16 @@ function getWebsiteContent(prompt: string): WebsiteContent {
 
 function buildWebsitePreview(prompt: string) {
   const intent = detectGenerationIntent(prompt);
-  const { title, styleDirection, palette, category } = intent;
+  const { title, styleDirection, category } = intent;
+  const templateProfile = getTemplateProfile(category);
+  const palette = templateProfile.palette;
   const content = getWebsiteContent(prompt);
 
-  const featureCards = content.features
-    .map(
-      (feature, index) => `
-        <article class="card">
-          <span class="kicker">0${index + 1}</span>
-          <h3>${esc(feature.title)}</h3>
-          <p>${esc(feature.body)}</p>
-        </article>`
-    )
-    .join("");
+  const featureCards = buildFeatureGridHtml(content.features);
   const navLinks = content.nav.map((item) => `<span>${esc(item)}</span>`).join("");
-  const stats = content.stats
-    .map((item) => `<span><strong>${esc(item.value)}</strong> ${esc(item.label)}</span>`)
-    .join("");
-  const quotes = content.quotes.map((quote) => `<div class="quote"><p>${esc(quote)}</p></div>`).join("");
+  const stats = buildStatsHtml(content.stats);
+  const quotes = buildTestimonialsHtml(content.quotes);
+  const proofLogos = buildLogosHtml(templateProfile.proofLogos);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -206,6 +201,7 @@ function buildWebsitePreview(prompt: string) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${esc(title)}</title>
   <style>
+    ${buildMotionCss()}
     *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:${palette.bg};color:${palette.text}}
     .shell{position:relative;overflow:hidden;min-height:100vh}
     .shell:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 12%,${palette.accent}24,transparent 28%),radial-gradient(circle at 88% 8%,${palette.accent2}22,transparent 25%),linear-gradient(180deg,rgba(255,255,255,.76),transparent 44%);pointer-events:none}
@@ -242,6 +238,7 @@ function buildWebsitePreview(prompt: string) {
     .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:${palette.accent};font-weight:850}
     .section h2{font-size:clamp(28px,4.5vw,54px);line-height:1.02;letter-spacing:-.05em;margin:12px 0 14px}
     .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:24px}
+    .logo-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.logo-strip span{border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.72);border-radius:999px;padding:8px 12px;color:${palette.muted};font-size:12px;font-weight:800}
     .card{padding:22px;border-radius:26px;border:1px solid rgba(148,163,184,.18);background:white;box-shadow:0 16px 45px rgba(15,23,42,.07)}
     .kicker{display:inline-flex;min-width:40px;height:40px;align-items:center;justify-content:center;border-radius:14px;background:#eff6ff;font-size:11px;font-weight:900;color:${palette.accent}}
     .card h3{margin:18px 0 10px;font-size:20px}
@@ -271,6 +268,7 @@ function buildWebsitePreview(prompt: string) {
             <a class="secondary" href="#proof">${esc(content.secondaryCta)}</a>
           </div>
           <div class="stats">${stats}</div>
+          <div class="logo-strip" aria-label="Trusted by">${proofLogos}</div>
         </div>
         <div class="mock">
           <div class="mock-top">
