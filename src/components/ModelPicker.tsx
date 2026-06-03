@@ -20,7 +20,7 @@ type FilterKey = "All" | "Chat" | "Coding" | "Reasoning" | "Search" | "Image" | 
 
 const FILTERS: FilterKey[] = ["All", "Chat", "Coding", "Reasoning", "Search", "Image", "Free", "Paid"];
 
-const PROVIDER_LOGO_MAP: Record<OpenRouterProvider, string> = {
+const PROVIDER_LOGO_MAP: Partial<Record<OpenRouterProvider, string>> = {
   "Moonshot AI": "/provider-logos/moonshot.svg",
   OpenAI: "/provider-logos/openai.svg",
   Meta: "/provider-logos/meta.svg",
@@ -36,11 +36,21 @@ function ProviderLogo({ provider, size = "md" }: { provider: OpenRouterProvider;
   const src = PROVIDER_LOGO_MAP[provider];
   const shellSize = size === "sm" ? "h-7 w-7" : "h-8 w-8";
   const imageSize = size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
+  const initials = provider
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_4px_rgba(15,23,42,0.12)] ring-1 ring-slate-200`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={`${provider} logo`} className={`${imageSize} object-contain`} />
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={`${provider} logo`} className={`${imageSize} object-contain`} />
+      ) : (
+        <span className="text-[10px] font-black tracking-tight text-sky-600">{initials}</span>
+      )}
     </span>
   );
 }
@@ -139,18 +149,18 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/35 px-4 py-4 backdrop-blur-sm sm:py-6"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/35 px-3 pb-8 pt-12 backdrop-blur-sm sm:px-5 sm:pb-10 sm:pt-14"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setIsOpen(false);
           }}
         >
           <div
-            className="flex max-h-[calc(100vh-2rem)] w-[95vw] max-w-[1040px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100vh-3rem)]"
+            className="flex max-h-[calc(100dvh-6rem)] w-full max-w-[1080px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100dvh-7rem)]"
             role="dialog"
             aria-modal="true"
             aria-label="Select model"
           >
-            <div className="shrink-0 border-b border-slate-200 px-5 py-4 sm:px-6">
+            <div className="sticky top-0 z-10 shrink-0 border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur-xl sm:px-6">
               <div className="mb-3 flex items-center justify-between gap-4">
                 <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[28px]">Select Model</h2>
                 <button
@@ -194,7 +204,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
 
             <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
               {filteredModels.length ? (
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 pb-1 md:grid-cols-2 xl:grid-cols-3">
                   {filteredModels.map((model) => (
                     <ModelGridCard
                       key={model.id}

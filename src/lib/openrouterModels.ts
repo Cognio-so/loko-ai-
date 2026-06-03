@@ -13,6 +13,8 @@ export type OpenRouterProvider =
   | "Arcee AI"
   | "Cognitive Computations"
   | "Google"
+  | "Z AI"
+  | "DeepSeek"
   | "Black Forest Labs";
 
 export type OpenRouterModelOption = {
@@ -65,6 +67,14 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     free: true,
   },
   {
+    id: "z-ai/glm-4.5-air:free",
+    name: "GLM 4.5 Air",
+    provider: "Z AI",
+    type: "Reasoning",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
+    free: true,
+  },
+  {
     id: "nousresearch/hermes-3-llama-3.1-405b:free",
     name: "Hermes 3 405B",
     provider: "Nous Research",
@@ -86,6 +96,21 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models"],
     free: true,
+  },
+  {
+    id: "google/gemma-4-26b-a4b-it:free",
+    name: "Gemma 4 26B",
+    provider: "Google",
+    type: "Chat",
+    categories: ["Chat Models", "Search Models"],
+    free: true,
+  },
+  {
+    id: "deepseek/deepseek-v4-pro",
+    name: "DeepSeek V4 Pro",
+    provider: "DeepSeek",
+    type: "Reasoning",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
   },
   {
     id: "google/gemini-2.5-flash",

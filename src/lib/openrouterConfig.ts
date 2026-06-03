@@ -8,20 +8,27 @@ const DEFAULT_OPENROUTER_MODELS = [
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
   "qwen/qwen3-coder:free",
+  "z-ai/glm-4.5-air:free",
   "nousresearch/hermes-3-llama-3.1-405b:free",
   "arcee-ai/trinity-large-thinking",
   "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "deepseek/deepseek-v4-pro",
 ];
 const DEFAULT_WEBSITE_MODELS = [
   "qwen/qwen3-coder:free",
+  "z-ai/glm-4.5-air:free",
   "moonshotai/kimi-k2.6:free",
   "openai/gpt-oss-120b:free",
+  "deepseek/deepseek-v4-pro",
   "meta-llama/llama-3.3-70b-instruct:free",
   "nousresearch/hermes-3-llama-3.1-405b:free",
   "google/gemini-2.5-flash",
 ];
 const DEFAULT_CODER_MODELS = [
   "qwen/qwen3-coder:free",
+  "z-ai/glm-4.5-air:free",
+  "deepseek/deepseek-v4-pro",
   "moonshotai/kimi-k2.6:free",
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
@@ -36,7 +43,9 @@ const DEFAULT_IMAGE_MODELS = [
 const DEFAULT_SEARCH_MODELS = [
   "openai/gpt-oss-120b:free",
   "openai/gpt-4o-mini-search-preview",
+  "z-ai/glm-4.5-air:free",
   "moonshotai/kimi-k2.6:free",
+  "google/gemma-4-26b-a4b-it:free",
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 const DEFAULT_FAST_MODEL = "qwen/qwen3-coder:free";

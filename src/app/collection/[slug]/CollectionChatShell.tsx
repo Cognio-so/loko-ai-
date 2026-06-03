@@ -477,7 +477,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                       {isModelMenuOpen && (
                         <div className="absolute bottom-11 right-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
                           <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
-                            {OPENROUTER_MODEL_OPTIONS.slice(0, 10).map((model) => (
+                            {OPENROUTER_MODEL_OPTIONS.map((model) => (
                               <button
                                 key={model.id}
                                 onClick={() => {
