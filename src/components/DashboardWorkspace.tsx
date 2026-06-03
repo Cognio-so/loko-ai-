@@ -16,12 +16,15 @@ import {
   Bot,
   Check,
   ChevronRight,
+  Code2,
   Compass,
   Copy,
+  ExternalLink,
   FileText,
   FolderOpen,
   Maximize2,
   Grid3X3,
+  Layers3,
   History,
   Loader2,
   Menu,
@@ -29,6 +32,7 @@ import {
   Moon,
   Notebook,
   Package,
+  PanelLeft,
   Paperclip,
   Plus,
   RefreshCw,
@@ -2010,39 +2014,116 @@ function BuildSidePanel({
   const files = project.generated_code ?? [];
   const currentFile = files.find((file) => file.path === selectedFile) ?? files[0] ?? null;
   const previewHtml = project.preview_html || "";
+  const [previewReloadKey, setPreviewReloadKey] = useState(0);
+  const [isFileRailOpen, setIsFileRailOpen] = useState(true);
+
+  function openPreviewInNewTab() {
+    if (!previewHtml) return;
+    const url = URL.createObjectURL(new Blob([previewHtml], { type: "text/html" }));
+    window.open(url, "_blank", "noopener,noreferrer");
+    window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+  }
 
   return (
     <aside className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 bg-white/95 shadow-[inset_1px_0_0_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-slate-950/88 lg:border-t-0">
-      <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-3 dark:border-white/10">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{project.title}</p>
-          <p className="truncate text-xs text-slate-500 dark:text-slate-400">{files.length} files generated</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-white/10 dark:bg-slate-900">
+      <div className="shrink-0 border-b border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/90">
+        <div className="grid items-center gap-3 xl:grid-cols-[1fr_auto_1fr]">
+          <div className="flex min-w-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsFileRailOpen((open) => !open)}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border transition ${
+                isFileRailOpen
+                  ? "border-sky-200 bg-sky-50 text-sky-600"
+                  : "border-slate-200 bg-white text-slate-500 hover:text-slate-900"
+              } dark:border-white/10 dark:bg-slate-900 dark:text-slate-300`}
+              aria-label={isFileRailOpen ? "Hide file explorer" : "Show file explorer"}
+              title={isFileRailOpen ? "Hide file explorer" : "Show file explorer"}
+            >
+              <PanelLeft className="h-4 w-4" />
+            </button>
+            <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1 shadow-sm dark:border-white/10 dark:bg-slate-900">
             <button
               type="button"
               onClick={() => onTabChange("preview")}
-              className={`h-8 rounded-lg px-3 text-xs font-semibold transition ${
+              className={`inline-flex h-8 items-center gap-1.5 rounded-xl px-3 text-xs font-bold transition ${
                 activeTab === "preview"
-                  ? "bg-white text-sky-600 shadow-sm dark:bg-sky-500 dark:text-white"
+                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-blue-200 dark:bg-blue-500 dark:text-white dark:ring-blue-400/30"
                   : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               }`}
             >
+              <Globe className="h-3.5 w-3.5" />
               Preview
             </button>
             <button
               type="button"
               onClick={() => onTabChange("code")}
-              className={`h-8 rounded-lg px-3 text-xs font-semibold transition ${
-                activeTab === "code"
-                  ? "bg-white text-sky-600 shadow-sm dark:bg-sky-500 dark:text-white"
-                  : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-              }`}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              aria-label="Files"
+              title="Files"
             >
-              Code
+              <FileText className="h-3.5 w-3.5" />
+            </button>
+            <span className="h-5 w-px bg-slate-200 dark:bg-white/10" />
+            <button
+              type="button"
+              onClick={() => onTabChange("code")}
+              className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${
+                activeTab === "code"
+                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-blue-200 dark:bg-blue-500 dark:text-white dark:ring-blue-400/30"
+                  : "text-slate-500 hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              }`}
+              aria-label="Code"
+              title="Code"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onTabChange("code")}
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition hover:bg-white hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+              aria-label="Layers"
+              title="Layers"
+            >
+              <Layers3 className="h-3.5 w-3.5" />
             </button>
           </div>
+          </div>
+
+          <div className="hidden min-w-[220px] items-center justify-between gap-2 rounded-full border border-slate-100 bg-[#f8f5ef] px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-inner lg:flex dark:border-white/10 dark:bg-slate-900 dark:text-slate-300">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="h-2.5 w-3.5 rounded-sm border border-slate-500/60" />
+              <span className="truncate">/</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={openPreviewInNewTab}
+                disabled={!previewHtml}
+                className="rounded-md p-1 text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-white/10 dark:hover:text-white"
+                aria-label="Open preview in new tab"
+                title="Open preview in new tab"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewReloadKey((key) => key + 1)}
+                disabled={!previewHtml}
+                className="rounded-md p-1 text-slate-500 transition hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-white/10 dark:hover:text-white"
+                aria-label="Refresh preview"
+                title="Refresh preview"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          </div>
+
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            <div className="hidden min-w-0 text-right sm:block">
+              <p className="truncate text-xs font-bold text-slate-950 dark:text-white">{project.title}</p>
+              <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{files.length} files generated</p>
+            </div>
           <button
             type="button"
             onClick={onClose}
@@ -2053,6 +2134,7 @@ function BuildSidePanel({
             <X className="h-4 w-4" />
           </button>
         </div>
+        </div>
       </div>
 
       {activeTab === "preview" ? (
@@ -2060,6 +2142,7 @@ function BuildSidePanel({
           {previewHtml ? (
             <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10">
               <iframe
+                key={previewReloadKey}
                 title={`${project.title} preview`}
                 srcDoc={previewHtml}
                 sandbox="allow-scripts allow-forms allow-popups allow-modals"
@@ -2073,7 +2156,8 @@ function BuildSidePanel({
           )}
         </div>
       ) : (
-        <div className="grid min-h-0 flex-1 grid-cols-1 bg-white dark:bg-slate-950 md:grid-cols-[260px_1fr]">
+        <div className={`grid min-h-0 flex-1 grid-cols-1 bg-white dark:bg-slate-950 ${isFileRailOpen ? "md:grid-cols-[260px_1fr]" : "md:grid-cols-1"}`}>
+          {isFileRailOpen && (
           <div className="min-h-0 border-b border-slate-200 bg-slate-50/80 p-3 dark:border-white/10 dark:bg-slate-900/60 md:border-b-0 md:border-r">
             <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400">
               <FolderOpen className="h-3.5 w-3.5" />
@@ -2097,6 +2181,7 @@ function BuildSidePanel({
               ))}
             </div>
           </div>
+          )}
 
           <div className="min-h-0 overflow-hidden">
             <div className="flex h-10 items-center justify-between border-b border-slate-200 bg-white px-3 dark:border-white/10 dark:bg-slate-950">
