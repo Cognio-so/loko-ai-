@@ -107,9 +107,9 @@ const MODEL_LOGO_THEMES: Record<string, { tint: string; filter: string; bg: stri
     bg: "linear-gradient(135deg, rgba(77,107,254,0.14), rgba(239,246,255,0.96))",
   },
   "Kimi K2.6": {
-    tint: "#111827",
-    filter: "none",
-    bg: "linear-gradient(135deg, rgba(15,23,42,0.08), rgba(255,255,255,0.95))",
+    tint: "#0ea5e9",
+    filter: "invert(52%) sepia(89%) saturate(1102%) hue-rotate(166deg) brightness(95%) contrast(92%)",
+    bg: "linear-gradient(135deg, rgba(14,165,233,0.14), rgba(240,249,255,0.96))",
   },
   "Dolphin Mistral 24B Venice": {
     tint: "#ff7000",
@@ -127,19 +127,19 @@ const MODEL_LOGO_THEMES: Record<string, { tint: string; filter: string; bg: stri
     bg: "linear-gradient(135deg, rgba(37,99,235,0.14), rgba(239,246,255,0.96))",
   },
   "FLUX.2 Pro": {
-    tint: "#111827",
-    filter: "invert(13%) sepia(19%) saturate(1207%) hue-rotate(183deg) brightness(93%) contrast(92%)",
-    bg: "linear-gradient(135deg, rgba(15,23,42,0.10), rgba(248,250,252,0.96))",
+    tint: "#7c3aed",
+    filter: "invert(37%) sepia(78%) saturate(2874%) hue-rotate(247deg) brightness(93%) contrast(93%)",
+    bg: "linear-gradient(135deg, rgba(124,58,237,0.14), rgba(245,243,255,0.96))",
   },
   "FLUX.2 Flex": {
-    tint: "#111827",
-    filter: "invert(13%) sepia(19%) saturate(1207%) hue-rotate(183deg) brightness(93%) contrast(92%)",
-    bg: "linear-gradient(135deg, rgba(15,23,42,0.10), rgba(248,250,252,0.96))",
+    tint: "#7c3aed",
+    filter: "invert(37%) sepia(78%) saturate(2874%) hue-rotate(247deg) brightness(93%) contrast(93%)",
+    bg: "linear-gradient(135deg, rgba(124,58,237,0.14), rgba(245,243,255,0.96))",
   },
   "FLUX.2 Klein 4B": {
-    tint: "#111827",
-    filter: "invert(13%) sepia(19%) saturate(1207%) hue-rotate(183deg) brightness(93%) contrast(92%)",
-    bg: "linear-gradient(135deg, rgba(15,23,42,0.10), rgba(248,250,252,0.96))",
+    tint: "#7c3aed",
+    filter: "invert(37%) sepia(78%) saturate(2874%) hue-rotate(247deg) brightness(93%) contrast(93%)",
+    bg: "linear-gradient(135deg, rgba(124,58,237,0.14), rgba(245,243,255,0.96))",
   },
 };
 
