@@ -29,6 +29,8 @@ const PROVIDER_LOGO_MAP: Partial<Record<OpenRouterProvider, string>> = {
   "Arcee AI": "/provider-logos/arcee.svg",
   "Cognitive Computations": "/provider-logos/cognitive.svg",
   Google: "/provider-logos/google-gemini.svg",
+  "Z AI": "/provider-logos/z-ai.svg",
+  DeepSeek: "/provider-logos/deepseek.svg",
   "Black Forest Labs": "/provider-logos/bfl.svg",
 };
 
