@@ -8,10 +8,13 @@ import { cn } from "@/lib/utils";
 
 const appRoutePrefixes = [
   "/affiliate",
+  "/appearance",
   "/build",
   "/collection",
+  "/community",
   "/create",
   "/dashboard",
+  "/documentation",
   "/generate",
   "/integrations",
   "/launchpad",
@@ -20,6 +23,7 @@ const appRoutePrefixes = [
   "/profile",
   "/projects",
   "/settings",
+  "/support",
   "/workspace",
 ];
 

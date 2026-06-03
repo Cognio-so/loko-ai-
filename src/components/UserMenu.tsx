@@ -2,21 +2,15 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpen,
-  Check,
-  FileQuestion,
+  BookOpenText,
   Home,
   LifeBuoy,
   LogOut,
-  Megaphone,
-  MessageCircle,
-  Moon,
   Palette,
-  ShieldCheck,
   Settings,
-  Sparkles,
-  Sun,
   UserCircle,
   Users,
 } from "lucide-react";
@@ -26,14 +20,10 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/components/ThemeProvider";
 
 type UserMenuProps = {
   variant?: "avatar" | "sidebar";
@@ -99,26 +89,26 @@ function MenuAvatar({
   );
 }
 
-function ExternalItem({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5 text-slate-700 focus:bg-sky-50 focus:text-sky-700 dark:text-slate-200 dark:focus:bg-white/10 dark:focus:text-white">
-      <a href={href} target="_blank" rel="noreferrer" className="flex items-center gap-2.5">
-        {children}
-      </a>
-    </DropdownMenuItem>
-  );
-}
+const menuItems = [
+  { href: "/profile", label: "Profile", icon: UserCircle },
+  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/appearance", label: "Appearance", icon: Palette },
+  { href: "/support", label: "Support", icon: LifeBuoy },
+  { href: "/documentation", label: "Documentation", icon: BookOpenText },
+  { href: "/community", label: "Community", icon: Users },
+  { href: "/dashboard", label: "Home", icon: Home },
+];
 
 export default function UserMenu({ variant = "avatar" }: UserMenuProps) {
-  const { user, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const profile = getUserProfile(user);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { user, profile: storedProfile, signOut } = useAuth();
+  const fallbackProfile = getUserProfile(user);
+  const profile = {
+    ...fallbackProfile,
+    avatar: storedProfile?.avatar_url || fallbackProfile.avatar,
+    name: storedProfile?.username || fallbackProfile.name,
+  };
 
   if (!user) return null;
 
@@ -126,12 +116,12 @@ export default function UserMenu({ variant = "avatar" }: UserMenuProps) {
     variant === "sidebar" ? (
       <button
         type="button"
-        className="group/menu flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg hover:shadow-sky-500/10 dark:border-white/10 dark:bg-slate-900 dark:ring-white/5"
+        className="group/menu flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left shadow-sm ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-lg hover:shadow-sky-500/10"
       >
         <MenuAvatar avatar={profile.avatar} name={profile.name} initials={profile.initials} size="md" />
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-slate-900 dark:text-white">{profile.name}</span>
-          <span className="block truncate text-[11px] text-slate-400">{profile.email}</span>
+          <span className="block truncate text-sm font-semibold text-foreground">{profile.name}</span>
+          <span className="block truncate text-[11px] text-muted-foreground">{profile.email}</span>
         </span>
       </button>
     ) : (
@@ -143,109 +133,75 @@ export default function UserMenu({ variant = "avatar" }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        sideOffset={10}
-        className="w-80 rounded-3xl border border-slate-200/80 bg-white/95 p-2 text-slate-900 shadow-[0_28px_90px_rgba(15,23,42,0.22)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/95 dark:text-white"
-      >
-        <DropdownMenuLabel className="p-3">
-          <div className="flex items-center gap-3">
-            <MenuAvatar avatar={profile.avatar} name={profile.name} initials={profile.initials} />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-black text-slate-950 dark:text-white">{profile.name}</p>
-              <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">{profile.email}</p>
-              <p className="mt-1 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
-                Google account connected
-              </p>
-            </div>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/10" />
+      <DropdownMenuContent align="end" sideOffset={10} className="w-80 overflow-hidden rounded-3xl border border-border bg-popover/95 p-0 text-popover-foreground shadow-[0_28px_90px_rgba(15,23,42,0.22)] backdrop-blur-2xl">
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.97 }}
+            transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+            className="p-2"
+          >
+            <DropdownMenuLabel className="p-3">
+              <div className="flex items-center gap-3">
+                <MenuAvatar avatar={profile.avatar} name={profile.name} initials={profile.initials} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-black text-foreground">{profile.name}</p>
+                  <p className="truncate text-xs font-medium text-muted-foreground">{profile.email}</p>
+                  <p className="mt-1 inline-flex rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-300">
+                    Google account connected
+                  </p>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-border" />
 
-        <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-          <Link href="/profile" className="flex items-center gap-2.5">
-            <UserCircle className="h-4 w-4" />
-            Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-          <Link href="/settings" className="flex items-center gap-2.5">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
-        </DropdownMenuItem>
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+              const Icon = item.icon;
+              return (
+                <DropdownMenuItem
+                  key={item.href}
+                  asChild={item.href !== "/dashboard"}
+                  onClick={
+                    item.href === "/dashboard"
+                      ? () => {
+                          if (pathname === "/dashboard") window.scrollTo({ top: 0, behavior: "smooth" });
+                          else router.push("/dashboard");
+                        }
+                      : undefined
+                  }
+                  className={`cursor-pointer rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                    isActive
+                      ? "bg-sky-500/10 text-sky-600 dark:text-sky-200"
+                      : "text-foreground/80 focus:bg-accent focus:text-accent-foreground"
+                  }`}
+                >
+                  {item.href === "/dashboard" ? (
+                    <>
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </>
+                  ) : (
+                    <Link href={item.href} className="flex items-center gap-2.5">
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
 
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-            <Palette className="h-4 w-4" />
-            Appearance
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-44 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
-            {[
-              { value: "light" as const, label: "Light", icon: Sun },
-              { value: "dark" as const, label: "Dark", icon: Moon },
-              { value: "system" as const, label: "System", icon: Sparkles },
-            ].map((item) => (
-              <DropdownMenuItem
-                key={item.value}
-                onClick={() => setTheme(item.value)}
-                className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10"
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-                {theme === item.value ? <Check className="ml-auto h-4 w-4 text-sky-500" /> : null}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-            <LifeBuoy className="h-4 w-4" />
-            Support
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-48 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
-            <ExternalItem href="https://support.google.com"> <LifeBuoy className="h-4 w-4" /> Help Center </ExternalItem>
-            <ExternalItem href="https://openrouter.ai/status"> <Megaphone className="h-4 w-4" /> Status </ExternalItem>
-            <ExternalItem href="https://supabase.com/support"> <ShieldCheck className="h-4 w-4" /> Report Abuse </ExternalItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-            <BookOpen className="h-4 w-4" />
-            Documentation
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="min-w-52 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
-            <ExternalItem href="https://nextjs.org/docs"> <BookOpen className="h-4 w-4" /> Documentation </ExternalItem>
-            <ExternalItem href="https://platform.openai.com/docs/guides/prompt-engineering"> <FileQuestion className="h-4 w-4" /> Prompts </ExternalItem>
-            <ExternalItem href="https://supabase.com/privacy"> <ShieldCheck className="h-4 w-4" /> Terms & Privacy </ExternalItem>
-            <ExternalItem href="https://nextjs.org/blog"> <Megaphone className="h-4 w-4" /> Changelog </ExternalItem>
-            <ExternalItem href="https://supabase.com/security"> <ShieldCheck className="h-4 w-4" /> Security </ExternalItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-          <Link href="/community" className="flex items-center gap-2.5">
-            <Users className="h-4 w-4" />
-            Community
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="cursor-pointer rounded-xl px-3 py-2.5 focus:bg-sky-50 focus:text-sky-700 dark:focus:bg-white/10">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <Home className="h-4 w-4" />
-            Home
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="bg-slate-100 dark:bg-white/10" />
-        <DropdownMenuItem
-          onClick={() => void signOut()}
-          className="cursor-pointer rounded-xl px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-300 dark:focus:bg-red-500/10"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-border" />
+            <DropdownMenuItem
+              onClick={() => void signOut()}
+              className="cursor-pointer rounded-xl px-3 py-2.5 text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-300 dark:focus:bg-red-500/10"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </DropdownMenuItem>
+          </motion.div>
+        </AnimatePresence>
       </DropdownMenuContent>
     </DropdownMenu>
   );
