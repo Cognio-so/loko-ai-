@@ -220,15 +220,15 @@ export function detectGenerationIntent(prompt: string): GenerationIntent {
       ...base,
       surface: "website",
       category: "restaurant",
-      styleDirection: "Warm hospitality design, appetite-led visuals, cozy depth, and reservation-friendly information hierarchy.",
-      sectionLabels: ["Hero", "Menu", "Chef Story", "Booking"],
+      styleDirection: "Warm premium hospitality design with appetite-led visuals, menu storytelling, social proof, and reservation-friendly conversion flow.",
+      sectionLabels: ["Signature Menu", "Roastery Story", "Guest Experience", "Reservations"],
       palette: {
-        bg: "#20110b",
-        surface: "#342018",
-        accent: "#ff9d3d",
-        accent2: "#ffe4c2",
-        text: "#fff7ee",
-        muted: "#d4bfa7",
+        bg: "#fff8ef",
+        surface: "#fffaf2",
+        accent: "#b7652d",
+        accent2: "#1f6f5b",
+        text: "#24150f",
+        muted: "#7c6658",
       },
     };
   }
