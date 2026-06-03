@@ -1419,9 +1419,11 @@ export default function DashboardWorkspace() {
 
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
-    appendAgentLog("Prompt received", trimmed || "Analyzing uploaded file", "thinking");
+    appendAgentLog("Understanding Request", trimmed || "Analyzing uploaded file", "thinking");
+    appendAgentLog("Planning", isBuildRequestPrompt(trimmed) ? "Preparing builder execution plan" : "Preparing response strategy", "thinking");
+    appendAgentLog("Loading Context", "Loading chat history, selected model, and workspace state", "tool");
     if (attachmentToSend) {
-      appendAgentLog("Reading files", attachmentToSend.name, "file");
+      appendAgentLog("Reading Files", attachmentToSend.name, "file");
     }
     setPrompt("");
     setUploadedAttachment(null);
@@ -1430,7 +1432,8 @@ export default function DashboardWorkspace() {
     try {
       if (trimmed && isBuildRequestPrompt(trimmed) && !attachmentToSend) {
         setAgentStatus("Writing code...");
-        appendAgentLog("Builder mode", "Planning project structure and UI system", "tool");
+        appendAgentLog("Calling Tools", "Starting project generation pipeline", "tool");
+        appendAgentLog("Executing Actions", "Planning project structure and UI system", "tool");
         const generateResponse = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1444,10 +1447,10 @@ export default function DashboardWorkspace() {
 
         const generated = (await generateResponse.json()) as GeneratedProjectResponse;
         setAgentStatus("Generating preview...");
-        appendAgentLog("Generating preview", generated.projectTitle || "Rendering workspace preview", "preview");
+        appendAgentLog("Generating Output", generated.projectTitle || "Rendering workspace preview", "preview");
         const generatedFiles = normalizeGeneratedFiles(generated.files);
         setAgentStatus("Editing files...");
-        appendAgentLog("Writing files", `${generatedFiles.length} project files prepared`, "file");
+        appendAgentLog("Verification", `${generatedFiles.length} project files prepared`, "file");
         const assistantFinal: ChatMessage = {
           ...assistantMessage,
           isStreaming: false,
@@ -1499,7 +1502,8 @@ export default function DashboardWorkspace() {
       }
 
       setAgentStatus(attachmentToSend ? "Reading files..." : "Searching...");
-      appendAgentLog(attachmentToSend ? "File context" : "Model router", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool");
+      appendAgentLog(attachmentToSend ? "Reading Files" : "Searching Resources", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool");
+      appendAgentLog("Calling Tools", "Connecting to the selected model provider", "tool");
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1538,7 +1542,7 @@ export default function DashboardWorkspace() {
         if (!hasStreamed) {
           hasStreamed = true;
           setAgentStatus("Writing code...");
-          appendAgentLog("Streaming response", "Tokens are arriving in real time", "thinking");
+          appendAgentLog("Generating Output", "Tokens are arriving in real time", "thinking");
         }
         setMessages((current) =>
           current.map((message) =>
@@ -1554,13 +1558,14 @@ export default function DashboardWorkspace() {
           message.id === assistantId ? { ...message, isStreaming: false } : message
         )
       );
+      appendAgentLog("Verification", "Checking final response state", "tool");
       setAgentStatus("Completed");
       appendAgentLog("Completed", "Response finished successfully", "done");
       loadProjects();
     } catch (error) {
       console.warn("Chat send failed:", error);
-      setAgentStatus("Completed");
-      appendAgentLog("Error handled", "The provider returned an issue and the message was shown", "done");
+      setAgentStatus("Error");
+      appendAgentLog("Verification", "The provider returned an issue and the message was shown", "error");
       const errorMessage =
         error instanceof Error
           ? error.message
