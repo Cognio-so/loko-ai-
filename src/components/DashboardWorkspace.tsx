@@ -7,12 +7,10 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from "recharts";
 import {
   Bot,
@@ -116,6 +114,11 @@ type ActivityDatum = {
   month: string;
   date: string;
   count: number;
+};
+
+type ActivityTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ payload?: ActivityDatum }>;
 };
 
 type GeneratedProjectResponse = {
@@ -609,7 +612,7 @@ function FormattedMarkdownText({ content }: { content: string }) {
   );
 }
 
-function ActivityTooltip({ active, payload }: TooltipProps<number, string>) {
+function ActivityTooltip({ active, payload }: ActivityTooltipProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0]?.payload as ActivityDatum | undefined;
   if (!item) return null;
@@ -761,7 +764,7 @@ function DashboardOverview({
                       const item = activityDays[payload.index];
                       if (!item) return <g />;
                       return (
-                        <g transform={`translate(${x},${y + 6})`}>
+                        <g transform={`translate(${Number(x)},${Number(y) + 6})`}>
                           <text textAnchor="middle" className="fill-slate-400 text-[10px] font-bold">
                             <tspan x="0" dy="0">{item.month}</tspan>
                             <tspan x="0" dy="12">{item.date}</tspan>
