@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark" | "midnight" | "blue-neon" | "purple-ai" | "glass";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -23,13 +23,18 @@ function getStoredTheme(storageKey: string, defaultTheme: Theme): Theme {
   }
 
   const storedTheme = window.localStorage.getItem(storageKey);
-  return storedTheme === "light" || storedTheme === "dark" || storedTheme === "system" ? storedTheme : defaultTheme;
+  return isTheme(storedTheme) ? storedTheme : defaultTheme;
 }
 
-function getResolvedTheme(theme: Theme) {
-  if (theme !== "system") return theme;
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+export function isTheme(value: unknown): value is Theme {
+  return (
+    value === "light" ||
+    value === "dark" ||
+    value === "midnight" ||
+    value === "blue-neon" ||
+    value === "purple-ai" ||
+    value === "glass"
+  );
 }
 
 export function ThemeProvider({
@@ -55,22 +60,17 @@ export function ThemeProvider({
 
   const applyTheme = React.useCallback((nextTheme: Theme) => {
     const root = document.documentElement;
-    const resolvedTheme = getResolvedTheme(nextTheme);
+    const isDarkTheme = nextTheme !== "light";
 
-    root.classList.toggle("dark", resolvedTheme === "dark");
-    root.style.colorScheme = resolvedTheme;
+    root.classList.remove("light", "dark", "midnight", "blue-neon", "purple-ai", "glass");
+    root.classList.add(nextTheme);
+    root.classList.toggle("dark", isDarkTheme);
+    root.dataset.theme = nextTheme;
+    root.style.colorScheme = isDarkTheme ? "dark" : "light";
   }, []);
 
   React.useEffect(() => {
     applyTheme(theme);
-  }, [applyTheme, theme]);
-
-  React.useEffect(() => {
-    if (theme !== "system") return;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => applyTheme("system");
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
   }, [applyTheme, theme]);
 
   const setTheme = React.useCallback((nextTheme: Theme) => {
