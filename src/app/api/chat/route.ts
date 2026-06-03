@@ -157,6 +157,13 @@ function isSearchPrompt(prompt: string) {
   return CURRENT_FACT_PATTERN.test(prompt);
 }
 
+function isVerifiedResearchPrompt(prompt: string) {
+  return (
+    isSearchPrompt(prompt) ||
+    /\b(website|company|startup|software|app|tool|ai tool|github|repo|repository|api|pricing|docs|documentation|tutorial|official|integrations?|changelog)\b|https?:\/\/[^\s]+/i.test(prompt)
+  );
+}
+
 function isImagePrompt(prompt: string) {
   return IMAGE_PATTERN.test(prompt);
 }
@@ -286,8 +293,8 @@ function buildOpenRouterPayload(
   processedFile?: ProcessedChatFile | null,
   agentSlug?: string
 ) {
-  const searchInstruction = isSearchPrompt(userText)
-    ? ` For current, latest, sports, news, price, weather, or web-search questions: ${config.enableWebSearch ? "use web search before answering" : "web search is disabled, so do not invent live facts"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} If search is unavailable or sources do not confirm the answer, say you could not verify it instead of guessing.`
+  const searchInstruction = isVerifiedResearchPrompt(userText)
+    ? ` For current facts, websites, companies, AI tools, startups, software, apps, GitHub repositories, APIs, pricing, documentation, tutorials, changelogs, and URLs: ${config.enableWebSearch ? "use web search before answering and prefer official sources first" : "web search is disabled, so do not invent live facts, URLs, pricing, repositories, docs, or changelogs"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} Never hallucinate URLs. If sources do not confirm a claim, label it unverified. When relevant, structure the answer with Name, Official URL, Description, Features, Pricing, Docs, GitHub, Integrations, Latest Info, Best Use Cases, and Notes.`
     : "";
   const promptInstruction = isPromptRequest(userText)
     ? " If the user asks for a prompt, provide a clean copy-ready prompt in the response language selected from the latest user message and include useful details without asking unnecessary follow-up questions."
