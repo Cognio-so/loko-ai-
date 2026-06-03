@@ -105,6 +105,27 @@ function extractApiErrorMessage(value: string) {
   }
 }
 
+function cleanVisibleChatText(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((line) => {
+      const trimmed = line.trim();
+      if (/^[-*_]{3,}$/.test(trimmed) || /^[*+-]\s*[-*_]{2,}$/.test(trimmed)) return "";
+
+      return trimmed
+        .replace(/^#{1,6}\s+/, "")
+        .replace(/^>\s*/, "")
+        .replace(/^[-*+]\s*/, "")
+        .replace(/^\d+\.\s+/, "")
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1")
+        .replace(/`([^`]+)`/g, "$1")
+        .trim();
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
 function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
   const Icon = assistant.icon;
   const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-12 w-12";
@@ -649,7 +670,8 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-8">
           <div className="mx-auto max-w-2xl space-y-6">
             {messages.map((message, index) => {
-              if (!message.content.trim()) return null;
+              const visibleContent = cleanVisibleChatText(message.content);
+              if (!visibleContent.trim()) return null;
 
               return (
                 <div
@@ -663,7 +685,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
                         : "text-slate-600 dark:text-slate-300"
                     }`}
                   >
-                    {message.content}
+                    {visibleContent}
                   </div>
                 </div>
               );

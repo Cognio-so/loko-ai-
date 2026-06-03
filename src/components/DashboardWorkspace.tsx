@@ -577,10 +577,13 @@ function MarkdownText({ content }: { content: string }) {
 }
 
 function cleanMarkdownText(value: string) {
-  return value
+  const trimmed = value.trim();
+  if (/^[-*_]{3,}$/.test(trimmed) || /^[*+-]\s*[-*_]{2,}$/.test(trimmed)) return "";
+
+  return trimmed
     .replace(/^#{1,6}\s+/, "")
-    .replace(/^>\s+/, "")
-    .replace(/^[-*+]\s+/, "")
+    .replace(/^>\s*/, "")
+    .replace(/^[-*+]\s*/, "")
     .replace(/^\d+\.\s+/, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/__(.*?)__/g, "$1")
