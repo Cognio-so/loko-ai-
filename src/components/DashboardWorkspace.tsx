@@ -1287,7 +1287,7 @@ export default function DashboardWorkspace() {
           kind,
           createdAt: new Date().toISOString(),
         },
-      ].slice(-9)
+      ].slice(-12)
     );
   }
 
