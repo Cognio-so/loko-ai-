@@ -2290,11 +2290,11 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex min-w-0 flex-col overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
+    <div className="relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 sm:rounded-[26px] sm:shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
-      <div className="relative px-5 pt-4">
+      <div className="relative px-4 pt-3 sm:px-5 sm:pt-4">
         <AnimatePresence mode="wait">
           {shouldShowAnimatedPlaceholder && hasStarted && (
             <motion.div
@@ -2303,9 +2303,9 @@ function Composer({
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -8, filter: "blur(8px)" }}
               transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="pointer-events-none absolute left-5 right-5 top-5 z-10 flex min-h-[44px] items-center overflow-hidden py-2.5"
+              className="pointer-events-none absolute left-4 right-4 top-4 z-10 flex min-h-[40px] items-center overflow-hidden py-2 sm:left-5 sm:right-5 sm:top-5 sm:min-h-[44px] sm:py-2.5"
             >
-              <span className="line-clamp-2 text-[0.95rem] font-normal leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
+              <span className="line-clamp-2 text-sm font-normal leading-relaxed text-slate-600 sm:text-base dark:text-slate-400">
                 {displayText}
               </span>
               <motion.span
@@ -2322,21 +2322,21 @@ function Composer({
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder={isSubmitting ? "Generating..." : ""}
-          className="relative z-0 max-h-48 min-h-[38px] w-full resize-none bg-transparent py-2 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+          className="relative z-0 max-h-40 min-h-[34px] w-full resize-none bg-transparent py-2 text-sm leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 sm:max-h-48 sm:min-h-[38px] sm:text-base dark:text-slate-100 dark:placeholder:text-slate-500"
         />
       </div>
       
-      <div className="flex min-w-0 items-center justify-between gap-2 px-3 pb-3 pt-2">
-        <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-1.5 px-2.5 pb-2.5 pt-1.5 sm:gap-2 sm:px-3 sm:pb-3 sm:pt-2">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button 
                 type="button" 
-                className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-slate-800" 
+                className="flex h-9 w-9 items-center justify-center overflow-visible rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 sm:h-10 sm:w-10 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-slate-800" 
                 aria-label="Add content"
                 title="Add content"
               >
-                <Plus className="size-5 overflow-visible" />
+                <Plus className="size-4.5 overflow-visible sm:size-5" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64 rounded-[24px] border border-slate-100 bg-white p-2 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:border-white/10 dark:bg-slate-900">
@@ -2365,11 +2365,11 @@ function Composer({
           <button 
             type="button" 
             onClick={onVoiceInput} 
-            className="flex h-10 w-10 items-center justify-center overflow-visible rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
+            className="flex h-9 w-9 items-center justify-center overflow-visible rounded-full text-slate-500 transition hover:bg-slate-50 hover:text-slate-900 sm:h-10 sm:w-10 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100" 
             aria-label="Voice input"
             title="Voice input"
           >
-            <Mic className="size-5 overflow-visible" />
+            <Mic className="size-4.5 overflow-visible sm:size-5" />
           </button>
           <ModelPicker selectedModelId={selectedModelId} onModelChange={onModelChange} />
         </div>

@@ -129,11 +129,11 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0">
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="group inline-flex h-10 max-w-[210px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
+        className="group inline-flex h-9 max-w-[112px] items-center gap-1.5 rounded-full border border-slate-200 bg-white py-0.5 pl-1 pr-2 text-[12px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950 sm:h-10 sm:max-w-[210px] sm:gap-2 sm:pl-1.5 sm:pr-2.5 sm:text-[13px]"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
