@@ -23,7 +23,28 @@ export async function POST(req: Request) {
 
     // Write each file
     for (const file of files) {
-      const filePath = path.join(baseDir, file.path);
+      if (
+        !file ||
+        typeof file !== "object" ||
+        typeof file.path !== "string" ||
+        typeof file.content !== "string"
+      ) {
+        return NextResponse.json({ error: "Invalid generated file payload" }, { status: 400 });
+      }
+
+      const safeRelativePath = file.path.replace(/\\/g, "/");
+      if (
+        safeRelativePath.startsWith("/") ||
+        safeRelativePath.split("/").some((part: string) => part === ".." || part === "." || !part)
+      ) {
+        return NextResponse.json({ error: `Unsafe file path: ${file.path}` }, { status: 400 });
+      }
+
+      const filePath = path.resolve(baseDir, safeRelativePath);
+      if (!filePath.startsWith(path.resolve(baseDir))) {
+        return NextResponse.json({ error: `Unsafe file path: ${file.path}` }, { status: 400 });
+      }
+
       const fileDir = path.dirname(filePath);
 
       // Ensure directory exists for the file

@@ -3,6 +3,8 @@ import { getAIResponse } from "@/lib/ai";
 import { getErrorMessage } from "@/lib/api";
 import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOfflineGeneratedProject } from "@/lib/openrouter";
+import { detectPromptMode } from "@/lib/promptRouter";
+import { writeGeneratedProjectToWorkspace } from "@/lib/fileGenerationEngine";
 
 const GENERATION_TIMEOUT_MS = 28000;
 
@@ -159,11 +161,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
+    const promptRoute = detectPromptMode(prompt);
     const systemPrompt = `
       You are an advanced AI Website Builder and AI IDE similar to Lovable, V0, and Bolt.
       Your job is to generate complete modern websites and web applications from user prompts.
 
       ${LOKO_AI_CORE_STANDARD}
+
+      CURRENT MODE: ${promptRoute.mode.toUpperCase()}
+      ROUTER REASON: ${promptRoute.reason}
 
       ${PREMIUM_UI_DESIGN_STANDARD}
 
@@ -224,7 +230,25 @@ export async function POST(req: Request) {
     }
 
     const result = parseAIJson(content);
-    return NextResponse.json(result);
+    let workspaceWrite = null;
+
+    if (promptRoute.mode === "builder" && Array.isArray(result.files)) {
+      workspaceWrite = writeGeneratedProjectToWorkspace(result, {
+        projectId: crypto.randomUUID().slice(0, 8),
+      });
+    }
+
+    return NextResponse.json({
+      ...result,
+      mode: promptRoute.mode,
+      routeReason: promptRoute.reason,
+      workspace: workspaceWrite
+        ? {
+            path: workspaceWrite.relativeProjectDir,
+            files: workspaceWrite.writtenFiles,
+          }
+        : null,
+    });
   } catch (error: unknown) {
     console.error("LokoAI Engine Error:", error);
     return NextResponse.json(
