@@ -34,7 +34,7 @@ function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?
 
   return (
     <span
-      className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full border border-white/70 shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 backdrop-blur-xl transition duration-300 group-hover:scale-105 group-hover:shadow-[0_12px_32px_rgba(14,165,233,0.18)]`}
+      className={`flex ${shellSize} shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/70 shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 backdrop-blur-xl transition duration-300 group-hover:scale-105 group-hover:shadow-[0_12px_32px_rgba(14,165,233,0.18)]`}
       style={{ background: logoTheme.bg, color: logoTheme.tint, ["--tw-ring-color" as string]: `${logoTheme.tint}33` }}
     >
       {src ? (

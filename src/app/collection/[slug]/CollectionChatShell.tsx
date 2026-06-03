@@ -508,7 +508,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                       >
                         <span
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
                           style={{
                             background: selectedModelLogoTheme?.bg,
                             color: selectedModelLogoTheme?.tint,
@@ -543,7 +543,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50" : ""}`}
                               >
                                 <span
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
                                   style={{
                                     background: logoTheme.bg,
                                     color: logoTheme.tint,
