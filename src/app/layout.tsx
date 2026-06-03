@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 
 import "./globals.css";
 import AppChrome from "@/components/AppChrome";
+import ProfileThemeSync from "@/components/ProfileThemeSync";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export default function RootLayout({
 
         <ThemeProvider defaultTheme="dark">
           <AuthProvider>
+            <ProfileThemeSync />
             <AppChrome>{children}</AppChrome>
           </AuthProvider>
         </ThemeProvider>
