@@ -735,7 +735,8 @@ function DashboardOverview({
         </div>
 
         <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
-          <section className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+          <section className="flex rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+            <div className="flex min-h-[320px] w-full flex-col">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h2 className="text-base font-black text-slate-950">Conversation Activity</h2>
@@ -743,7 +744,7 @@ function DashboardOverview({
               </div>
               <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">Last 30 days</span>
             </div>
-            <div className="relative h-48 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50/80 to-white px-2 pb-1 pt-4">
+            <div className="relative min-h-0 flex-1 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50/80 to-white px-2 pb-1 pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={activityDays} margin={{ top: 4, right: 14, bottom: 14, left: 0 }}>
                   <defs>
@@ -800,6 +801,7 @@ function DashboardOverview({
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            </div>
             </div>
           </section>
 
