@@ -167,12 +167,8 @@ const BUILD_REQUEST_PATTERN =
 
 function isBuildRequestPrompt(value: string) {
   const normalized = value.trim();
-  const wantsBuilderWorkspace =
-    /\b(open|launch|show|create|generate|build)\b.{0,40}\b(builder|workspace|live preview|preview panel|project files|right side|right panel)\b/i.test(normalized) ||
-    /\b(build mode|builder mode|generate project|create project|open preview)\b/i.test(normalized);
 
   return (
-    wantsBuilderWorkspace &&
     BUILD_REQUEST_PATTERN.test(normalized) &&
     !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(normalized)
   );
@@ -1302,7 +1298,7 @@ export default function DashboardWorkspace() {
     setIsActivityOpen(true);
     setAgentStartedAt(Date.now());
     setRuntimeSeconds(0);
-    setAgentStatus(uploadedAttachment ? "Reading files..." : "Thinking...");
+    setAgentStatus(trimmed && isBuildRequestPrompt(trimmed) && !uploadedAttachment ? "Writing code..." : uploadedAttachment ? "Reading files..." : "Thinking...");
     setActivityLogs([]);
     const attachmentToSend = uploadedAttachment;
     const userVisibleContent = [
@@ -1779,7 +1775,7 @@ export default function DashboardWorkspace() {
                     </div>
                   ) : (
                     <>
-                      <div className="shrink-0 space-y-3 px-4 pt-5 sm:px-6">
+                      <div className="shrink-0 px-4 pt-5 sm:px-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <WorkspaceTabs
                             hasPreview={Boolean(activeBuildProject)}
@@ -1793,25 +1789,28 @@ export default function DashboardWorkspace() {
                             {isSubmitting ? "Live streaming" : "Ready"}
                           </div>
                         </div>
-                        <AgentStatusPanel
-                          status={agentStatus}
-                          logs={activityLogs}
-                          runtimeSeconds={runtimeSeconds}
-                          isRunning={isSubmitting}
-                          isOpen={isActivityOpen}
-                          onToggle={() => setIsActivityOpen((open) => !open)}
-                        />
                       </div>
-                      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 sm:px-6">
-                        <div className="space-y-12">
+                      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-6">
+                        <div className="space-y-8">
                           {messages.map((message) => (
-                            <MessageBubble
-                              key={message.id}
-                              message={message}
-                              copied={copiedMessageId === message.id}
-                              onCopy={() => void handleCopyMessage(message)}
-                              onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
-                            />
+                            <div key={message.id} className="space-y-4">
+                              <MessageBubble
+                                message={message}
+                                copied={copiedMessageId === message.id}
+                                onCopy={() => void handleCopyMessage(message)}
+                                onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
+                              />
+                              {message.role === "assistant" && message.isStreaming && (
+                                <AgentStatusPanel
+                                  status={agentStatus}
+                                  logs={activityLogs}
+                                  runtimeSeconds={runtimeSeconds}
+                                  isRunning={isSubmitting}
+                                  isOpen={isActivityOpen}
+                                  onToggle={() => setIsActivityOpen((open) => !open)}
+                                />
+                              )}
+                            </div>
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
                             <div className="flex items-center gap-3 text-sm font-normal text-slate-400 dark:text-slate-500">
