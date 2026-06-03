@@ -115,13 +115,14 @@ type AgentStatus =
   | "Writing code..."
   | "Editing files..."
   | "Generating preview..."
-  | "Completed";
+  | "Completed"
+  | "Error";
 
 type AgentActivityLog = {
   id: string;
   label: string;
   detail: string;
-  kind: "thinking" | "tool" | "file" | "preview" | "done";
+  kind: "thinking" | "tool" | "file" | "preview" | "done" | "error";
   createdAt: string;
 };
 
@@ -649,6 +650,59 @@ function ActivityActiveDot({ cx, cy }: { cx?: number; cy?: number }) {
     </g>
   );
 }
+
+const EXECUTION_TIMELINE_STEPS = [
+  {
+    label: "Understanding Request",
+    detail: "Parsing user intent, task type, target output, and required mode.",
+    log: "$ agent.parse_request --mode auto",
+  },
+  {
+    label: "Planning",
+    detail: "Designing the execution path, UI plan, and response strategy.",
+    log: "$ agent.plan --timeline structured",
+  },
+  {
+    label: "Reading Files",
+    detail: "Checking attached files and local workspace context when available.",
+    log: "$ fs.read_context --safe",
+  },
+  {
+    label: "Loading Context",
+    detail: "Loading chat history, selected model, project state, and agent memory.",
+    log: "$ context.load --chat --project",
+  },
+  {
+    label: "Searching Resources",
+    detail: "Routing to knowledge, search, or local resources based on the request.",
+    log: "$ resources.search --relevant",
+  },
+  {
+    label: "Calling Tools",
+    detail: "Preparing model, generation, file, preview, or backend calls.",
+    log: "$ tools.call --stream",
+  },
+  {
+    label: "Executing Actions",
+    detail: "Running the selected action path and coordinating agent operations.",
+    log: "$ actions.execute --live",
+  },
+  {
+    label: "Generating Output",
+    detail: "Streaming tokens, code, files, UI, or preview output.",
+    log: "$ output.generate --streaming",
+  },
+  {
+    label: "Verification",
+    detail: "Checking generated content, response state, and workspace handoff.",
+    log: "$ verify.result --quality",
+  },
+  {
+    label: "Completed",
+    detail: "Final response is ready and execution state is closed.",
+    log: "$ agent.complete --success",
+  },
+] as const;
 
 function AgentStatusPanel({
   status,
