@@ -2,6 +2,46 @@ import { getAssistant } from "@/app/collection/collection-data";
 
 // Specialization patterns for each agent type
 const AGENT_PATTERNS: Record<string, { keywords: RegExp; restrictions: RegExp }> = {
+  "frontend-design": {
+    keywords: /ui|ux|frontend|react|next|tailwind|component|layout|landing|dashboard|responsive|animation|shadcn/i,
+    restrictions: /backend only|database only|seo only|sales outreach|legal|medical/i,
+  },
+  "fullstack-builder": {
+    keywords: /build|app|api|backend|frontend|database|auth|full.?stack|node|express|prisma|supabase|realtime|dashboard/i,
+    restrictions: /image prompt|thumbnail|seo only|viral hook|creator voice/i,
+  },
+  "gpt-image": {
+    keywords: /image|prompt|poster|thumbnail|camera|lighting|cinematic|visual|composition|mood|texture/i,
+    restrictions: /backend|database|api|code implementation|seo strategy/i,
+  },
+  "deep-research": {
+    keywords: /research|market|competitor|compare|analysis|report|industry|opportunity|findings/i,
+    restrictions: /code implementation|actual image generation|database setup/i,
+  },
+  "hook-generator": {
+    keywords: /hook|headline|reel|ad copy|caption|ctr|viral|attention|curiosity|engagement/i,
+    restrictions: /backend|database|api|architecture|code implementation/i,
+  },
+  "social-media-os": {
+    keywords: /social|content|reel|caption|growth|niche|audience|retention|instagram|youtube|tiktok|strategy/i,
+    restrictions: /backend|database|api|code implementation/i,
+  },
+  "thumbnail-strategist": {
+    keywords: /thumbnail|youtube|ctr|click|visual hierarchy|emotion|composition|title|video topic/i,
+    restrictions: /backend|database|api|code implementation/i,
+  },
+  "design-auditor": {
+    keywords: /audit|ui|ux|design|spacing|typography|accessibility|responsive|hierarchy|layout|usability/i,
+    restrictions: /backend|database|api|seo strategy|sales outreach/i,
+  },
+  "voice-builder": {
+    keywords: /voice|tone|brand|creator|writing style|personality|communication|audience|identity/i,
+    restrictions: /backend|database|api|code implementation/i,
+  },
+  "loko-ai": {
+    keywords: /.*/i,
+    restrictions: /^$/i,
+  },
   "brief-buddy": {
     keywords: /prompt|task|brief|instruction|note|writing/i,
     restrictions: /code|coding|develop|build|seo|sales|ui review|design|image|video/i,
@@ -55,8 +95,8 @@ export function checkAgentSpecialization(agentSlug: string, userMessage: string)
     return { isAllowed: true };
   }
 
-  // LokoAI Assistant (formerly Daily Druid) has no restrictions
-  if (agentSlug === "daily-druid") {
+  // LokoAI Assistant has no restrictions
+  if (agentSlug === "daily-druid" || agentSlug === "loko-ai") {
     return { isAllowed: true };
   }
 
@@ -85,6 +125,16 @@ export function getAgentSystemPrompt(agentSlug: string): string {
   if (!agent) return "";
 
   const specList = agent.specializations.join(", ");
+
+  if (agent.skillPrompt) {
+    return `${agent.skillPrompt}
+
+You are ${agent.name}. ${agent.description}
+
+Your specializations: ${specList}
+
+Stay within this skill unless the user is only greeting you or asking a harmless clarification. If the request falls outside your specialization, politely suggest a better LokoAI agent.`;
+  }
   
   return `You are ${agent.name}. ${agent.description}
 
