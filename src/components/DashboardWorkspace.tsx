@@ -639,6 +639,10 @@ function DashboardOverview({
   });
   const maxActivity = Math.max(1, ...activityDays.map((day) => day.count));
   const hasActivity = activityDays.some((day) => day.count > 0);
+  const chartTickValues = Array.from({ length: Math.min(5, maxActivity + 1) }, (_, index) => {
+    const maxTick = Math.max(4, maxActivity);
+    return maxTick - index;
+  });
 
   return (
     <div className="relative min-h-full overflow-hidden bg-[#f8fbff] text-slate-950">
@@ -691,45 +695,66 @@ function DashboardOverview({
               </div>
               <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">Last 30 days</span>
             </div>
-            <div className="relative h-44 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-4">
-              {hasActivity ? (
-                <div className="flex h-full items-end gap-1.5 sm:gap-2">
-                  {activityDays.map((day, index) => {
-                    const barHeight = day.count > 0 ? Math.max(12, (day.count / maxActivity) * 100) : 2;
-                    const showLabel = index % 4 === 0 || index === activityDays.length - 1;
+            <div className="relative h-44 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white px-4 pb-2 pt-4">
+              <div className="grid h-full grid-cols-[34px_1fr] grid-rows-[1fr_28px] gap-x-3">
+                <div className="relative row-start-1">
+                  {chartTickValues.map((tick, index) => (
+                    <span
+                      key={tick}
+                      className="absolute right-0 -translate-y-1/2 text-[10px] font-semibold text-slate-500"
+                      style={{ top: `${(index / Math.max(1, chartTickValues.length - 1)) * 100}%` }}
+                    >
+                      {tick}
+                    </span>
+                  ))}
+                </div>
 
-                    return (
-                      <div key={day.key} className="group flex min-w-0 flex-1 flex-col items-center gap-2">
-                        <div className="relative flex h-full w-full items-end">
-                          <div
-                            className={`w-full rounded-t-xl transition duration-300 ${
-                              day.count > 0
-                                ? "bg-gradient-to-t from-sky-500 to-cyan-300 shadow-[0_10px_26px_rgba(14,165,233,0.22)] group-hover:from-indigo-500 group-hover:to-fuchsia-400"
-                                : "bg-slate-200/70"
-                            }`}
-                            style={{ height: `${barHeight}%` }}
-                          />
-                          {day.count > 0 && (
-                            <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 hidden -translate-x-1/2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-bold text-slate-700 shadow-xl group-hover:block">
-                              <span className="block text-slate-400">{day.label}</span>
-                              <span className="text-slate-950">{day.count}</span>
-                            </div>
+                <div className="relative row-start-1 overflow-visible">
+                  <div className="absolute inset-0">
+                    {chartTickValues.map((tick, index) => (
+                      <div
+                        key={tick}
+                        className="absolute left-0 right-0 border-t border-dashed border-slate-200/80"
+                        style={{ top: `${(index / Math.max(1, chartTickValues.length - 1)) * 100}%` }}
+                      />
+                    ))}
+                  </div>
+                  <div className="relative flex h-full items-end gap-1.5 sm:gap-2">
+                    {activityDays.map((day, index) => {
+                      const barHeight = hasActivity && day.count > 0 ? Math.max(8, (day.count / maxActivity) * 100) : 0;
+                      const showLabel = index % 4 === 0 || index === activityDays.length - 1;
+                      const [month, date] = day.label.split(" ");
+
+                      return (
+                        <div key={day.key} className="group relative flex min-w-0 flex-1 flex-col items-center">
+                          <div className="relative flex h-full w-full items-end">
+                            {day.count > 0 && (
+                              <div
+                                className="w-full rounded-t-xl bg-gradient-to-t from-sky-500 to-cyan-300 shadow-[0_10px_26px_rgba(14,165,233,0.22)] transition duration-300 group-hover:from-indigo-500 group-hover:to-fuchsia-400"
+                                style={{ height: `${barHeight}%` }}
+                              />
+                            )}
+                            {day.count > 0 && (
+                              <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 hidden -translate-x-1/2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-bold text-slate-700 shadow-xl group-hover:block">
+                                <span className="block text-slate-400">{day.label}</span>
+                                <span className="text-slate-950">{day.count}</span>
+                              </div>
+                            )}
+                          </div>
+                          {showLabel && (
+                            <span className="absolute top-[calc(100%+6px)] text-center text-[10px] font-bold leading-3 text-slate-400">
+                              <span className="block">{month}</span>
+                              <span className="block">{date}</span>
+                            </span>
                           )}
                         </div>
-                        <span className="h-3 text-[9px] font-semibold text-slate-400">{showLabel ? day.label : ""}</span>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <History className="mb-3 h-8 w-8 text-slate-300" />
-                  <p className="text-sm font-bold text-slate-700">No real activity yet</p>
-                  <p className="mt-1 max-w-sm text-xs text-slate-500">
-                    Start a chat or open an agent. Your real daily conversation activity will appear here automatically.
-                  </p>
-                </div>
-              )}
+
+                <div className="col-start-2 row-start-2" />
+              </div>
             </div>
           </section>
 
