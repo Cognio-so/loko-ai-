@@ -67,6 +67,7 @@ import AffiliatePage from "@/app/affiliate/page";
 import PricingPage from "@/app/pricing/page";
 import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
 import { ModelPicker } from "@/components/ModelPicker";
+import UserMenu from "@/components/UserMenu";
 import {
   DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
@@ -1220,14 +1221,6 @@ export default function DashboardWorkspace() {
   const [runtimeSeconds, setRuntimeSeconds] = useState(0);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
 
-  const userName = useMemo(() => {
-    return getFirstDisplayName(user);
-  }, [user]);
-
-  const userAvatar = useMemo(() => {
-    return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
-  }, [user]);
-
   const loadProjects = useCallback(() => {
     setIsLoadingProjects(true);
     fetch("/api/projects?limit=50")
@@ -1772,25 +1765,7 @@ export default function DashboardWorkspace() {
                   Settings
                 </button>
               </div>
-              {user && (
-                <div className="rounded-2xl bg-white border border-slate-100 p-3 shadow-sm ring-1 ring-slate-100">
-                  <div className="flex items-center gap-3">
-                    {userAvatar ? (
-                      <img src={userAvatar} alt={userName} className="h-10 w-10 shrink-0 rounded-xl object-cover shadow-sm ring-1 ring-slate-100" />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-medium text-white shadow-sm">{userName.slice(0, 1).toUpperCase()}</div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-normal text-slate-900">{userName}</p>
-                      <p className="truncate text-[11px] text-slate-400">{user.email}</p>
-                    </div>
-                  </div>
-                  <button type="button" onClick={() => void signOut()} className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-normal text-slate-500 transition hover:bg-red-50 hover:text-red-600">
-                    <Bot className="h-3.5 w-3.5" />
-                    Sign out
-                  </button>
-                </div>
-              )}
+              {user && <UserMenu variant="sidebar" />}
             </div>
           </div>
         </aside>

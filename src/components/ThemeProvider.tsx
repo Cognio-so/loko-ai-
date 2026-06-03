@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -23,7 +23,13 @@ function getStoredTheme(storageKey: string, defaultTheme: Theme): Theme {
   }
 
   const storedTheme = window.localStorage.getItem(storageKey);
-  return storedTheme === "light" || storedTheme === "dark" ? storedTheme : defaultTheme;
+  return storedTheme === "light" || storedTheme === "dark" || storedTheme === "system" ? storedTheme : defaultTheme;
+}
+
+function getResolvedTheme(theme: Theme) {
+  if (theme !== "system") return theme;
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({
@@ -49,13 +55,22 @@ export function ThemeProvider({
 
   const applyTheme = React.useCallback((nextTheme: Theme) => {
     const root = document.documentElement;
+    const resolvedTheme = getResolvedTheme(nextTheme);
 
-    root.classList.toggle("dark", nextTheme === "dark");
-    root.style.colorScheme = nextTheme;
+    root.classList.toggle("dark", resolvedTheme === "dark");
+    root.style.colorScheme = resolvedTheme;
   }, []);
 
   React.useEffect(() => {
     applyTheme(theme);
+  }, [applyTheme, theme]);
+
+  React.useEffect(() => {
+    if (theme !== "system") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => applyTheme("system");
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
   }, [applyTheme, theme]);
 
   const setTheme = React.useCallback((nextTheme: Theme) => {
