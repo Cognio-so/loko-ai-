@@ -1756,8 +1756,8 @@ export default function DashboardWorkspace() {
             className="hidden"
             onChange={handleFileInputChange}
           />
-          <header className="z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-100 bg-white/80 px-4 backdrop-blur-md transition-colors duration-300 sm:px-8 dark:border-white/10 dark:bg-slate-950/80">
-            <div className="flex items-center gap-4">
+          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-100 bg-white/80 px-3 backdrop-blur-md transition-colors duration-300 sm:h-16 sm:px-8 dark:border-white/10 dark:bg-slate-950/80">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
               </button>
@@ -1766,15 +1766,15 @@ export default function DashboardWorkspace() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-9 items-center gap-2 rounded-full bg-sky-50 px-5 text-xs font-normal text-sky-600 transition hover:bg-sky-100">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-sky-50 px-3 text-[11px] font-normal text-sky-600 transition hover:bg-sky-100 sm:h-9 sm:gap-2 sm:px-5 sm:text-xs">
                 <Sparkles className="h-3.5 w-3.5" />
-                Upgrade Pro
+                <span className="hidden min-[360px]:inline">Upgrade Pro</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 sm:h-9 sm:w-9 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                 aria-label={theme === "dark" ? "Switch to light mode" : "Switch to night mode"}
                 title={theme === "dark" ? "Light mode" : "Night mode"}
               >
@@ -1807,9 +1807,9 @@ export default function DashboardWorkspace() {
                     : "mx-auto max-w-[860px] flex-1"
                 }`}>
                   {messages.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:py-8">
+                    <div className="flex flex-1 flex-col items-center justify-end px-3 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 sm:justify-center sm:px-4 sm:py-8">
                       <AnimatedChatHero />
-                      <div className="w-full max-w-2xl">
+                      <div className="w-full max-w-[min(100%,42rem)]">
                         <Composer
                           prompt={prompt}
                           setPrompt={setPrompt}
@@ -1881,7 +1881,7 @@ export default function DashboardWorkspace() {
                           setBuilderTab("preview");
                         }}
                       />
-                      <div className="shrink-0 border-t border-slate-100 bg-white/92 px-4 pb-4 pt-3 backdrop-blur-md transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/85">
+                      <div className="shrink-0 border-t border-slate-100 bg-white/92 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur-md transition-colors duration-300 sm:px-4 sm:pb-4 dark:border-white/10 dark:bg-slate-950/85">
                         <div className="mx-auto w-full max-w-[720px]">
                           <Composer
                             prompt={prompt}
@@ -2205,17 +2205,17 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <div className="relative mt-3 w-full overflow-hidden">
-      <div className="quick-actions scrollbar-soft flex w-full justify-start gap-2 overflow-x-auto whitespace-nowrap px-0.5 pb-2">
+    <div className="relative mt-3 w-full overflow-visible sm:overflow-hidden">
+      <div className="quick-actions scrollbar-soft flex w-full flex-wrap justify-center gap-2 overflow-visible whitespace-normal px-0 pb-1 sm:flex-nowrap sm:justify-start sm:overflow-x-auto sm:whitespace-nowrap sm:px-0.5 sm:pb-2">
         {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
           item.title === "Explore More" ? (
             <button
               key={item.title}
               type="button"
               onClick={() => setIsMoreOpen((open) => !open)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
+              className="quick-action-btn inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm sm:h-9 sm:px-3 sm:text-[13px] dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
             >
-              <Plus className="size-3.5 shrink-0 overflow-visible text-slate-400" />
+              <Plus className="size-3 shrink-0 overflow-visible text-slate-400 sm:size-3.5" />
               Explore More
             </button>
           ) : (
@@ -2223,9 +2223,9 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="quick-action-btn inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-3 text-[13px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
+              className="quick-action-btn inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm sm:h-9 sm:px-3 sm:text-[13px] dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
             >
-              <Sparkles className="size-3.5 shrink-0 overflow-visible text-sky-400" />
+              <Sparkles className="size-3 shrink-0 overflow-visible text-sky-400 sm:size-3.5" />
               {item.title}
             </button>
           )
