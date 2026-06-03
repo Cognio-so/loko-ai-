@@ -54,7 +54,7 @@ type OpenRouterTool =
     };
 
 const CURRENT_FACT_PATTERN =
-  /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|weather|score|match|final|winner|won|result|live|update|breaking|stock|crypto|rate|ipl|cricket|election|kal|aaj|aj|abhi|haal|mausam|mousam|jiti|jeeti|jita|jeeta|kon|kaun|konsi|konsa|kisne|kab)\b/i;
+  /\b(search|latest|today|news|current|web|internet|google|find|lookup|price|pricing|weather|score|match|final|winner|won|result|live|update|updates|changelog|breaking|stock|crypto|rate|ipl|cricket|election|website|company|startup|software|tool|ai tool|github|repo|repository|api|docs|documentation|tutorial|official|openai|cursor|openclaw|v0|bolt|lovable|gemini|claude|perplexity|supabase|firebase|openrouter|vercel|tavily|serper|firecrawl|crawl4ai|jina|kal|aaj|aj|abhi|haal|mausam|mousam|jiti|jeeti|jita|jeeta|kon|kaun|konsi|konsa|kisne|kab)\b|https?:\/\/[^\s]+/i;
 
 const WEBSITE_PATTERN =
   /\b(website|design|ui|ux|app|landing|dashboard|code|component|page|frontend|html|css|react|next|desktop)\b/i;
