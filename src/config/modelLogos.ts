@@ -1,7 +1,7 @@
 const MODEL_LOGOS: Record<string, string> = {
-  "Claude Opus 4.8 Fast": "/models/anthropic.svg",
-  "Claude Opus 4.8": "/models/anthropic.svg",
-  "Claude Opus 4.7 Fast": "/models/anthropic.svg",
+  "Claude Opus 4.8 Fast": "/models/claude.png",
+  "Claude Opus 4.8": "/models/claude.png",
+  "Claude Opus 4.7 Fast": "/models/claude.png",
 
   "MiniMax M3": "/models/minimax.svg",
 
