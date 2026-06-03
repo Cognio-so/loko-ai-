@@ -14,7 +14,7 @@ import {
   FolderOpen,
   Grid3X3,
   History,
-  Home,
+  Compass,
   Library,
   Lightbulb,
   Menu,
@@ -42,7 +42,7 @@ type ChatMessage = {
 };
 
 const navItems = [
-  { label: "Home", href: "/", icon: Home },
+  { label: "Dashboard", href: "/dashboard", icon: Compass },
   { label: "Integrations", href: "/integrations", icon: Grid3X3 },
   { label: "Partners", href: "/partners", icon: Users },
   { label: "Launchpad", href: "/launchpad", icon: Rocket },

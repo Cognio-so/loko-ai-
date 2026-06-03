@@ -28,7 +28,7 @@ import {
   Globe,
   Grid3X3,
   History,
-  Home,
+  Compass,
   Library,
   Loader2,
   Menu,
@@ -489,7 +489,7 @@ export default function UniversalChatInterface({ slug }: { slug: string }) {
             <p className="mb-3 px-4 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">Navigation</p>
             <div className="space-y-0.5">
               {[
-                { label: "Home", href: "/", icon: Home },
+                { label: "Dashboard", href: "/dashboard", icon: Compass },
                 { label: "Integrations", href: "/integrations", icon: Grid3X3 },
                 { label: "Partners", href: "/partners", icon: Users },
                 { label: "Launchpad", href: "/launchpad", icon: Rocket },

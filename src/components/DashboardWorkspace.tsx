@@ -14,7 +14,6 @@ import {
   Maximize2,
   Grid3X3,
   History,
-  Home,
   Loader2,
   Menu,
   Mic,
@@ -46,7 +45,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
-import LandingPage from "@/app/page";
 import IntegrationsPage from "@/app/integrations/page";
 import PartnersPage from "@/app/partners/page";
 import LaunchpadPage from "@/app/launchpad/page";
@@ -89,7 +87,7 @@ type Project = {
   updated_at: string;
 };
 
-type View = "chat" | "home" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
+type View = "chat" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
 
 type UploadedAttachment = {
   name: string;
@@ -160,7 +158,7 @@ function getDefaultGeneratedFile(project: Project | null) {
 }
 
 const navItems = [
-  { label: "Home", href: "/", icon: Home, view: "home" as View },
+  { label: "Dashboard", href: "/dashboard", icon: Compass, view: "chat" as View },
   { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
   { label: "Partners", href: "/partners", icon: Users, view: "partners" as View },
   { label: "Launchpad", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
@@ -1278,7 +1276,6 @@ export default function DashboardWorkspace() {
               </div>
             ) : (
               <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                {activeView === "home" && <LandingPage />}
                 {activeView === "integrations" && <IntegrationsPage />}
                 {activeView === "partners" && <PartnersPage />}
                 {activeView === "launchpad" && <LaunchpadPage />}
