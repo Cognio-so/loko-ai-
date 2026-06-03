@@ -899,7 +899,7 @@ function AgentFloatingActions({
   onOpenPreview: () => void;
 }) {
   return (
-    <div className="pointer-events-none absolute bottom-28 right-4 z-20 flex flex-col gap-2 sm:right-6">
+    <div className="pointer-events-none absolute bottom-44 right-3 z-20 flex flex-col gap-2 sm:right-5">
       <button
         type="button"
         onClick={onToggleActivity}
@@ -1848,7 +1848,7 @@ export default function DashboardWorkspace() {
               <div className={`relative z-10 flex min-h-0 flex-1 overflow-hidden ${activeBuildProject ? "flex-col lg:flex-row" : "flex-col"}`}>
                 <div className={`relative flex min-h-0 w-full flex-col overflow-hidden ${
                   activeBuildProject
-                    ? "mx-0 flex-[0_0_42%] border-r border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-slate-950/35 lg:max-w-[520px]"
+                    ? "mx-0 flex-[0_0_46%] border-r border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-slate-950/35 lg:min-w-[520px] lg:max-w-[640px] xl:flex-[0_0_42%]"
                     : "mx-auto max-w-[860px] flex-1"
                 }`}>
                   {messages.length === 0 ? (
@@ -1891,8 +1891,8 @@ export default function DashboardWorkspace() {
                           </div>
                         </div>
                       </div>
-                      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-6">
-                        <div className="space-y-8">
+                      <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-6 sm:px-5">
+                        <div className="space-y-7">
                           {messages.map((message) => (
                             <div key={message.id} className="space-y-4">
                               <MessageBubble
@@ -1933,8 +1933,8 @@ export default function DashboardWorkspace() {
                           setBuilderTab("preview");
                         }}
                       />
-                      <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md transition-colors duration-300 sm:pb-10 dark:bg-slate-950/80">
-                        <div className="mx-auto max-w-2xl">
+                      <div className="shrink-0 border-t border-slate-100 bg-white/92 px-4 pb-4 pt-3 backdrop-blur-md transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/85">
+                        <div className="mx-auto w-full max-w-[720px]">
                           <Composer
                             prompt={prompt}
                             setPrompt={setPrompt}
@@ -2012,7 +2012,7 @@ function BuildSidePanel({
   const previewHtml = project.preview_html || "";
 
   return (
-    <aside className="flex min-h-0 flex-1 flex-col border-t border-slate-200 bg-white/95 shadow-[inset_1px_0_0_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-slate-950/88 lg:border-t-0">
+    <aside className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 bg-white/95 shadow-[inset_1px_0_0_rgba(148,163,184,0.16)] dark:border-white/10 dark:bg-slate-950/88 lg:border-t-0">
       <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-3 dark:border-white/10">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{project.title}</p>
@@ -2176,8 +2176,8 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <div className="relative mt-6 w-full">
-      <div className="quick-actions flex w-full justify-start gap-2 overflow-x-auto whitespace-nowrap px-1 pb-2 sm:justify-center">
+    <div className="relative mt-3 w-full overflow-hidden">
+      <div className="quick-actions scrollbar-soft flex w-full justify-start gap-2 overflow-x-auto whitespace-nowrap px-0.5 pb-2">
         {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
           item.title === "Explore More" ? (
             <button
@@ -2261,11 +2261,11 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex flex-col rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
+    <div className="relative flex min-w-0 flex-col overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
-      <div className="relative px-5 pt-5">
+      <div className="relative px-5 pt-4">
         <AnimatePresence mode="wait">
           {shouldShowAnimatedPlaceholder && hasStarted && (
             <motion.div
@@ -2293,12 +2293,12 @@ function Composer({
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder={isSubmitting ? "Generating..." : ""}
-          className="relative z-0 max-h-60 min-h-[44px] w-full resize-none bg-transparent py-2.5 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+          className="relative z-0 max-h-48 min-h-[38px] w-full resize-none bg-transparent py-2 text-base leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
       </div>
       
-      <div className="flex items-center justify-between px-3 pb-3 pt-2">
-        <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center justify-between gap-2 px-3 pb-3 pt-2">
+        <div className="flex min-w-0 items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button 
