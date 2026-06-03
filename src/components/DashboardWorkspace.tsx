@@ -461,12 +461,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
   return (
     <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-[0_16px_38px_rgba(15,23,42,0.10)]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-500">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-400/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber-300/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 font-normal text-slate-500">{language}</span>
-        </div>
+        <span className="font-normal text-slate-500">{language}</span>
         <div className="flex items-center gap-2">
           {canPreview && (
             <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
