@@ -2202,23 +2202,10 @@ function AttachmentPreview({
 }
 
 function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-
   return (
     <div className="relative mt-3 w-full overflow-visible sm:overflow-hidden">
       <div className="quick-actions scrollbar-soft flex w-full flex-wrap justify-center gap-2 overflow-visible whitespace-normal px-0 pb-1 sm:flex-nowrap sm:justify-start sm:overflow-x-auto sm:whitespace-nowrap sm:px-0.5 sm:pb-2">
-        {[...quickActions, { title: "Explore More", prompt: "" }].map((item) =>
-          item.title === "Explore More" ? (
-            <button
-              key={item.title}
-              type="button"
-              onClick={() => setIsMoreOpen((open) => !open)}
-              className="quick-action-btn inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm sm:h-9 sm:px-3 sm:text-[13px] dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
-            >
-              <Plus className="size-3 shrink-0 overflow-visible text-slate-400 sm:size-3.5" />
-              Explore More
-            </button>
-          ) : (
+        {quickActions.map((item) => (
             <button
               key={item.title}
               type="button"
@@ -2231,25 +2218,6 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
           )
         )}
       </div>
-      {isMoreOpen && (
-        <div className="absolute bottom-12 right-0 z-30 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl ring-1 ring-slate-200 animate-in fade-in zoom-in-95 duration-200 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 dark:border-white/10 dark:bg-slate-900 dark:ring-white/10">
-          <div className="mb-2 px-3 py-1 text-[10px] font-normal uppercase tracking-widest text-slate-400 dark:text-slate-500">Templates</div>
-          {moreQuickActions.map((moreItem) => (
-            <button
-              key={moreItem.title}
-              type="button"
-              onClick={() => {
-                setPrompt(moreItem.prompt);
-                setIsMoreOpen(false);
-              }}
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-normal text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <Sparkles className="size-4 shrink-0 overflow-visible text-sky-400" />
-              {moreItem.title}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
