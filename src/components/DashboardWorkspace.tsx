@@ -605,7 +605,40 @@ function DashboardOverview({
   const totalMessages = projects.reduce((count, project) => count + (project.chat_messages?.length ?? 0), 0);
   const recentProjects = projects.slice(0, 5);
   const popularAgents = assignedAgents.slice(0, 5);
-  const activityBars = [32, 44, 28, 58, 46, 72, 64, 86, 54, 92, 68, 78];
+  const activityDateFormatter = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+  const activityKeyFormatter = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const activityCounts = new Map<string, number>();
+  const today = new Date();
+
+  for (const project of projects) {
+    const realEvents = project.chat_messages?.length
+      ? project.chat_messages.filter((message) => message.role === "user").map((message) => message.createdAt)
+      : [project.updated_at || project.created_at];
+
+    for (const eventDate of realEvents) {
+      const parsedDate = new Date(eventDate);
+      if (Number.isNaN(parsedDate.getTime())) continue;
+      const key = activityKeyFormatter.format(parsedDate);
+      activityCounts.set(key, (activityCounts.get(key) ?? 0) + 1);
+    }
+  }
+
+  const activityDays = Array.from({ length: 30 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (29 - index));
+    const key = activityKeyFormatter.format(date);
+    return {
+      key,
+      label: activityDateFormatter.format(date),
+      count: activityCounts.get(key) ?? 0,
+    };
+  });
+  const maxActivity = Math.max(1, ...activityDays.map((day) => day.count));
+  const hasActivity = activityDays.some((day) => day.count > 0);
 
   return (
     <div className="relative min-h-full overflow-hidden bg-[#f8fbff] text-slate-950">
@@ -658,16 +691,45 @@ function DashboardOverview({
               </div>
               <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">Last 30 days</span>
             </div>
-            <div className="flex h-44 items-end gap-3 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-4">
-              {activityBars.map((height, index) => (
-                <div key={index} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t-2xl bg-gradient-to-t from-sky-500 to-cyan-300 shadow-[0_10px_30px_rgba(14,165,233,0.2)] transition hover:from-indigo-500 hover:to-fuchsia-400"
-                    style={{ height: `${height}%` }}
-                  />
-                  <span className="text-[10px] font-semibold text-slate-400">{index + 1}</span>
+            <div className="relative h-44 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-4">
+              {hasActivity ? (
+                <div className="flex h-full items-end gap-1.5 sm:gap-2">
+                  {activityDays.map((day, index) => {
+                    const barHeight = day.count > 0 ? Math.max(12, (day.count / maxActivity) * 100) : 2;
+                    const showLabel = index % 4 === 0 || index === activityDays.length - 1;
+
+                    return (
+                      <div key={day.key} className="group flex min-w-0 flex-1 flex-col items-center gap-2">
+                        <div className="relative flex h-full w-full items-end">
+                          <div
+                            className={`w-full rounded-t-xl transition duration-300 ${
+                              day.count > 0
+                                ? "bg-gradient-to-t from-sky-500 to-cyan-300 shadow-[0_10px_26px_rgba(14,165,233,0.22)] group-hover:from-indigo-500 group-hover:to-fuchsia-400"
+                                : "bg-slate-200/70"
+                            }`}
+                            style={{ height: `${barHeight}%` }}
+                          />
+                          {day.count > 0 && (
+                            <div className="pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 hidden -translate-x-1/2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-bold text-slate-700 shadow-xl group-hover:block">
+                              <span className="block text-slate-400">{day.label}</span>
+                              <span className="text-slate-950">{day.count}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className="h-3 text-[9px] font-semibold text-slate-400">{showLabel ? day.label : ""}</span>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center text-center">
+                  <History className="mb-3 h-8 w-8 text-slate-300" />
+                  <p className="text-sm font-bold text-slate-700">No real activity yet</p>
+                  <p className="mt-1 max-w-sm text-xs text-slate-500">
+                    Start a chat or open an agent. Your real daily conversation activity will appear here automatically.
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 
