@@ -55,18 +55,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (typeof nextUser.user_metadata?.picture === "string" && nextUser.user_metadata.picture) ||
       null;
 
-    const { data, error } = await supabase
+    const existing = await supabase
       .from("profiles")
-      .upsert(
-        {
-          id: nextUser.id,
-          email: nextUser.email ?? null,
-          username: fallbackUsername,
-          avatar_url: fallbackAvatar,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id", ignoreDuplicates: false }
-      )
+      .select("id,email,username,avatar_url,theme,created_at,updated_at")
+      .eq("id", nextUser.id)
+      .maybeSingle();
+
+    const { data, error } = existing.data
+      ? await supabase
+          .from("profiles")
+          .update({
+            email: nextUser.email ?? existing.data.email,
+            avatar_url: existing.data.avatar_url || fallbackAvatar,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", nextUser.id)
+          .select("id,email,username,avatar_url,theme,created_at,updated_at")
+          .single()
+      : await supabase
+          .from("profiles")
+          .insert({
+            id: nextUser.id,
+            email: nextUser.email ?? null,
+            username: fallbackUsername,
+            avatar_url: fallbackAvatar,
+          })
       .select("id,email,username,avatar_url,theme,created_at,updated_at")
       .single();
 
@@ -161,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     router.push("/login");
     router.refresh();
-  }, [router, supabase]);
+  }, [loadProfile, router, supabase]);
 
   const value = useMemo(
     () => ({ user, isLoading, isConfigured, profile, signOut, refreshUser, refreshProfile, updateProfile }),

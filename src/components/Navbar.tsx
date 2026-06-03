@@ -33,9 +33,13 @@ export default function Navbar() {
     const routesToPrefetch = [
       ...navItems.map((item) => item.href),
       "/dashboard",
+      "/appearance",
+      "/community",
+      "/documentation",
       "/profile",
       "/projects",
       "/settings",
+      "/support",
       "/workspace",
       "/login?next=/dashboard",
     ];
@@ -101,11 +105,11 @@ export default function Navbar() {
             {/* Theme Toggle Button */}
             <button
               type="button"
-              aria-label={`Switch to ${currentTheme === "dark" ? "light" : "dark"} mode`}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label={`Switch to ${currentTheme === "light" ? "dark" : "light"} mode`}
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
               className="p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white/50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-gray-300 transition-all duration-300 flex items-center justify-center group shadow-sm hover:shadow"
             >
-              {currentTheme === "dark" ? (
+              {currentTheme !== "light" ? (
                 <Moon className="w-4 h-4 group-hover:rotate-[360deg] transition-transform duration-500 text-sky-400" />
               ) : (
                 <Sun className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500 text-amber-500" />
@@ -153,13 +157,13 @@ export default function Navbar() {
           <div className="lg:hidden flex items-center gap-2 shrink-0">
              <button
                 type="button"
-                aria-label={`Switch to ${currentTheme === "dark" ? "light" : "dark"} mode`}
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                aria-label={`Switch to ${currentTheme === "light" ? "dark" : "light"} mode`}
+                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
                 className={`p-2 rounded-lg border transition-all duration-300 ${
-                  currentTheme === "dark" ? "bg-black border-[#00BFFF] text-white" : "bg-white border-[#00BFFF] text-black"
+                  currentTheme !== "light" ? "bg-black border-[#00BFFF] text-white" : "bg-white border-[#00BFFF] text-black"
                 }`}
               >
-                {currentTheme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                {currentTheme !== "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
               </button>
             <button
               type="button"

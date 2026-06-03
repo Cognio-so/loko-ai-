@@ -1635,10 +1635,10 @@ export default function DashboardWorkspace() {
   const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
 
   return (
-    <div data-app-shell className="h-dvh overflow-hidden bg-white text-slate-900">
+    <div data-app-shell className="h-dvh overflow-hidden bg-background text-foreground">
       <div className="flex h-full min-h-0 overflow-hidden">
         <aside
-          className={`scrollbar-soft fixed inset-y-0 left-0 z-40 h-dvh w-[280px] overflow-y-auto overscroll-contain border-r border-slate-100 bg-slate-50/50 px-4 py-6 backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
+          className={`scrollbar-soft fixed inset-y-0 left-0 z-40 h-dvh w-[280px] overflow-y-auto overscroll-contain border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground backdrop-blur-xl transition-transform lg:static lg:translate-x-0 ${
             isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -1748,7 +1748,7 @@ export default function DashboardWorkspace() {
 
         {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/10 backdrop-blur-sm lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
 
-        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+        <main className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background text-foreground transition-colors duration-300">
           <input
             ref={fileInputRef}
             type="file"
@@ -1773,9 +1773,9 @@ export default function DashboardWorkspace() {
               </button>
               <button
                 type="button"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
                 className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 sm:h-9 sm:w-9 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to night mode"}
+                aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                 title={theme === "dark" ? "Light mode" : "Night mode"}
               >
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarDays, Gauge, Mail, ShieldCheck, UserCircle } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,13 +10,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/supabase";
+import AvatarUploadClient from "./AvatarUploadClient";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/profile");
 
   const email = user.email ?? "Signed in user";
-  const avatarUrl = user.user_metadata?.avatar_url;
+  const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
   const displayName =
     user.user_metadata?.full_name ||
     user.user_metadata?.name ||
@@ -56,13 +56,8 @@ export default async function ProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         <Card>
-          <CardHeader className="items-center text-center">
-            <Avatar className="h-24 w-24 border border-white/10 shadow-lg">
-              <AvatarImage src={avatarUrl} alt={email} />
-              <AvatarFallback className="bg-sky-500 text-3xl font-bold text-white">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+          <CardHeader className="text-center">
+            <AvatarUploadClient initialAvatar={avatarUrl} displayName={displayName} initials={initials} />
             <div>
               <CardTitle>{displayName}</CardTitle>
               <CardDescription className="mt-1">{email}</CardDescription>
