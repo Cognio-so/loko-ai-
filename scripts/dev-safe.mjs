@@ -47,7 +47,7 @@ if (process.env.DEV_SAFE_CLEAR === "1" && existsSync(devOutputDir)) {
 const nextBin = resolve(projectRoot, "node_modules", "next", "dist", "bin", "next");
 const child = spawn(
   process.execPath,
-  ["--max-old-space-size=4096", nextBin, "dev", "--webpack", "-p", "302"],
+  ["--max-old-space-size=4096", nextBin, "dev", "-p", "302"],
   {
     stdio: "inherit",
     env: { ...process.env, ...localEnv },
