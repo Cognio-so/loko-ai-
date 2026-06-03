@@ -65,7 +65,7 @@ function ModelGridCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex h-14 w-full items-center gap-3 rounded-[18px] border px-4 text-left transition ${
+      className={`flex min-h-14 w-full items-center gap-3 rounded-[18px] border px-4 py-3 text-left transition ${
         isSelected
           ? "border-sky-500 bg-sky-50 shadow-[0_10px_28px_rgba(14,165,233,0.16)]"
           : "border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)] hover:border-slate-300 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
@@ -73,7 +73,7 @@ function ModelGridCard({
     >
       <ProviderLogo provider={model.provider} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-medium text-slate-900">{model.name}</p>
+        <p className="line-clamp-2 break-words text-[15px] font-medium leading-tight text-slate-900">{model.name}</p>
       </div>
       {isSelected && (
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white">
@@ -139,20 +139,20 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/35 px-4 py-4 backdrop-blur-sm sm:py-6"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setIsOpen(false);
           }}
         >
           <div
-            className="flex max-h-[84vh] w-[95vw] max-w-[980px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200"
+            className="flex max-h-[calc(100vh-2rem)] w-[95vw] max-w-[1040px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100vh-3rem)]"
             role="dialog"
             aria-modal="true"
             aria-label="Select model"
           >
-            <div className="border-b border-slate-200 px-6 py-5">
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="text-[30px] font-semibold tracking-tight text-slate-950">Select Model</h2>
+            <div className="shrink-0 border-b border-slate-200 px-5 py-4 sm:px-6">
+              <div className="mb-3 flex items-center justify-between gap-4">
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[28px]">Select Model</h2>
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
@@ -163,7 +163,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
                 </button>
               </div>
 
-              <div className="flex h-12 items-center gap-3 rounded-full border border-slate-200 bg-white px-4 shadow-[inset_0_1px_2px_rgba(15,23,42,0.02)]">
+              <div className="flex h-11 items-center gap-3 rounded-full border border-slate-200 bg-white px-4 shadow-[inset_0_1px_2px_rgba(15,23,42,0.02)]">
                 <Search className="h-4 w-4 shrink-0 text-slate-400" />
                 <input
                   value={query}
@@ -174,13 +174,13 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
                 />
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {FILTERS.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setFilter(item)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
                       filter === item
                         ? "bg-[#2f63bf] text-white shadow-sm"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -192,9 +192,9 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
               </div>
             </div>
 
-            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
               {filteredModels.length ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {filteredModels.map((model) => (
                     <ModelGridCard
                       key={model.id}
