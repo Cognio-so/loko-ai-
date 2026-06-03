@@ -587,6 +587,7 @@ function cleanMarkdownText(value: string) {
     .replace(/^\d+\.\s+/, "")
     .replace(/\*\*(.*?)\*\*/g, "$1")
     .replace(/__(.*?)__/g, "$1")
+    .replace(/\*{2,}/g, "")
     .replace(/`([^`]+)`/g, "$1")
     .trim();
 }
