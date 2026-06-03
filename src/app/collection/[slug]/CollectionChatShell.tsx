@@ -212,6 +212,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
     recognition.start();
   }
 
+  const selectedModelForMenu = getOpenRouterModelById(selectedModelId || "");
+  const selectedModelLogo = selectedModelForMenu ? getModelLogo(selectedModelForMenu.name) : null;
+
   return (
     <div className="min-h-dvh bg-white text-slate-900">
       <div className="flex min-h-dvh">
@@ -469,10 +472,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         onClick={() => setIsModelMenuOpen((s) => !s)}
                         className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                       >
-                        <span className="h-5 w-5 flex items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">
-                          {getOpenRouterModelById(selectedModelId || "")?.provider?.[0] ?? "A"}
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+                          {selectedModelLogo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={selectedModelLogo} alt={`${selectedModelForMenu?.name ?? "Model"} logo`} className="h-5 w-5 object-contain" />
+                          ) : (
+                            <span className="text-[10px] font-black text-sky-600">
+                              {(selectedModelForMenu?.name ?? "AI").slice(0, 2).toUpperCase()}
+                            </span>
+                          )}
                         </span>
-                        <span className="max-w-[120px] truncate text-xs">{getOpenRouterModelById(selectedModelId || "")?.name ?? "Model"}</span>
+                        <span className="max-w-[120px] truncate text-xs">{selectedModelForMenu?.name ?? "Model"}</span>
                         <ChevronDown className="h-3 w-3 text-slate-400" />
                       </button>
                       {isModelMenuOpen && (
@@ -487,7 +497,14 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                                 }}
                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50" : ""}`}
                               >
-                                <span className="h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">{model.provider[0]}</span>
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+                                  {getModelLogo(model.name) ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={getModelLogo(model.name)!} alt={`${model.name} logo`} className="h-5 w-5 object-contain" />
+                                  ) : (
+                                    <span className="text-[10px] font-black text-sky-600">{model.name.slice(0, 2).toUpperCase()}</span>
+                                  )}
+                                </span>
                                 <div className="min-w-0 text-left">
                                   <div className="truncate font-medium">{model.name}</div>
                                   <div className="truncate text-xs text-slate-400">{model.provider}</div>

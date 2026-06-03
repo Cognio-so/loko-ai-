@@ -125,7 +125,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="group inline-flex h-[34px] max-w-[190px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
+        className="group inline-flex h-10 max-w-[210px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
