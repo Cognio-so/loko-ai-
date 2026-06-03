@@ -362,3 +362,39 @@ body.app-shell-active {
   background-size: 160px 160px, 210px 210px, 190px 190px;
   pointer-events: none;
 }
+
+.loko-particle-field {
+  opacity: 0.36;
+  background-image:
+    radial-gradient(circle at 14% 28%, rgba(255,255,255,0.32) 0.7px, transparent 1.4px),
+    radial-gradient(circle at 82% 18%, rgba(34,211,238,0.38) 0.7px, transparent 1.5px),
+    radial-gradient(circle at 54% 72%, rgba(217,70,239,0.28) 0.7px, transparent 1.6px);
+  background-size: 150px 150px, 210px 210px, 180px 180px;
+  animation: loko-particles 18s linear infinite;
+}
+
+.loko-icon-pulse {
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.32), transparent 58%);
+  animation: loko-glow-pulse 3.8s ease-in-out infinite;
+}
+
+@keyframes loko-particles {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-44px, 32px, 0);
+  }
+}
+
+@keyframes loko-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(1.18);
+  }
+}
