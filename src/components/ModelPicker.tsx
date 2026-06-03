@@ -47,6 +47,10 @@ function matchesFilter(model: OpenRouterModelOption, filter: FilterKey) {
   if (filter === "All") return true;
   if (filter === "Free") return Boolean(model.free);
   if (filter === "Paid") return !model.free;
+  if (filter === "Coding") return model.categories.includes("Coding Models") || model.type === "Coding";
+  if (filter === "Search") return model.categories.includes("Search Models") || model.type === "Search";
+  if (filter === "Chat") return model.categories.includes("Chat Models") || model.type === "Chat";
+  if (filter === "Image") return model.categories.includes("Image Models") || model.type === "Image";
   return model.type === filter;
 }
 
