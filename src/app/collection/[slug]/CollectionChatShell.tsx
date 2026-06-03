@@ -77,6 +77,31 @@ function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssist
   );
 }
 
+function AgentChatHero({ assistant, showName }: { assistant: CollectionAssistant; showName: boolean }) {
+  return (
+    <div className="flex flex-col items-center justify-center pb-8 pt-8 text-center sm:pt-10">
+      <div className="relative">
+        <div className="absolute inset-0 rounded-[28px] bg-sky-400/20 blur-2xl" />
+        <div className="relative animate-in fade-in zoom-in-95 duration-500">
+          <AssistantLogo assistant={assistant} size="lg" />
+        </div>
+      </div>
+      <div
+        className={`mt-4 min-h-[42px] transition-all duration-700 ${
+          showName ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
+      >
+        <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+          {assistant.name}
+        </h2>
+        <p className="mt-1 text-sm font-medium text-slate-500">
+          {assistant.specializations.slice(0, 3).join(" • ")}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function CollectionChatShell({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
   const router = useRouter();
@@ -90,6 +115,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAgentName, setShowAgentName] = useState(false);
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
@@ -101,8 +127,15 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
   function startNewChat() {
     setMessages([{ role: "assistant", content: assistant.welcome }]);
     setPrompt("");
+    setShowAgentName(false);
     setIsSidebarOpen(false);
   }
+
+  useEffect(() => {
+    setShowAgentName(false);
+    const timer = window.setTimeout(() => setShowAgentName(true), 2000);
+    return () => window.clearTimeout(timer);
+  }, [assistant.slug]);
 
   useEffect(() => {
     try {
@@ -393,6 +426,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
           <section className="flex flex-1 flex-col overflow-y-auto">
             <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-12 sm:px-6 lg:px-8">
+              <AgentChatHero assistant={assistant} showName={showAgentName} />
               <div className="flex-1 space-y-10">
                 {messages.map((message, index) => (
                   <div
@@ -460,7 +494,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                           sendMessage();
                         }
                       }}
-                      placeholder="Ask LokoAI anything..."
+                      placeholder={`Ask ${assistant.name} anything...`}
                       rows={1}
                       className="flex-1 resize-none bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400"
                     />
