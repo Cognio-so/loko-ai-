@@ -868,30 +868,6 @@ function AgentStatusPanel({
   );
 }
 
-function WorkspaceTabs({
-  hasPreview,
-  onOpenPreview,
-}: {
-  hasPreview: boolean;
-  onOpenPreview: () => void;
-}) {
-  return (
-    <div className="inline-flex rounded-2xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
-      <button type="button" className="h-9 rounded-xl bg-slate-950 px-4 text-xs font-black text-white shadow-sm dark:bg-white dark:text-slate-950">
-        Chat
-      </button>
-      <button
-        type="button"
-        onClick={onOpenPreview}
-        disabled={!hasPreview}
-        className="h-9 rounded-xl px-4 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-45 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
-      >
-        Preview
-      </button>
-    </div>
-  );
-}
-
 function AgentFloatingActions({
   isActivityOpen,
   onToggleActivity,
@@ -1857,13 +1833,6 @@ export default function DashboardWorkspace() {
                     <>
                       <div className="shrink-0 px-4 pt-5 sm:px-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <WorkspaceTabs
-                            hasPreview={Boolean(activeBuildProject)}
-                            onOpenPreview={() => {
-                              if (!activeBuildProject) return;
-                              setBuilderTab("preview");
-                            }}
-                          />
                           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
                             {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" /> : <Check className="h-3.5 w-3.5 text-emerald-500" />}
                             {isSubmitting ? "Live streaming" : "Ready"}
