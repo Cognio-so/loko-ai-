@@ -44,6 +44,11 @@ export default function CommunityClient({ initialPosts }: { initialPosts: Commun
     { label: "Workflows", value: posts.filter((post) => post.category === "Workflows").length, icon: Workflow },
     { label: "Requests", value: posts.filter((post) => post.category === "Feature Requests").length, icon: GitPullRequestArrow },
   ];
+  const latestProjects = posts.filter((post) => post.category === "AI Projects").slice(0, 3);
+  const popularWorkflows = posts
+    .filter((post) => post.category === "Workflows")
+    .sort((a, b) => (b.votes ?? 0) - (a.votes ?? 0))
+    .slice(0, 3);
 
   const submitPost = async () => {
     if (!title.trim() || !content.trim()) return;
@@ -102,6 +107,33 @@ export default function CommunityClient({ initialPosts }: { initialPosts: Commun
                 <span className="font-mono text-sm font-bold">{stat.value}</span>
               </div>
             ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Latest Projects</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {latestProjects.map((post) => (
+              <button key={post.id} type="button" onClick={() => setQuery(post.title)} className="block w-full rounded-xl bg-muted p-3 text-left text-sm font-semibold transition hover:bg-accent">
+                {post.title}
+              </button>
+            ))}
+            {!latestProjects.length ? <p className="text-sm text-muted-foreground">Publish an AI Projects post to fill this feed.</p> : null}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Most Popular Workflows</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {popularWorkflows.map((post) => (
+              <button key={post.id} type="button" onClick={() => setQuery(post.title)} className="flex w-full items-center justify-between rounded-xl bg-muted p-3 text-left text-sm font-semibold transition hover:bg-accent">
+                <span className="truncate">{post.title}</span>
+                <span className="ml-3 font-mono text-xs text-muted-foreground">{post.votes ?? 0}</span>
+              </button>
+            ))}
+            {!popularWorkflows.length ? <p className="text-sm text-muted-foreground">Workflow posts with votes will appear here.</p> : null}
           </CardContent>
         </Card>
       </aside>
