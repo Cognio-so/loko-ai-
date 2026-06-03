@@ -941,6 +941,11 @@ export default function DashboardWorkspace() {
   const [activeBuildProject, setActiveBuildProject] = useState<Project | null>(null);
   const [builderTab, setBuilderTab] = useState<BuilderTab>("preview");
   const [selectedBuilderFile, setSelectedBuilderFile] = useState("");
+  const [agentStatus, setAgentStatus] = useState<AgentStatus>("Completed");
+  const [activityLogs, setActivityLogs] = useState<AgentActivityLog[]>([]);
+  const [agentStartedAt, setAgentStartedAt] = useState<number | null>(null);
+  const [runtimeSeconds, setRuntimeSeconds] = useState(0);
+  const [isActivityOpen, setIsActivityOpen] = useState(true);
 
   const userName = useMemo(() => {
     return getFirstDisplayName(user);
@@ -991,6 +996,31 @@ export default function DashboardWorkspace() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!agentStartedAt) return;
+
+    const intervalId = window.setInterval(() => {
+      setRuntimeSeconds(Math.max(0, Math.floor((Date.now() - agentStartedAt) / 1000)));
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [agentStartedAt]);
+
+  function appendAgentLog(label: string, detail: string, kind: AgentActivityLog["kind"] = "thinking") {
+    setActivityLogs((current) =>
+      [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          label,
+          detail,
+          kind,
+          createdAt: new Date().toISOString(),
+        },
+      ].slice(-9)
+    );
+  }
 
   function startNewChat() {
     setActiveChatId(null);
