@@ -5,6 +5,7 @@ import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
 import { getOfflineGeneratedProject } from "@/lib/openrouter";
 import { detectPromptMode } from "@/lib/promptRouter";
 import { writeGeneratedProjectToWorkspace } from "@/lib/fileGenerationEngine";
+import { buildIntentInstructions } from "@/lib/generationIntent";
 
 const GENERATION_TIMEOUT_MS = 28000;
 
@@ -26,20 +27,15 @@ Before generating files, silently plan:
 
 For any website, landing page, dashboard, SaaS app, AI app, admin panel, mobile app UI, portfolio, or business website:
 - Never create basic layouts, beginner UI, raw Bootstrap-like pages, or boring templates
+- Never create generic hero sections, placeholder cards, fake charts, empty sections, repeated layouts, weak spacing, tiny CTAs, random lorem ipsum, or default Tailwind demo pages
 - Always create modern premium design, professional spacing, strong visual hierarchy, beautiful typography, consistent color, modern cards, clean icons, polished buttons, production shadows, premium gradients, smooth animations, and accessible responsive components
 - Prefer refined startup-quality interfaces that look like a funded company hired a professional design team
 
 Landing pages must include, when relevant:
-- Hero
-- Social proof
-- Features
-- Benefits
-- Product showcase
-- Testimonials
-- Pricing
-- FAQ
-- CTA
-- Professional footer
+- A wow-factor hero with a massive headline, strong subheadline, premium CTA, trust indicators, and a visual centerpiece
+- Category-specific product or service mockup, not a generic dashboard unless the prompt is actually SaaS/dashboard
+- Social proof, customer logos or trust badges, features, benefits, workflow/use cases, testimonials, pricing or packages, FAQ, CTA, and professional footer
+- Believable content that matches the requested business, product, audience, and industry
 
 Dashboards must include, when relevant:
 - Modern sidebar
@@ -60,6 +56,7 @@ Code quality:
 - No ugly default styling
 - No broken visual assets
 - No generic filler copy
+- Before returning JSON, self-review the result. If it would not impress a paying startup founder, redesign it silently and return the improved version
 `;
 
 const TOOL_STACK_CONTEXT = `
@@ -162,6 +159,7 @@ export async function POST(req: Request) {
     }
 
     const promptRoute = detectPromptMode(prompt);
+    const intentInstructions = buildIntentInstructions(prompt);
     const systemPrompt = `
       You are an advanced AI Website Builder and AI IDE similar to Lovable, V0, and Bolt.
       Your job is to generate complete modern websites and web applications from user prompts.
@@ -172,6 +170,9 @@ export async function POST(req: Request) {
       ROUTER REASON: ${promptRoute.reason}
 
       ${PREMIUM_UI_DESIGN_STANDARD}
+
+      INTENT-SPECIFIC DESIGN DIRECTION:
+      ${intentInstructions}
 
       ${TOOL_STACK_CONTEXT}
 
