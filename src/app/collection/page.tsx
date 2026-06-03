@@ -23,10 +23,10 @@ export default function CollectionPage() {
                 <Zap className="h-3.5 w-3.5" />
                 Collections
               </div>
-              <h1 className="mt-4 max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+              <h1 className="mt-4 max-w-3xl bg-gradient-to-r from-slate-950 via-sky-700 to-cyan-500 bg-clip-text text-4xl font-black tracking-tight text-transparent drop-shadow-[0_18px_45px_rgba(14,165,233,0.14)] sm:text-5xl">
                 Loko AI Operating System
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600 sm:text-base">
                 Launch specialized AI agents for design, engineering, research, content, growth, and workflow execution.
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function CollectionPage() {
                       <span className="mb-2 inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
                         AI Skill
                       </span>
-                      <h2 className="text-lg font-black leading-snug text-slate-950">
+                      <h2 className="text-lg font-black leading-snug text-slate-900 transition duration-300 group-hover:text-sky-700">
                         {assistant.name}
                       </h2>
                     </div>
