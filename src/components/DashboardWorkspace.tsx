@@ -108,6 +108,23 @@ type UploadedAttachment = {
 
 type BuilderTab = "preview" | "code";
 
+type AgentStatus =
+  | "Thinking..."
+  | "Reading files..."
+  | "Searching..."
+  | "Writing code..."
+  | "Editing files..."
+  | "Generating preview..."
+  | "Completed";
+
+type AgentActivityLog = {
+  id: string;
+  label: string;
+  detail: string;
+  kind: "thinking" | "tool" | "file" | "preview" | "done";
+  createdAt: string;
+};
+
 type ActivityDatum = {
   key: string;
   label: string;
