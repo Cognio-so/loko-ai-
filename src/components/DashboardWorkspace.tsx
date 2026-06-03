@@ -719,50 +719,55 @@ function AgentStatusPanel({
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const latestLogs = logs.length
-    ? logs
-    : [
-        {
-          id: "idle",
-          label: "Ready",
-          detail: "Ask LokoAI to chat, research, design, or build.",
-          kind: "done" as const,
-          createdAt: new Date().toISOString(),
-        },
-      ];
+  const [expandedStep, setExpandedStep] = useState<string | null>("Understanding Request");
+  const hasError = status === "Error" || logs.some((log) => log.kind === "error");
+  const completedLabels = new Set(logs.map((log) => log.label));
+  const activeLog = [...logs].reverse().find((log) => log.kind !== "done" && log.kind !== "error");
+  const matchedActiveIndex = EXECUTION_TIMELINE_STEPS.findIndex((step) => step.label === activeLog?.label);
+  const activeIndex = status === "Completed"
+    ? EXECUTION_TIMELINE_STEPS.length - 1
+    : Math.max(0, matchedActiveIndex);
+  const actionCount = Math.min(
+    EXECUTION_TIMELINE_STEPS.length,
+    Math.max(logs.length, isRunning ? activeIndex + 1 : completedLabels.size)
+  );
 
   return (
     <motion.div
       layout
-      className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/90 shadow-[0_22px_70px_rgba(15,23,42,0.10)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/75 dark:shadow-[0_28px_90px_rgba(2,8,23,0.45)]"
+      className="overflow-hidden rounded-[24px] border border-slate-800 bg-slate-950 text-slate-100 shadow-[0_24px_80px_rgba(2,8,23,0.28)] ring-1 ring-white/5"
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50/70 dark:hover:bg-white/[0.03]"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-white/[0.04]"
         aria-expanded={isOpen}
       >
         <div className="flex min-w-0 items-center gap-3">
           <span
             className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border ${
-              isRunning
-                ? "border-sky-300/60 bg-sky-50 text-sky-600 shadow-[0_0_35px_rgba(14,165,233,0.28)] dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300"
-                : "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-400/25 dark:bg-emerald-500/10 dark:text-emerald-300"
+              hasError
+                ? "border-red-400/30 bg-red-500/10 text-red-300 shadow-[0_0_35px_rgba(248,113,113,0.20)]"
+                : isRunning
+                  ? "border-sky-400/30 bg-sky-500/10 text-sky-300 shadow-[0_0_35px_rgba(14,165,233,0.28)]"
+                  : "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
             }`}
           >
-            {isRunning && <span className="absolute inset-0 animate-ping rounded-2xl bg-sky-400/20" />}
-            {isRunning ? <Loader2 className="relative h-4 w-4 animate-spin" /> : <Check className="relative h-4 w-4" />}
+            {isRunning && !hasError && <span className="absolute inset-0 animate-ping rounded-2xl bg-sky-400/20" />}
+            {hasError ? <X className="relative h-4 w-4" /> : isRunning ? <Loader2 className="relative h-4 w-4 animate-spin" /> : <Check className="relative h-4 w-4" />}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-black text-slate-900 dark:text-white">{status}</p>
-            <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
-              {isRunning ? `Running for ${runtimeSeconds}s` : "Agent workspace ready"}
+            <p className="truncate text-sm font-black text-white">
+              {hasError ? "Execution error" : isRunning ? status : "Completed"}
+            </p>
+            <p className="truncate text-xs font-medium text-slate-400">
+              {isRunning ? `Running for ${runtimeSeconds}s` : `Finished in ${runtimeSeconds}s`} · {actionCount} actions
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 sm:inline-flex dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-            {latestLogs.length} steps
+          <span className="hidden rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-slate-300 sm:inline-flex">
+            {actionCount}/{EXECUTION_TIMELINE_STEPS.length} steps
           </span>
           <ChevronRight className={`h-4 w-4 text-slate-400 transition ${isOpen ? "rotate-90" : ""}`} />
         </div>
@@ -775,44 +780,81 @@ function AgentStatusPanel({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="border-t border-slate-200/70 dark:border-white/10"
+            className="border-t border-white/10"
           >
-            <div className="space-y-3 px-4 py-4">
-              {latestLogs.map((log, index) => (
-                <motion.div
-                  key={log.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.025 }}
-                  className="relative flex gap-3"
-                >
-                  <div className="flex flex-col items-center">
-                    <span
-                      className={`mt-1 h-2.5 w-2.5 rounded-full ${
-                        log.kind === "done"
-                          ? "bg-emerald-400"
-                          : log.kind === "file"
-                            ? "bg-violet-400"
-                            : log.kind === "preview"
-                              ? "bg-cyan-400"
-                              : log.kind === "tool"
-                                ? "bg-amber-400"
-                                : "bg-sky-400"
-                      } shadow-[0_0_20px_currentColor]`}
-                    />
-                    {index < latestLogs.length - 1 && <span className="mt-2 h-8 w-px bg-slate-200 dark:bg-white/10" />}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{log.label}</p>
-                      <span className="shrink-0 font-mono text-[10px] text-slate-400">
-                        {formatTime(log.createdAt)}
+            <div className="space-y-2 px-4 py-4">
+              {EXECUTION_TIMELINE_STEPS.map((step, index) => {
+                const log = logs.find((item) => item.label === step.label);
+                const isStepCompleted = status === "Completed" || completedLabels.has(step.label) || index < activeIndex;
+                const isStepActive = isRunning && index === activeIndex && !hasError;
+                const isStepError = hasError && index === activeIndex;
+                const detail = log?.detail ?? step.detail;
+                const createdAt = log?.createdAt;
+
+                return (
+                  <motion.div
+                    key={step.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.025 }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setExpandedStep((current) => (current === step.label ? null : step.label))}
+                      className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${
+                        isStepError
+                          ? "border-red-400/25 bg-red-500/10"
+                          : isStepActive
+                            ? "border-sky-400/25 bg-sky-500/10 shadow-[0_0_28px_rgba(14,165,233,0.10)]"
+                            : isStepCompleted
+                              ? "border-emerald-400/15 bg-emerald-500/[0.06]"
+                              : "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-900">
+                        {isStepError ? (
+                          <X className="h-3.5 w-3.5 text-red-300" />
+                        ) : isStepActive ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-300" />
+                        ) : isStepCompleted ? (
+                          <Check className="h-3.5 w-3.5 text-emerald-300" />
+                        ) : (
+                          <span className="h-2 w-2 rounded-full bg-slate-600" />
+                        )}
                       </span>
-                    </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{log.detail}</p>
-                  </div>
-                </motion.div>
-              ))}
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-3">
+                          <span className="truncate text-sm font-black text-slate-100">{step.label}</span>
+                          <span className="shrink-0 font-mono text-[10px] text-slate-500">
+                            {createdAt ? formatTime(createdAt) : isStepActive ? "now" : "--:--"}
+                          </span>
+                        </span>
+                        <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-400">{detail}</span>
+                      </span>
+                      <ChevronRight className={`mt-1 h-3.5 w-3.5 shrink-0 text-slate-500 transition ${expandedStep === step.label ? "rotate-90" : ""}`} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {expandedStep === step.label && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.18 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="ml-9 mt-2 rounded-2xl border border-white/10 bg-black/35 px-3 py-2 font-mono text-[11px] leading-5 text-slate-300">
+                            <p className="text-slate-500">terminal</p>
+                            <p>{step.log}</p>
+                            <p className={isStepError ? "text-red-300" : isStepCompleted ? "text-emerald-300" : isStepActive ? "text-sky-300" : "text-slate-500"}>
+                              {isStepError ? "error: action failed, showing recoverable response" : isStepCompleted ? "ok: completed" : isStepActive ? "running..." : "waiting..."}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         )}
