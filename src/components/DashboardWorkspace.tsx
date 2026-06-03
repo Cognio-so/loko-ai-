@@ -49,6 +49,7 @@ import IntegrationsPage from "@/app/integrations/page";
 import PartnersPage from "@/app/partners/page";
 import LaunchpadPage from "@/app/launchpad/page";
 import CollectionPage from "@/app/collection/page";
+import { assistants } from "@/app/collection/collection-data";
 import AffiliatePage from "@/app/affiliate/page";
 import PricingPage from "@/app/pricing/page";
 import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
@@ -87,7 +88,7 @@ type Project = {
   updated_at: string;
 };
 
-type View = "chat" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
+type View = "chat" | "dashboard" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
 
 type UploadedAttachment = {
   name: string;
@@ -158,7 +159,7 @@ function getDefaultGeneratedFile(project: Project | null) {
 }
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Compass, view: "chat" as View },
+  { label: "Dashboard", href: "/dashboard", icon: Compass, view: "dashboard" as View },
   { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
   { label: "Partners", href: "/partners", icon: Users, view: "partners" as View },
   { label: "Launchpad", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
