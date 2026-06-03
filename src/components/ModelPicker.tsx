@@ -149,13 +149,13 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/35 px-3 pb-8 pt-12 backdrop-blur-sm sm:px-5 sm:pb-10 sm:pt-14"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/35 p-3 backdrop-blur-sm sm:p-6"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setIsOpen(false);
           }}
         >
           <div
-            className="flex max-h-[calc(100dvh-6rem)] w-full max-w-[1080px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100dvh-7rem)]"
+            className="flex max-h-[calc(100dvh-2rem)] w-full max-w-[1080px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100dvh-3rem)]"
             role="dialog"
             aria-modal="true"
             aria-label="Select model"
@@ -204,7 +204,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
 
             <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
               {filteredModels.length ? (
-                <div className="grid grid-cols-1 gap-3 pb-1 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 xl:grid-cols-3">
                   {filteredModels.map((model) => (
                     <ModelGridCard
                       key={model.id}
