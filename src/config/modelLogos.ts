@@ -1,4 +1,12 @@
 const MODEL_LOGOS: Record<string, string> = {
+  "Claude Opus 4.8 Fast": "/models/anthropic.svg",
+  "Claude Opus 4.8": "/models/anthropic.svg",
+  "Claude Opus 4.7 Fast": "/models/anthropic.svg",
+
+  "MiniMax M3": "/models/minimax.svg",
+
+  "Mistral Medium 3.5": "/models/mistral.svg",
+
   "GPT OSS 120B": "/models/openai.svg",
   "GPT-4o Mini": "/models/openai.svg",
   "GPT-5 Image Mini": "/models/openai.svg",

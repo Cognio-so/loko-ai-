@@ -5,6 +5,11 @@ const DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2.6:free";
 const DEFAULT_FREE_MODEL = "openai/gpt-oss-120b:free";
 const DEFAULT_OPENROUTER_MODELS = [
   "moonshotai/kimi-k2.6:free",
+  "anthropic/claude-opus-4.8-fast",
+  "anthropic/claude-opus-4.8",
+  "minimax/minimax-m3",
+  "anthropic/claude-opus-4.7-fast",
+  "mistralai/mistral-medium-3-5",
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
   "qwen/qwen3-coder:free",
@@ -16,7 +21,10 @@ const DEFAULT_OPENROUTER_MODELS = [
   "deepseek/deepseek-v4-pro",
 ];
 const DEFAULT_WEBSITE_MODELS = [
+  "anthropic/claude-opus-4.8-fast",
   "qwen/qwen3-coder:free",
+  "mistralai/mistral-medium-3-5",
+  "minimax/minimax-m3",
   "z-ai/glm-4.5-air:free",
   "moonshotai/kimi-k2.6:free",
   "openai/gpt-oss-120b:free",
@@ -26,7 +34,10 @@ const DEFAULT_WEBSITE_MODELS = [
   "google/gemini-2.5-flash",
 ];
 const DEFAULT_CODER_MODELS = [
+  "anthropic/claude-opus-4.8-fast",
   "qwen/qwen3-coder:free",
+  "mistralai/mistral-medium-3-5",
+  "minimax/minimax-m3",
   "z-ai/glm-4.5-air:free",
   "deepseek/deepseek-v4-pro",
   "moonshotai/kimi-k2.6:free",
@@ -41,7 +52,9 @@ const DEFAULT_IMAGE_MODELS = [
   "black-forest-labs/flux.2-klein-4b",
 ];
 const DEFAULT_SEARCH_MODELS = [
+  "anthropic/claude-opus-4.8-fast",
   "openai/gpt-oss-120b:free",
+  "mistralai/mistral-medium-3-5",
   "openai/gpt-4o-mini-search-preview",
   "z-ai/glm-4.5-air:free",
   "moonshotai/kimi-k2.6:free",

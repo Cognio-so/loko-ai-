@@ -5,6 +5,7 @@ export const MODEL_CATEGORIES = ["Chat Models", "Coding Models", "Search Models"
 export type ModelCategory = (typeof MODEL_CATEGORIES)[number];
 
 export type OpenRouterProvider =
+  | "Anthropic"
   | "Moonshot AI"
   | "OpenAI"
   | "Meta"
@@ -15,6 +16,8 @@ export type OpenRouterProvider =
   | "Google"
   | "Z AI"
   | "DeepSeek"
+  | "MiniMax"
+  | "Mistral AI"
   | "Black Forest Labs";
 
 export type OpenRouterModelOption = {
@@ -34,6 +37,41 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models", "Search Models", "Coding Models"],
     free: true,
+  },
+  {
+    id: "anthropic/claude-opus-4.8-fast",
+    name: "Claude Opus 4.8 Fast",
+    provider: "Anthropic",
+    type: "Reasoning",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
+  },
+  {
+    id: "anthropic/claude-opus-4.8",
+    name: "Claude Opus 4.8",
+    provider: "Anthropic",
+    type: "Reasoning",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
+  },
+  {
+    id: "minimax/minimax-m3",
+    name: "MiniMax M3",
+    provider: "MiniMax",
+    type: "Chat",
+    categories: ["Chat Models", "Coding Models"],
+  },
+  {
+    id: "anthropic/claude-opus-4.7-fast",
+    name: "Claude Opus 4.7 Fast",
+    provider: "Anthropic",
+    type: "Reasoning",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
+  },
+  {
+    id: "mistralai/mistral-medium-3-5",
+    name: "Mistral Medium 3.5",
+    provider: "Mistral AI",
+    type: "Chat",
+    categories: ["Chat Models", "Coding Models", "Search Models"],
   },
   {
     id: "openai/gpt-oss-120b:free",
