@@ -1827,6 +1827,7 @@ export default function DashboardWorkspace() {
                           onRemoveAttachment={removeUploadedAttachment}
                         />
                         <PromptChips setPrompt={setPrompt} />
+                        <ChatIconsRow />
                       </div>
                     </div>
                   ) : (
@@ -1900,6 +1901,7 @@ export default function DashboardWorkspace() {
                             onRemoveAttachment={removeUploadedAttachment}
                           />
                           <PromptChips setPrompt={setPrompt} />
+                          <ChatIconsRow />
                         </div>
                       </div>
                     </>
@@ -2218,6 +2220,34 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
           )
         )}
       </div>
+    </div>
+  );
+}
+
+function ChatIconsRow() {
+  const features = [
+    { Icon: Sparkles, label: "AI", color: "text-sky-400" },
+    { Icon: Zap, label: "Fast", color: "text-amber-400" },
+    { Icon: Rocket, label: "Deploy", color: "text-rose-400" },
+    { Icon: Code2, label: "Code", color: "text-emerald-400" },
+  ];
+
+  return (
+    <div className="mt-6 flex justify-center gap-6 sm:gap-8">
+      {features.map(({ Icon, label, color }, idx) => (
+        <motion.div
+          key={label}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.1, duration: 0.5 }}
+          className="flex flex-col items-center gap-2"
+        >
+          <div className={`${color} opacity-60 transition-all duration-300 group hover:opacity-100`}>
+            <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+          </div>
+          <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{label}</span>
+        </motion.div>
+      ))}
     </div>
   );
 }
