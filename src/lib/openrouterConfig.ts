@@ -13,6 +13,7 @@ const DEFAULT_OPENROUTER_MODELS = [
   "cognitivecomputations/dolphin-mistral-24b-venice-edition:free",
 ];
 const DEFAULT_WEBSITE_MODELS = [
+  "qwen/qwen3-coder:free",
   "moonshotai/kimi-k2.6:free",
   "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
@@ -33,14 +34,14 @@ const DEFAULT_IMAGE_MODELS = [
   "black-forest-labs/flux.2-klein-4b",
 ];
 const DEFAULT_SEARCH_MODELS = [
+  "openai/gpt-oss-120b:free",
   "openai/gpt-4o-mini-search-preview",
   "moonshotai/kimi-k2.6:free",
-  "openai/gpt-oss-120b:free",
   "meta-llama/llama-3.3-70b-instruct:free",
 ];
 const DEFAULT_FAST_MODEL = "qwen/qwen3-coder:free";
 const DEFAULT_SMART_MODEL = "moonshotai/kimi-k2.6:free";
-const DEFAULT_REASONING_MODEL = "arcee-ai/trinity-large-thinking";
+const DEFAULT_REASONING_MODEL = "openai/gpt-oss-120b:free";
 const DEFAULT_BIG_CONTEXT_MODEL = "nousresearch/hermes-3-llama-3.1-405b:free";
 const CHAT_COMPLETIONS_SUFFIX = "/chat/completions";
 
