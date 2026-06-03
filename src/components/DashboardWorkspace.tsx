@@ -610,12 +610,12 @@ function DashboardOverview({
   return (
     <div className="relative min-h-full overflow-hidden bg-[#f8fbff] text-slate-950">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(14,165,233,0.16),transparent_28%),radial-gradient(circle_at_82%_0%,rgba(99,102,241,0.12),transparent_30%),linear-gradient(180deg,#ffffff_0%,#f8fbff_45%,#eef6ff_100%)]" />
-      <div className="relative mx-auto max-w-7xl px-5 py-8 lg:px-8">
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="relative mx-auto w-full max-w-[1500px] px-5 py-5 lg:px-7">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-sky-500">Loko AI dashboard</p>
-            <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Your Dashboard</h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+            <h1 className="mt-1.5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Your Dashboard</h1>
+            <p className="mt-1.5 max-w-3xl text-sm text-slate-500">
               Overview of your agent usage, conversation activity, model routing, workflows, and quick launch agents.
             </p>
           </div>
@@ -636,8 +636,8 @@ function DashboardOverview({
             { label: "AI Messages", value: totalMessages, note: "Conversation activity", icon: FileText, tone: "from-violet-500 to-fuchsia-500" },
             { label: "Generated Files", value: generatedFiles, note: "Project files created", icon: Database, tone: "from-orange-500 to-amber-400" },
           ].map((stat) => (
-            <div key={stat.label} className="group rounded-[26px] border border-slate-200/80 bg-white/80 p-5 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_26px_90px_rgba(14,165,233,0.14)]">
-              <div className="mb-7 flex items-center justify-between">
+            <div key={stat.label} className="group rounded-[24px] border border-slate-200/80 bg-white/82 p-4 shadow-[0_16px_54px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:-translate-y-1 hover:shadow-[0_22px_72px_rgba(14,165,233,0.14)]">
+              <div className="mb-4 flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-500">{stat.label}</p>
                 <div className={`flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br ${stat.tone} shadow-lg shadow-slate-300/50`}>
                   <stat.icon className="h-4 w-4 text-white" />
@@ -649,16 +649,16 @@ function DashboardOverview({
           ))}
         </div>
 
-        <div className="mt-5 grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-          <section className="rounded-[28px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_22px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-            <div className="mb-6 flex items-start justify-between">
+        <div className="mt-4 grid gap-4 xl:grid-cols-[1.25fr_0.75fr]">
+          <section className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+            <div className="mb-4 flex items-start justify-between">
               <div>
                 <h2 className="text-base font-black text-slate-950">Conversation Activity</h2>
                 <p className="mt-1 text-xs text-slate-500">Daily workspace signal across the latest sessions</p>
               </div>
               <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">Last 30 days</span>
             </div>
-            <div className="flex h-56 items-end gap-3 rounded-3xl border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-5">
+            <div className="flex h-44 items-end gap-3 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-4">
               {activityBars.map((height, index) => (
                 <div key={index} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                   <div
@@ -671,12 +671,12 @@ function DashboardOverview({
             </div>
           </section>
 
-          <section className="rounded-[28px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_22px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-            <div className="mb-5">
+          <section className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+            <div className="mb-4">
               <h2 className="text-base font-black text-slate-950">Model Router</h2>
               <p className="mt-1 text-xs text-slate-500">Best model selected by task type</p>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {[
                 ["Frontend/Coding", "qwen/qwen3-coder:free", "from-indigo-500 to-cyan-400"],
                 ["Creative Writing", "moonshotai/kimi-k2.6:free", "from-emerald-500 to-teal-400"],
@@ -684,7 +684,7 @@ function DashboardOverview({
                 ["UI Analysis", "hermes-3-llama-405b", "from-slate-700 to-slate-500"],
                 ["Image Prompting", "gemini-2.5-flash-image", "from-orange-500 to-amber-400"],
               ].map(([label, model, tone]) => (
-                <div key={label} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                <div key={label} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2.5">
                   <span className={`h-3 w-3 rounded-full bg-gradient-to-br ${tone} shadow-lg`} />
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-black text-slate-800">{label}</p>
@@ -696,9 +696,9 @@ function DashboardOverview({
           </section>
         </div>
 
-        <div className="mt-5 grid gap-5 xl:grid-cols-2">
-          <section className="rounded-[28px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_22px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center gap-2">
+        <div className="mt-4 grid gap-4 xl:grid-cols-2">
+          <section className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+            <div className="mb-4 flex items-center gap-2">
               <History className="h-4 w-4 text-sky-500" />
               <h2 className="text-base font-black text-slate-950">Recent Conversations</h2>
             </div>
@@ -720,7 +720,7 @@ function DashboardOverview({
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-52 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/70 text-center">
+              <div className="flex min-h-36 flex-col items-center justify-center rounded-[22px] border border-dashed border-slate-200 bg-slate-50/70 text-center">
                 <History className="mb-3 h-9 w-9 text-slate-400" />
                 <p className="text-sm font-bold text-slate-700">No conversations yet</p>
                 <p className="mt-1 text-xs text-slate-500">Start chatting with your assigned agents to see them here.</p>
@@ -728,21 +728,21 @@ function DashboardOverview({
             )}
           </section>
 
-          <section className="rounded-[28px] border border-slate-200/80 bg-white/85 p-5 shadow-[0_22px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-            <div className="mb-5 flex items-center justify-between">
+          <section className="rounded-[26px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_18px_64px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+            <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bot className="h-4 w-4 text-sky-500" />
                 <h2 className="text-base font-black text-slate-950">Quick Launch Agents</h2>
               </div>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500">AI Collection</span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {popularAgents.map((agent) => (
                 <button
                   key={agent.slug}
                   type="button"
                   onClick={() => onOpenAgent(agent.slug)}
-                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 text-left transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
+                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 text-left transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md"
                 >
                   <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${agent.accent} shadow-lg shadow-slate-300/50`}>
                     <agent.icon className="h-5 w-5 text-white" />
