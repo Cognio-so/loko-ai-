@@ -654,6 +654,183 @@ function ActivityActiveDot({ cx, cy }: { cx?: number; cy?: number }) {
   );
 }
 
+function AgentStatusPanel({
+  status,
+  logs,
+  runtimeSeconds,
+  isRunning,
+  isOpen,
+  onToggle,
+}: {
+  status: AgentStatus;
+  logs: AgentActivityLog[];
+  runtimeSeconds: number;
+  isRunning: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
+  const latestLogs = logs.length
+    ? logs
+    : [
+        {
+          id: "idle",
+          label: "Ready",
+          detail: "Ask LokoAI to chat, research, design, or build.",
+          kind: "done" as const,
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+  return (
+    <motion.div
+      layout
+      className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/90 shadow-[0_22px_70px_rgba(15,23,42,0.10)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/75 dark:shadow-[0_28px_90px_rgba(2,8,23,0.45)]"
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50/70 dark:hover:bg-white/[0.03]"
+        aria-expanded={isOpen}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span
+            className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border ${
+              isRunning
+                ? "border-sky-300/60 bg-sky-50 text-sky-600 shadow-[0_0_35px_rgba(14,165,233,0.28)] dark:border-sky-400/30 dark:bg-sky-500/10 dark:text-sky-300"
+                : "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-400/25 dark:bg-emerald-500/10 dark:text-emerald-300"
+            }`}
+          >
+            {isRunning && <span className="absolute inset-0 animate-ping rounded-2xl bg-sky-400/20" />}
+            {isRunning ? <Loader2 className="relative h-4 w-4 animate-spin" /> : <Check className="relative h-4 w-4" />}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-black text-slate-900 dark:text-white">{status}</p>
+            <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+              {isRunning ? `Running for ${runtimeSeconds}s` : "Agent workspace ready"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-500 sm:inline-flex dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+            {latestLogs.length} steps
+          </span>
+          <ChevronRight className={`h-4 w-4 text-slate-400 transition ${isOpen ? "rotate-90" : ""}`} />
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="border-t border-slate-200/70 dark:border-white/10"
+          >
+            <div className="space-y-3 px-4 py-4">
+              {latestLogs.map((log, index) => (
+                <motion.div
+                  key={log.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: index * 0.025 }}
+                  className="relative flex gap-3"
+                >
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={`mt-1 h-2.5 w-2.5 rounded-full ${
+                        log.kind === "done"
+                          ? "bg-emerald-400"
+                          : log.kind === "file"
+                            ? "bg-violet-400"
+                            : log.kind === "preview"
+                              ? "bg-cyan-400"
+                              : log.kind === "tool"
+                                ? "bg-amber-400"
+                                : "bg-sky-400"
+                      } shadow-[0_0_20px_currentColor]`}
+                    />
+                    {index < latestLogs.length - 1 && <span className="mt-2 h-8 w-px bg-slate-200 dark:bg-white/10" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{log.label}</p>
+                      <span className="shrink-0 font-mono text-[10px] text-slate-400">
+                        {formatTime(log.createdAt)}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{log.detail}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function WorkspaceTabs({
+  hasPreview,
+  onOpenPreview,
+}: {
+  hasPreview: boolean;
+  onOpenPreview: () => void;
+}) {
+  return (
+    <div className="inline-flex rounded-2xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70">
+      <button type="button" className="h-9 rounded-xl bg-slate-950 px-4 text-xs font-black text-white shadow-sm dark:bg-white dark:text-slate-950">
+        Chat
+      </button>
+      <button
+        type="button"
+        onClick={onOpenPreview}
+        disabled={!hasPreview}
+        className="h-9 rounded-xl px-4 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-45 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+      >
+        Preview
+      </button>
+    </div>
+  );
+}
+
+function AgentFloatingActions({
+  isActivityOpen,
+  onToggleActivity,
+  hasPreview,
+  onOpenPreview,
+}: {
+  isActivityOpen: boolean;
+  onToggleActivity: () => void;
+  hasPreview: boolean;
+  onOpenPreview: () => void;
+}) {
+  return (
+    <div className="pointer-events-none absolute bottom-28 right-4 z-20 flex flex-col gap-2 sm:right-6">
+      <button
+        type="button"
+        onClick={onToggleActivity}
+        className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-600 shadow-[0_14px_35px_rgba(15,23,42,0.14)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:text-sky-600 dark:border-white/10 dark:bg-slate-950/80 dark:text-slate-300"
+        aria-label={isActivityOpen ? "Collapse activity" : "Expand activity"}
+        title={isActivityOpen ? "Collapse activity" : "Expand activity"}
+      >
+        <History className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        onClick={onOpenPreview}
+        disabled={!hasPreview}
+        className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-600 shadow-[0_14px_35px_rgba(15,23,42,0.14)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:text-sky-600 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-slate-950/80 dark:text-slate-300"
+        aria-label="Open preview"
+        title="Open preview"
+      >
+        <Maximize2 className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 function DashboardOverview({
   projects,
   onOpenProject,
@@ -1122,6 +1299,11 @@ export default function DashboardWorkspace() {
 
     setIsSubmitting(true);
     setComposerNotice("");
+    setIsActivityOpen(true);
+    setAgentStartedAt(Date.now());
+    setRuntimeSeconds(0);
+    setAgentStatus(uploadedAttachment ? "Reading files..." : "Thinking...");
+    setActivityLogs([]);
     const attachmentToSend = uploadedAttachment;
     const userVisibleContent = [
       trimmed || "Analyze the uploaded file.",
@@ -1145,12 +1327,18 @@ export default function DashboardWorkspace() {
 
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
+    appendAgentLog("Prompt received", trimmed || "Analyzing uploaded file", "thinking");
+    if (attachmentToSend) {
+      appendAgentLog("Reading files", attachmentToSend.name, "file");
+    }
     setPrompt("");
     setUploadedAttachment(null);
     setUploadProgress(0);
 
     try {
       if (trimmed && isBuildRequestPrompt(trimmed) && !attachmentToSend) {
+        setAgentStatus("Writing code...");
+        appendAgentLog("Builder mode", "Planning project structure and UI system", "tool");
         const generateResponse = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1163,7 +1351,11 @@ export default function DashboardWorkspace() {
         }
 
         const generated = (await generateResponse.json()) as GeneratedProjectResponse;
+        setAgentStatus("Generating preview...");
+        appendAgentLog("Generating preview", generated.projectTitle || "Rendering workspace preview", "preview");
         const generatedFiles = normalizeGeneratedFiles(generated.files);
+        setAgentStatus("Editing files...");
+        appendAgentLog("Writing files", `${generatedFiles.length} project files prepared`, "file");
         const assistantFinal: ChatMessage = {
           ...assistantMessage,
           isStreaming: false,
@@ -1208,10 +1400,14 @@ export default function DashboardWorkspace() {
         setActiveBuildProject(hydratedProject);
         setSelectedBuilderFile(getDefaultGeneratedFile(hydratedProject));
         setBuilderTab(hydratedProject.preview_html ? "preview" : "code");
+        setAgentStatus("Completed");
+        appendAgentLog("Completed", "Preview and source files are ready", "done");
         loadProjects();
         return;
       }
 
+      setAgentStatus(attachmentToSend ? "Reading files..." : "Searching...");
+      appendAgentLog(attachmentToSend ? "File context" : "Model router", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool");
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1241,11 +1437,17 @@ export default function DashboardWorkspace() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let hasStreamed = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        if (!hasStreamed) {
+          hasStreamed = true;
+          setAgentStatus("Writing code...");
+          appendAgentLog("Streaming response", "Tokens are arriving in real time", "thinking");
+        }
         setMessages((current) =>
           current.map((message) =>
             message.id === assistantId
@@ -1260,9 +1462,13 @@ export default function DashboardWorkspace() {
           message.id === assistantId ? { ...message, isStreaming: false } : message
         )
       );
+      setAgentStatus("Completed");
+      appendAgentLog("Completed", "Response finished successfully", "done");
       loadProjects();
     } catch (error) {
       console.warn("Chat send failed:", error);
+      setAgentStatus("Completed");
+      appendAgentLog("Error handled", "The provider returned an issue and the message was shown", "done");
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -1281,6 +1487,7 @@ export default function DashboardWorkspace() {
       );
     } finally {
       setIsSubmitting(false);
+      setAgentStartedAt(null);
     }
   }
 
@@ -1572,6 +1779,29 @@ export default function DashboardWorkspace() {
                     </div>
                   ) : (
                     <>
+                      <div className="shrink-0 space-y-3 px-4 pt-5 sm:px-6">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <WorkspaceTabs
+                            hasPreview={Boolean(activeBuildProject)}
+                            onOpenPreview={() => {
+                              if (!activeBuildProject) return;
+                              setBuilderTab("preview");
+                            }}
+                          />
+                          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
+                            {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" /> : <Check className="h-3.5 w-3.5 text-emerald-500" />}
+                            {isSubmitting ? "Live streaming" : "Ready"}
+                          </div>
+                        </div>
+                        <AgentStatusPanel
+                          status={agentStatus}
+                          logs={activityLogs}
+                          runtimeSeconds={runtimeSeconds}
+                          isRunning={isSubmitting}
+                          isOpen={isActivityOpen}
+                          onToggle={() => setIsActivityOpen((open) => !open)}
+                        />
+                      </div>
                       <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-10 sm:px-6">
                         <div className="space-y-12">
                           {messages.map((message) => (
@@ -1594,6 +1824,15 @@ export default function DashboardWorkspace() {
                           <div ref={messagesEndRef} />
                         </div>
                       </div>
+                      <AgentFloatingActions
+                        isActivityOpen={isActivityOpen}
+                        onToggleActivity={() => setIsActivityOpen((open) => !open)}
+                        hasPreview={Boolean(activeBuildProject)}
+                        onOpenPreview={() => {
+                          if (!activeBuildProject) return;
+                          setBuilderTab("preview");
+                        }}
+                      />
                       <div className="shrink-0 bg-white/80 px-4 pb-6 pt-4 backdrop-blur-md transition-colors duration-300 sm:pb-10 dark:bg-slate-950/80">
                         <div className="mx-auto max-w-2xl">
                           <Composer
