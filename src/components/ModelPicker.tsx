@@ -9,7 +9,7 @@ import {
   getOpenRouterModelById,
   type OpenRouterModelOption,
 } from "@/lib/openrouterModels";
-import { getModelLogo } from "@/config/modelLogos";
+import { getModelLogo, getModelLogoTheme } from "@/config/modelLogos";
 
 type ModelPickerProps = {
   selectedModelId: string;
@@ -22,6 +22,7 @@ const FILTERS: FilterKey[] = ["All", "Chat", "Coding", "Reasoning", "Search", "I
 
 function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?: "sm" | "md" }) {
   const src = getModelLogo(model.name);
+  const logoTheme = getModelLogoTheme(model.name);
   const shellSize = size === "sm" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-9 w-9";
   const imageSize = size === "sm" ? "h-5 w-5 sm:h-6 sm:w-6" : "h-6 w-6";
   const initials = model.name
@@ -32,10 +33,13 @@ function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?
     .toUpperCase();
 
   return (
-    <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/75 shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/80 backdrop-blur-xl transition duration-300 group-hover:scale-105 group-hover:shadow-[0_12px_32px_rgba(14,165,233,0.18)]`}>
+    <span
+      className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full border border-white/70 shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 backdrop-blur-xl transition duration-300 group-hover:scale-105 group-hover:shadow-[0_12px_32px_rgba(14,165,233,0.18)]`}
+      style={{ background: logoTheme.bg, color: logoTheme.tint, ["--tw-ring-color" as string]: `${logoTheme.tint}33` }}
+    >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={`${model.name} logo`} className={`${imageSize} object-contain`} />
+        <img src={src} alt={`${model.name} logo`} className={`${imageSize} object-contain`} style={{ filter: logoTheme.filter }} />
       ) : (
         <span className="text-[10px] font-black tracking-tight text-sky-600">{initials}</span>
       )}

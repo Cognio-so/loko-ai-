@@ -9,7 +9,7 @@ import {
   SELECTED_MODEL_STORAGE_KEY,
   getOpenRouterModelById,
 } from "@/lib/openrouterModels";
-import { getModelLogo } from "@/config/modelLogos";
+import { getModelLogo, getModelLogoTheme } from "@/config/modelLogos";
 import {
   Bot,
   FolderOpen,
@@ -247,6 +247,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
   const selectedModelForMenu = getOpenRouterModelById(selectedModelId || "");
   const selectedModelLogo = selectedModelForMenu ? getModelLogo(selectedModelForMenu.name) : null;
+  const selectedModelLogoTheme = selectedModelForMenu ? getModelLogoTheme(selectedModelForMenu.name) : null;
 
   return (
     <div className="min-h-dvh bg-white text-slate-900">
@@ -506,10 +507,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         onClick={() => setIsModelMenuOpen((s) => !s)}
                         className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
                       >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+                        <span
+                          className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
+                          style={{
+                            background: selectedModelLogoTheme?.bg,
+                            color: selectedModelLogoTheme?.tint,
+                            ["--tw-ring-color" as string]: selectedModelLogoTheme ? `${selectedModelLogoTheme.tint}33` : undefined,
+                          }}
+                        >
                           {selectedModelLogo ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={selectedModelLogo} alt={`${selectedModelForMenu?.name ?? "Model"} logo`} className="h-5 w-5 object-contain" />
+                            <img src={selectedModelLogo} alt={`${selectedModelForMenu?.name ?? "Model"} logo`} className="h-5 w-5 object-contain" style={{ filter: selectedModelLogoTheme?.filter }} />
                           ) : (
                             <span className="text-[10px] font-black text-sky-600">
                               {(selectedModelForMenu?.name ?? "AI").slice(0, 2).toUpperCase()}
@@ -523,6 +531,9 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                         <div className="absolute bottom-11 right-0 z-50 w-72 rounded-xl border border-slate-100 bg-white p-2 shadow-lg">
                           <div className="flex max-h-64 flex-col gap-1 overflow-y-auto">
                             {OPENROUTER_MODEL_OPTIONS.map((model) => (
+                              (() => {
+                                const logoTheme = getModelLogoTheme(model.name);
+                                return (
                               <button
                                 key={model.id}
                                 onClick={() => {
@@ -531,10 +542,17 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                                 }}
                                 className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 ${selectedModelId === model.id ? "bg-sky-50" : ""}`}
                               >
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/80 shadow-sm backdrop-blur">
+                                <span
+                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/70 shadow-sm ring-1 backdrop-blur"
+                                  style={{
+                                    background: logoTheme.bg,
+                                    color: logoTheme.tint,
+                                    ["--tw-ring-color" as string]: `${logoTheme.tint}33`,
+                                  }}
+                                >
                                   {getModelLogo(model.name) ? (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={getModelLogo(model.name)!} alt={`${model.name} logo`} className="h-5 w-5 object-contain" />
+                                    <img src={getModelLogo(model.name)!} alt={`${model.name} logo`} className="h-5 w-5 object-contain" style={{ filter: logoTheme.filter }} />
                                   ) : (
                                     <span className="text-[10px] font-black text-sky-600">{model.name.slice(0, 2).toUpperCase()}</span>
                                   )}
@@ -544,6 +562,8 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                                   <div className="truncate text-xs text-slate-400">{model.provider}</div>
                                 </div>
                               </button>
+                                );
+                              })()
                             ))}
                           </div>
                         </div>
