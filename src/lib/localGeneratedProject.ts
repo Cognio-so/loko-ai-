@@ -1,5 +1,7 @@
 import { detectGenerationIntent } from "@/lib/generationIntent";
 import { buildMotionCss } from "@/lib/animations";
+import { resolveLayoutPlan } from "@/lib/layoutEngine";
+import { resolveThemeProfile } from "@/lib/themeEngine";
 import { buildFeatureGridHtml, buildLogosHtml, buildStatsHtml, buildTestimonialsHtml } from "@/sections";
 import { getTemplateProfile } from "@/templates";
 
@@ -185,7 +187,9 @@ function buildWebsitePreview(prompt: string) {
   const intent = detectGenerationIntent(prompt);
   const { title, styleDirection, category } = intent;
   const templateProfile = getTemplateProfile(category);
-  const palette = templateProfile.palette;
+  const themeProfile = resolveThemeProfile(category);
+  const layoutPlan = resolveLayoutPlan(category);
+  const palette = themeProfile.palette;
   const content = getWebsiteContent(prompt);
 
   const featureCards = buildFeatureGridHtml(content.features);
@@ -284,6 +288,7 @@ function buildWebsitePreview(prompt: string) {
       <section id="features" class="section">
         <span class="eyebrow">Product system</span>
         <h2>${esc(styleDirection)}</h2>
+        <p class="sub">${esc(`${themeProfile.tone} Layout path: ${layoutPlan.structure.join(" -> ")}.`)}</p>
         <div class="grid">${featureCards}</div>
       </section>
       <section id="proof" class="section">
