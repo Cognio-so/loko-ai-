@@ -4,6 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  type TooltipProps,
+} from "recharts";
+import {
   Bot,
   Check,
   ChevronRight,
@@ -98,6 +109,14 @@ type UploadedAttachment = {
 };
 
 type BuilderTab = "preview" | "code";
+
+type ActivityDatum = {
+  key: string;
+  label: string;
+  month: string;
+  date: string;
+  count: number;
+};
 
 type GeneratedProjectResponse = {
   projectTitle?: string;
@@ -587,6 +606,32 @@ function FormattedMarkdownText({ content }: { content: string }) {
         );
       })}
     </>
+  );
+}
+
+function ActivityTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (!active || !payload?.length) return null;
+  const item = payload[0]?.payload as ActivityDatum | undefined;
+  if (!item) return null;
+
+  return (
+    <div className="pointer-events-none animate-in fade-in zoom-in-95 duration-150 rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 text-center shadow-[0_16px_45px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
+      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
+        {item.month} {item.date}
+      </p>
+      <p className="mt-1 text-xl font-black leading-none text-slate-950">{item.count}</p>
+    </div>
+  );
+}
+
+function ActivityActiveDot({ cx, cy }: { cx?: number; cy?: number }) {
+  if (typeof cx !== "number" || typeof cy !== "number") return null;
+
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={10} fill="rgba(14,165,233,0.12)" />
+      <circle cx={cx} cy={cy} r={5} fill="#0ea5e9" stroke="#ffffff" strokeWidth={3} />
+    </g>
   );
 }
 
