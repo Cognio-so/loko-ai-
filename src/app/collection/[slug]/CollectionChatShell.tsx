@@ -9,6 +9,7 @@ import {
   SELECTED_MODEL_STORAGE_KEY,
   getOpenRouterModelById,
 } from "@/lib/openrouterModels";
+import { getModelLogo } from "@/config/modelLogos";
 import {
   Bot,
   FolderOpen,

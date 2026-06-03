@@ -8,8 +8,8 @@ import {
   SELECTED_MODEL_STORAGE_KEY,
   getOpenRouterModelById,
   type OpenRouterModelOption,
-  type OpenRouterProvider,
 } from "@/lib/openrouterModels";
+import { getModelLogo } from "@/config/modelLogos";
 
 type ModelPickerProps = {
   selectedModelId: string;
@@ -20,25 +20,11 @@ type FilterKey = "All" | "Chat" | "Coding" | "Reasoning" | "Search" | "Image" | 
 
 const FILTERS: FilterKey[] = ["All", "Chat", "Coding", "Reasoning", "Search", "Image", "Free", "Paid"];
 
-const PROVIDER_LOGO_MAP: Partial<Record<OpenRouterProvider, string>> = {
-  "Moonshot AI": "/provider-logos/moonshot.svg",
-  OpenAI: "/provider-logos/openai.svg",
-  Meta: "/provider-logos/meta.svg",
-  Qwen: "/provider-logos/qwen.svg",
-  "Nous Research": "/provider-logos/nous.svg",
-  "Arcee AI": "/provider-logos/arcee.svg",
-  "Cognitive Computations": "/provider-logos/cognitive.svg",
-  Google: "/provider-logos/google-gemini.svg",
-  "Z AI": "/provider-logos/z-ai.svg",
-  DeepSeek: "/provider-logos/deepseek.svg",
-  "Black Forest Labs": "/provider-logos/bfl.svg",
-};
-
-function ProviderLogo({ provider, size = "md" }: { provider: OpenRouterProvider; size?: "sm" | "md" }) {
-  const src = PROVIDER_LOGO_MAP[provider];
-  const shellSize = size === "sm" ? "h-7 w-7" : "h-8 w-8";
-  const imageSize = size === "sm" ? "h-[18px] w-[18px]" : "h-5 w-5";
-  const initials = provider
+function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?: "sm" | "md" }) {
+  const src = getModelLogo(model.name);
+  const shellSize = size === "sm" ? "h-8 w-8 sm:h-9 sm:w-9" : "h-9 w-9";
+  const imageSize = size === "sm" ? "h-5 w-5 sm:h-6 sm:w-6" : "h-6 w-6";
+  const initials = model.name
     .split(/\s+/)
     .map((word) => word[0])
     .join("")
@@ -46,10 +32,10 @@ function ProviderLogo({ provider, size = "md" }: { provider: OpenRouterProvider;
     .toUpperCase();
 
   return (
-    <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full bg-white shadow-[0_1px_4px_rgba(15,23,42,0.12)] ring-1 ring-slate-200`}>
+    <span className={`flex ${shellSize} shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/75 shadow-[0_8px_24px_rgba(15,23,42,0.10)] ring-1 ring-slate-200/80 backdrop-blur-xl transition duration-300 group-hover:scale-105 group-hover:shadow-[0_12px_32px_rgba(14,165,233,0.18)]`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={`${provider} logo`} className={`${imageSize} object-contain`} />
+        <img src={src} alt={`${model.name} logo`} className={`${imageSize} object-contain`} />
       ) : (
         <span className="text-[10px] font-black tracking-tight text-sky-600">{initials}</span>
       )}
@@ -77,13 +63,13 @@ function ModelGridCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex min-h-14 w-full items-center gap-3 rounded-[18px] border px-4 py-3 text-left transition ${
+      className={`group flex min-h-14 w-full items-center gap-3 rounded-[18px] border px-4 py-3 text-left transition duration-300 ${
         isSelected
-          ? "border-sky-500 bg-sky-50 shadow-[0_10px_28px_rgba(14,165,233,0.16)]"
-          : "border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)] hover:border-slate-300 hover:shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+          ? "border-sky-500 bg-sky-50 shadow-[0_12px_34px_rgba(14,165,233,0.20)]"
+          : "border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)] hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_14px_32px_rgba(15,23,42,0.10)]"
       }`}
     >
-      <ProviderLogo provider={model.provider} />
+      <ModelLogo model={model} />
       <div className="min-w-0 flex-1">
         <p className="line-clamp-2 break-words text-[15px] font-medium leading-tight text-slate-900">{model.name}</p>
       </div>
@@ -139,11 +125,11 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex h-[34px] max-w-[190px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
+        className="group inline-flex h-[34px] max-w-[190px] items-center gap-2 rounded-full border border-slate-200 bg-white py-0.5 pl-1.5 pr-2.5 text-[13px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
-        <ProviderLogo provider={selectedModel.provider} size="sm" />
+        <ModelLogo model={selectedModel} size="sm" />
         <span className="hidden truncate sm:inline">{selectedModel.name}</span>
         <span className="inline truncate sm:hidden">Model</span>
         <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition ${isOpen ? "rotate-180" : ""}`} />
