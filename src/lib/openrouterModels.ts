@@ -152,14 +152,14 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
   },
   {
     id: "google/gemini-2.5-flash",
-    name: "Gemini 2.5 Flash",
+    name: "Loko AI 2.5 Flash",
     provider: "Google",
     type: "Chat",
     categories: ["Chat Models", "Search Models"],
   },
   {
     id: "google/gemini-2.5-flash-image",
-    name: "Gemini 2.5 Flash Image",
+    name: "Loko AI 2.5 Flash Image",
     provider: "Google",
     type: "Image",
     categories: ["Image Models"],

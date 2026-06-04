@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { unauthorizedResponse } from "@/lib/api";
 import { getCurrentUser } from "@/lib/supabase/server";
 import {
+  getProjectsSetupErrorMessage,
+  isMissingProjectsTableError,
   supabaseCreateProject,
   supabaseDeleteProject,
   supabaseGetProject,
@@ -25,6 +27,9 @@ export async function GET(
     return NextResponse.json({ project });
   } catch (err: unknown) {
     console.error("Project GET error:", err);
+    if (isMissingProjectsTableError(err)) {
+      return NextResponse.json({ error: getProjectsSetupErrorMessage() }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to fetch project" }, { status: 500 });
   }
 }
@@ -76,6 +81,9 @@ async function handlePut(
     return NextResponse.json({ project });
   } catch (err: unknown) {
     console.error("Project PUT error:", err);
+    if (isMissingProjectsTableError(err)) {
+      return NextResponse.json({ error: getProjectsSetupErrorMessage() }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
   }
 }
@@ -93,6 +101,9 @@ async function handleDelete(
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("Project DELETE error:", err);
+    if (isMissingProjectsTableError(err)) {
+      return NextResponse.json({ error: getProjectsSetupErrorMessage() }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
   }
 }

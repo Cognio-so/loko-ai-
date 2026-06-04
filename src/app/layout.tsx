@@ -21,7 +21,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      className={cn("font-sans", geist.variable)}
+    >
       <body className="bg-background text-foreground antialiased transition-colors duration-300">
 
         <ThemeProvider defaultTheme="dark">

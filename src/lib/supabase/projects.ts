@@ -18,6 +18,25 @@ export interface SupabaseProject {
   updated_at: string;
 }
 
+type SupabaseErrorLike = {
+  code?: string;
+  message?: string;
+};
+
+export function isMissingProjectsTableError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+
+  const maybeError = error as SupabaseErrorLike;
+  return (
+    maybeError.code === "PGRST205" ||
+    maybeError.message?.includes("Could not find the table 'public.projects' in the schema cache") === true
+  );
+}
+
+export function getProjectsSetupErrorMessage() {
+  return "Supabase table `public.projects` is missing. Run `supabase/schema.sql` in the Supabase SQL Editor, then retry.";
+}
+
 function parseJsonArray(value: unknown): unknown[] {
   if (Array.isArray(value)) return value;
   if (typeof value !== "string") return [];

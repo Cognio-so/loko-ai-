@@ -29,6 +29,7 @@ export default function AvatarUploadClient({
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const isBusy = progress > 0 && progress < 100;
 
   const loadFile = (nextFile: File) => {
     if (!ACCEPTED.includes(nextFile.type)) {
@@ -113,13 +114,6 @@ export default function AvatarUploadClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-center">
-        <Avatar className="h-28 w-28 border border-border shadow-lg">
-          <AvatarImage src={avatarUrl} alt={displayName} />
-          <AvatarFallback className="bg-sky-500 text-3xl font-bold text-white">{initials}</AvatarFallback>
-        </Avatar>
-      </div>
-
       <div
         onDragOver={(event) => {
           event.preventDefault();
@@ -127,7 +121,7 @@ export default function AvatarUploadClient({
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        className={`rounded-2xl border border-dashed p-4 text-center transition ${isDragging ? "border-sky-400 bg-sky-500/10" : "border-border bg-muted/40"}`}
+        className="text-center"
       >
         {preview ? (
           <div className="space-y-4">
@@ -145,10 +139,27 @@ export default function AvatarUploadClient({
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => fileInputRef.current?.click()} className="flex w-full flex-col items-center gap-3 rounded-xl p-6 text-sm font-semibold text-muted-foreground">
-            <Camera className="h-8 w-8 text-sky-500" />
-            Change Avatar
-            <span className="text-xs font-normal">Drag and drop or choose jpg, jpeg, png, webp up to 5MB.</span>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBusy}
+            className={`group relative mx-auto flex h-28 w-28 items-center justify-center rounded-full transition focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-500/20 ${
+              isDragging ? "scale-105 ring-4 ring-sky-500/20" : "hover:scale-[1.03]"
+            }`}
+            aria-label="Change profile avatar"
+            title="Change avatar"
+          >
+            <Avatar className="h-28 w-28 border border-border shadow-lg">
+              <AvatarImage src={avatarUrl} alt={displayName} />
+              <AvatarFallback className="bg-sky-500 text-3xl font-bold text-white">{initials}</AvatarFallback>
+            </Avatar>
+            <span className="absolute inset-0 flex flex-col items-center justify-center rounded-full bg-slate-950/0 text-white opacity-0 backdrop-blur-[1px] transition group-hover:bg-slate-950/55 group-hover:opacity-100">
+              <Camera className="h-6 w-6" />
+              <span className="mt-1 text-[11px] font-black">Change</span>
+            </span>
+            <span className="absolute -right-1 bottom-2 flex h-9 w-9 items-center justify-center rounded-full border-4 border-white bg-sky-500 text-white shadow-lg dark:border-slate-950">
+              <Camera className="h-4 w-4" />
+            </span>
           </button>
         )}
       </div>
@@ -164,7 +175,9 @@ export default function AvatarUploadClient({
         }}
       />
       {progress > 0 ? <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-sky-500 transition-all" style={{ width: `${progress}%` }} /></div> : null}
-      {message ? <p className="text-center text-xs font-semibold text-muted-foreground">{message}</p> : null}
+      <p className="text-center text-xs font-medium text-muted-foreground">
+        {message || "Click your avatar to upload jpg, png, or webp up to 5MB."}
+      </p>
     </div>
   );
 }

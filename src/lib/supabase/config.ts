@@ -1,10 +1,6 @@
 export const protectedRoutes: string[] = [
-  "/dashboard",
   "/profile",
   "/settings",
-  "/generate", // Assuming generation features require auth
-  "/api/chat", // If chat history is user-specific
-  // Add other routes that should require authentication
 ];
 
 function getSupabaseAnonKey() {

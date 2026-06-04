@@ -104,10 +104,20 @@ export default function UserMenu({ variant = "avatar" }: UserMenuProps) {
   const router = useRouter();
   const { user, profile: storedProfile, signOut } = useAuth();
   const fallbackProfile = getUserProfile(user);
+  const displayName = storedProfile?.username || fallbackProfile.name;
+  const displayInitials =
+    displayName
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || fallbackProfile.initials;
   const profile = {
     ...fallbackProfile,
     avatar: storedProfile?.avatar_url || fallbackProfile.avatar,
-    name: storedProfile?.username || fallbackProfile.name,
+    name: displayName,
+    initials: displayInitials,
   };
 
   if (!user) return null;

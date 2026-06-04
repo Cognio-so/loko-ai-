@@ -134,7 +134,7 @@ const clientBrands = [
     bg: "border-slate-300/60 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900 dark:to-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.08)]"
   },
   {
-    name: "Google Gemini",
+    name: "Loko AI",
     font: "font-sans font-extrabold tracking-tight",
     color: "text-sky-600 dark:text-sky-300",
     bg: "border-sky-400/20 bg-gradient-to-br from-sky-500/10 via-white to-cyan-400/[0.06] dark:via-slate-900/50 dark:to-slate-950 shadow-[0_14px_30px_rgba(14,165,233,0.12)]"

@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabaseCreateProject, supabaseGetProject, supabaseUpdateProject } from "@/lib/supabase/projects";
+import {
+  isMissingProjectsTableError,
+  supabaseCreateProject,
+  supabaseGetProject,
+  supabaseUpdateProject,
+} from "@/lib/supabase/projects";
 import { processUploadedChatFile, type ProcessedChatFile, type UploadedChatFile } from "@/lib/file-analysis";
 import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
 import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
@@ -7,6 +12,8 @@ import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 import { normalizeOpenRouterModelId } from "@/lib/openrouterModelAliases";
 import { checkAgentSpecialization, getAgentSystemPrompt } from "@/lib/agentSpecialization";
+import { buildSystemPrompt } from "@/lib/memory/buildSystemPrompt";
+import { EpisodicMemory, LongTermMemory, ShortTermMemory, WorkingMemory } from "@/lib/memory/memoryManager";
 import { getCurrentUser } from "@/lib/supabase/server";
 import { guarded, preflightResponse, readJsonBody, validatePrompt } from "@/lib/security";
 
@@ -21,11 +28,26 @@ type ChatMessage = {
 
 type ChatRequestBody = {
   chatId?: string;
+  sessionId?: string;
+  userId?: string;
   message?: string;
   messages?: ChatMessage[];
   selectedModel?: string;
   attachment?: UploadedChatFile | null;
   agent?: string;
+  agentName?: string;
+  savePreference?: {
+    key?: string;
+    value?: unknown;
+    category?: string;
+  };
+  recordEpisode?: {
+    eventType?: string;
+    description?: string;
+    outcome?: string;
+    importance?: number;
+    metadata?: Record<string, unknown>;
+  };
 };
 
 type OpenRouterMessageContent =
@@ -61,6 +83,9 @@ const CURRENT_FACT_PATTERN =
 const WEBSITE_PATTERN =
   /\b(website|design|ui|ux|app|landing|dashboard|code|component|page|frontend|html|css|react|next|desktop)\b/i;
 
+const BUILD_REQUEST_PATTERN =
+  /\b(create|build|make|design|generate|develop|craft|banake do|bna ke do|bana ke do|banao|bnao|bna|bana)\b.{0,80}\b(website|web app|landing page|webpage|web page|page|dashboard|app|desktop app|ui|ux|component|saas|frontend|react app|next app|portfolio)\b|\b(website|landing page|web app|webpage|web page|dashboard|desktop app|saas page|frontend ui|react app|next app)\b/i;
+
 const CODE_PATTERN =
   /\b(code|coding|program|function|component|debug|bug|fix|error|typescript|javascript|react|next|node|api|route|css|html|database|sql|python|java|php|build|compile)\b/i;
 
@@ -71,7 +96,7 @@ const IMAGE_PATTERN =
   /\b(image|photo|picture|poster|banner|thumbnail|logo|illustration|avatar|wallpaper|visual|generate image|create image|image bana|photo bana|tasveer|taseer|chitra|चित्र|तस्वीर)\b/i;
 
 const VIDEO_PATTERN =
-  /\b(video|clip|movie|animation|animate|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao)\b/i;
+  /\b(video|clip|movie|animation|animate|animated|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao|screen recording|screenrecording|camera movement|camera movements|cinematic shot|cinematic video|motion graphics|timelapse|time-lapse|fps|frame by frame)\b/i;
 
 const PROMPT_REQUEST_PATTERN =
   /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
@@ -93,6 +118,33 @@ const MAX_GROK_VIDEO_SECONDS = 15;
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
+}
+
+async function persistProjectUpdate(
+  chatId: string,
+  updates: Parameters<typeof supabaseUpdateProject>[1]
+) {
+  try {
+    await supabaseUpdateProject(chatId, updates);
+  } catch (error) {
+    if (isMissingProjectsTableError(error)) {
+      console.warn("Skipping chat persistence because public.projects is missing.");
+      return;
+    }
+    throw error;
+  }
+}
+
+async function persistProjectCreate(data: Parameters<typeof supabaseCreateProject>[0]) {
+  try {
+    await supabaseCreateProject(data);
+  } catch (error) {
+    if (isMissingProjectsTableError(error)) {
+      console.warn("Skipping chat persistence because public.projects is missing.");
+      return;
+    }
+    throw error;
+  }
 }
 
 function getProviderErrorMessage(text: string, status: number) {
@@ -139,6 +191,67 @@ function normalizeMessages(value: unknown): ChatMessage[] {
   });
 }
 
+function normalizeMemoryAgent(body: ChatRequestBody) {
+  const value = typeof body.agentName === "string" && body.agentName.trim()
+    ? body.agentName.trim()
+    : typeof body.agent === "string" && body.agent.trim()
+      ? body.agent.trim()
+      : "loko";
+  return value.replace(/^gemini$/i, "loko");
+}
+
+function normalizeRequestUserId(body: ChatRequestBody, currentUserId?: string | null) {
+  if (typeof body.userId === "string" && body.userId.trim()) {
+    return body.userId.trim();
+  }
+  return currentUserId ?? undefined;
+}
+
+function memoryMessagesToChatMessages(messages: Awaited<ReturnType<typeof ShortTermMemory.getHistory>>): ChatMessage[] {
+  const now = new Date().toISOString();
+  return messages
+    .filter((message): message is { role: ChatRole; content: string } => message.role === "user" || message.role === "assistant")
+    .map((message) => ({
+      id: crypto.randomUUID(),
+      role: message.role,
+      content: message.content,
+      createdAt: now,
+    }));
+}
+
+function shouldRecordEpisode(userText: string, assistantText: string) {
+  return /\b(remember|preference|decided|problem|error|success|completed|failed|important|fix|fixed|deploy|build|video|project|memory|history)\b/i.test(
+    `${userText}\n${assistantText}`
+  );
+}
+
+async function rememberAssistantMessage(params: {
+  sessionId: string;
+  userId?: string;
+  agentName: string;
+  userText: string;
+  assistantText: string;
+  step: string;
+}) {
+  await Promise.all([
+    ShortTermMemory.addMessage(params.sessionId, "assistant", params.assistantText, params.agentName, params.userId),
+    WorkingMemory.addStep(params.sessionId, params.step),
+  ]);
+
+  if (params.userId && shouldRecordEpisode(params.userText, params.assistantText)) {
+    await EpisodicMemory.record({
+      userId: params.userId,
+      sessionId: params.sessionId,
+      eventType: "conversation_highlight",
+      description: params.userText.slice(0, 240),
+      outcome: params.assistantText.slice(0, 240),
+      importance: 6,
+      agentName: params.agentName,
+      metadata: { source: "chat_route" },
+    });
+  }
+}
+
 function selectModelsForPrompt(
   prompt: string,
   config: ReturnType<typeof getOpenRouterConfig>
@@ -176,6 +289,16 @@ function isVideoPrompt(prompt: string) {
 
 function isWebsitePrompt(prompt: string) {
   return WEBSITE_PATTERN.test(prompt);
+}
+
+function isBuildRequestPrompt(prompt: string) {
+  return BUILD_REQUEST_PATTERN.test(prompt) && !isExplicitFileDownloadPrompt(prompt);
+}
+
+function isExplicitFileDownloadPrompt(prompt: string) {
+  return /\b(download|export|file mein|file me|as pdf|as docx|as xlsx|as pptx|excel file|word file|pdf file|download karke do|download kar ke do|as a file)\b/i.test(
+    prompt
+  );
 }
 
 function isWorkflowPrompt(prompt: string) {
@@ -241,7 +364,7 @@ function enhanceWebsitePrompt(userText: string) {
 
 ${LOKO_AI_CORE_STANDARD}
 
-Generate a premium, production-quality UI comparable to OpenAI, Apple, Linear, Notion, Stripe, Vercel, Claude, Gemini, Perplexity, Airbnb, Framer, Raycast, and Lovable/v0 quality.
+Generate a premium, production-quality UI comparable to OpenAI, Apple, Linear, Notion, Stripe, Vercel, Claude, Loko AI, Perplexity, Airbnb, Framer, Raycast, and Lovable/v0 quality.
 
 Before writing code, first provide a concise but complete UI/UX plan:
 - Layout strategy
@@ -293,7 +416,8 @@ function buildOpenRouterPayload(
   userText: string,
   config: ReturnType<typeof getOpenRouterConfig>,
   processedFile?: ProcessedChatFile | null,
-  agentSlug?: string
+  agentSlug?: string,
+  memorySystemPrompt?: string
 ) {
   const searchInstruction = isVerifiedResearchPrompt(userText)
     ? ` For current facts, websites, companies, AI tools, startups, software, apps, GitHub repositories, APIs, pricing, documentation, tutorials, changelogs, and URLs: ${config.enableWebSearch ? "use web search before answering and prefer official sources first" : "web search is disabled, so do not invent live facts, URLs, pricing, repositories, docs, or changelogs"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} Never hallucinate URLs. If sources do not confirm a claim, label it unverified. When relevant, structure the answer with Name, Official URL, Description, Features, Pricing, Docs, GitHub, Integrations, Latest Info, Best Use Cases, and Notes.`
@@ -386,6 +510,9 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
   const tools = getOpenRouterTools(userText, config);
   const languageInstruction = getResponseLanguageInstruction(userText);
   const agentInstruction = agentSlug ? `\n\n${getAgentSystemPrompt(agentSlug)}` : "";
+  const memoryInstruction = memorySystemPrompt
+    ? `\n\n${memorySystemPrompt}\n\nUse the memory context naturally. Do not mention memory tables or internal storage unless the user asks.`
+    : "";
   const preparedMessages = messagesBeforeAi.slice(-12).map((message, index, items) => {
     const isLatestUser = index === items.length - 1 && message.role === "user";
     let content: OpenRouterMessageContent = message.content;
@@ -424,7 +551,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         content:
           `${LOKO_AI_CORE_STANDARD}
 
-You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${agentInstruction}${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
+You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${agentInstruction}${memoryInstruction}${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],
@@ -724,7 +851,8 @@ async function requestOpenRouterStream(
   userText: string,
   config: ReturnType<typeof getOpenRouterConfig>,
   processedFile?: ProcessedChatFile | null,
-  agentSlug?: string
+  agentSlug?: string,
+  memorySystemPrompt?: string
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -743,7 +871,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile, agentSlug)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile, agentSlug, memorySystemPrompt)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
@@ -780,6 +908,42 @@ async function handlePost(req: Request) {
   }
 
   const userText = typeof body.message === "string" ? body.message.trim() : "";
+  const currentUser = await getCurrentUser();
+  const requestUserId = normalizeRequestUserId(body, currentUser?.id);
+  const userId = requestUserId ?? null;
+  const agentName = normalizeMemoryAgent(body);
+
+  if (!userText && (body.savePreference || body.recordEpisode)) {
+    const sessionId = typeof body.sessionId === "string" && body.sessionId.trim()
+      ? body.sessionId.trim()
+      : body.chatId || crypto.randomUUID();
+
+    if (body.savePreference?.key && requestUserId) {
+      await LongTermMemory.save(
+        requestUserId,
+        body.savePreference.key,
+        body.savePreference.value ?? null,
+        body.savePreference.category ?? "preference",
+        agentName
+      );
+    }
+
+    if (body.recordEpisode?.eventType && body.recordEpisode?.description && requestUserId) {
+      await EpisodicMemory.record({
+        userId: requestUserId,
+        sessionId,
+        eventType: body.recordEpisode.eventType,
+        description: body.recordEpisode.description,
+        outcome: body.recordEpisode.outcome,
+        importance: body.recordEpisode.importance ?? 7,
+        agentName,
+        metadata: body.recordEpisode.metadata ?? {},
+      });
+    }
+
+    return NextResponse.json({ ok: true, sessionId, agentName });
+  }
+
   const promptError = validatePrompt(userText, 20_000);
   if (promptError) {
     return jsonError(promptError);
@@ -811,26 +975,82 @@ async function handlePost(req: Request) {
     createdAt: now,
   };
 
-  const currentUser = await getCurrentUser();
-  const userId = currentUser?.id ?? null;
-
-  const existingProject = body.chatId ? await supabaseGetProject(body.chatId) : null;
+  let existingProject = null;
+  try {
+    existingProject = body.chatId ? await supabaseGetProject(body.chatId) : null;
+  } catch (error) {
+    if (!isMissingProjectsTableError(error)) {
+      throw error;
+    }
+    console.warn("Skipping project lookup because public.projects is missing.");
+  }
   const previousMessages = existingProject
     ? normalizeMessages(existingProject.chat_messages)
     : normalizeMessages(body.messages);
 
   const chatId = existingProject?.id ?? crypto.randomUUID();
+  const sessionId = typeof body.sessionId === "string" && body.sessionId.trim()
+    ? body.sessionId.trim()
+    : chatId;
   const title = existingProject?.title ?? (userText.slice(0, 64) || "New chat");
-  const messagesBeforeAi = [...previousMessages, userMessage];
+
+  if (body.savePreference?.key && requestUserId) {
+    await LongTermMemory.save(
+      requestUserId,
+      body.savePreference.key,
+      body.savePreference.value ?? null,
+      body.savePreference.category ?? "preference",
+      agentName
+    );
+  }
+
+  if (body.recordEpisode?.eventType && body.recordEpisode?.description && requestUserId) {
+    await EpisodicMemory.record({
+      userId: requestUserId,
+      sessionId,
+      eventType: body.recordEpisode.eventType,
+      description: body.recordEpisode.description,
+      outcome: body.recordEpisode.outcome,
+      importance: body.recordEpisode.importance ?? 7,
+      agentName,
+      metadata: body.recordEpisode.metadata ?? {},
+    });
+  }
+
+  const rememberedMessages = previousMessages.length
+    ? []
+    : memoryMessagesToChatMessages(await ShortTermMemory.getHistory(sessionId, 20));
+  const messagesBeforeAi = [...rememberedMessages, ...previousMessages, userMessage];
+  const memorySystemPrompt = await buildSystemPrompt({
+    sessionId,
+    userId: requestUserId,
+    agentName,
+  });
+
+  await Promise.all([
+    ShortTermMemory.addMessage(sessionId, "user", userText, agentName, requestUserId),
+    WorkingMemory.set(
+      sessionId,
+      userText,
+      {
+        chatId,
+        selectedModel: body.selectedModel,
+        agent: body.agent,
+        hasAttachment: Boolean(body.attachment),
+      },
+      requestUserId,
+      agentName
+    ),
+  ]);
 
   if (existingProject) {
-    await supabaseUpdateProject(chatId, {
+    await persistProjectUpdate(chatId, {
       title,
       prompt: userText,
       chat_messages: messagesBeforeAi,
     });
   } else {
-    await supabaseCreateProject({
+    await persistProjectCreate({
       id: chatId,
       user_id: userId,
       title,
@@ -840,7 +1060,7 @@ async function handlePost(req: Request) {
   }
 
   const fileIntent = getFileIntent(userText);
-  if (fileIntent.isFileRequest) {
+  if (fileIntent.isFileRequest && !isWebsitePrompt(userText) && !isBuildRequestPrompt(userText)) {
     try {
       const generatedFile = await createGeneratedFileFromPrompt(userText);
       if (!generatedFile) {
@@ -854,8 +1074,17 @@ async function handlePost(req: Request) {
         createdAt: new Date().toISOString(),
       };
 
-      await supabaseUpdateProject(chatId, {
+      await persistProjectUpdate(chatId, {
         chat_messages: [...messagesBeforeAi, assistantMessage],
+      });
+
+      await rememberAssistantMessage({
+        sessionId,
+        userId: requestUserId,
+        agentName,
+        userText,
+        assistantText: assistantMessage.content,
+        step: `Created downloadable file: ${generatedFile.fileName}`,
       });
 
       return new Response(assistantMessage.content, {
@@ -886,6 +1115,43 @@ async function handlePost(req: Request) {
     new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config)])
   );
 
+  if (isVideoPrompt(userText)) {
+    const videoResult = await requestOpenRouterVideo(apiKey, userText, processedFile);
+
+    if ("error" in videoResult) {
+      return jsonError(videoResult.error, videoResult.status);
+    }
+
+    const assistantMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: videoResult.content,
+      createdAt: new Date().toISOString(),
+    };
+
+    await persistProjectUpdate(chatId, {
+      chat_messages: [...messagesBeforeAi, assistantMessage],
+    });
+
+    await rememberAssistantMessage({
+      sessionId,
+      userId: requestUserId,
+      agentName,
+      userText,
+      assistantText: assistantMessage.content,
+      step: `Generated video with ${videoResult.model}`,
+    });
+
+    return new Response(videoResult.content, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Chat-Id": chatId,
+        "X-AI-Model": videoResult.model,
+      },
+    });
+  }
+
   if (isImagePrompt(userText)) {
     const imageModels = Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
     const imageResult = await requestOpenRouterImage(
@@ -908,8 +1174,17 @@ async function handlePost(req: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    await supabaseUpdateProject(chatId, {
+    await persistProjectUpdate(chatId, {
       chat_messages: [...messagesBeforeAi, assistantMessage],
+    });
+
+    await rememberAssistantMessage({
+      sessionId,
+      userId: requestUserId,
+      agentName,
+      userText,
+      assistantText: assistantMessage.content,
+      step: `Generated image with ${imageResult.model}`,
     });
 
     return new Response(imageResult.content, {
@@ -930,7 +1205,8 @@ async function handlePost(req: Request) {
     userText,
     config,
     processedFile,
-    body.agent
+    body.agent,
+    memorySystemPrompt
   );
 
   if ("error" in streamResult) {
@@ -990,8 +1266,17 @@ async function handlePost(req: Request) {
           createdAt: new Date().toISOString(),
         };
 
-        await supabaseUpdateProject(chatId, {
+        await persistProjectUpdate(chatId, {
           chat_messages: [...messagesBeforeAi, assistantMessage],
+        });
+
+        await rememberAssistantMessage({
+          sessionId,
+          userId: requestUserId,
+          agentName,
+          userText,
+          assistantText: assistantMessage.content,
+          step: `Completed chat response with ${selectedModel}`,
         });
 
         controller.close();

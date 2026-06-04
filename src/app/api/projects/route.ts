@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { unauthorizedResponse } from "@/lib/api";
 import { getCurrentUser } from "@/lib/supabase/server";
-import { supabaseCreateProject, supabaseListProjects } from "@/lib/supabase/projects";
+import {
+  getProjectsSetupErrorMessage,
+  isMissingProjectsTableError,
+  supabaseCreateProject,
+  supabaseListProjects,
+} from "@/lib/supabase/projects";
 import { guarded, preflightResponse, readJsonBody } from "@/lib/security";
 
 export async function GET(req: Request) {
@@ -17,6 +22,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ projects });
   } catch (err: unknown) {
     console.error("Projects GET error:", err);
+    if (isMissingProjectsTableError(err)) {
+      return NextResponse.json({
+        projects: [],
+        setupRequired: true,
+        warning: getProjectsSetupErrorMessage(),
+      });
+    }
     return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
   }
 }
@@ -49,6 +61,9 @@ async function handlePost(req: Request) {
     return NextResponse.json({ project }, { status: 201 });
   } catch (err: unknown) {
     console.error("Projects POST error:", err);
+    if (isMissingProjectsTableError(err)) {
+      return NextResponse.json({ error: getProjectsSetupErrorMessage() }, { status: 503 });
+    }
     return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
   }
 }

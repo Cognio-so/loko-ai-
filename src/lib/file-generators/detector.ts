@@ -1,7 +1,10 @@
 import { type FileIntent, type GeneratedFileType, SUPPORTED_FILE_TYPES } from "@/lib/file-generators/types";
 
-const FILE_REQUEST_PATTERN =
-  /\b(create|generate|make|prepare|build|draft|banao|bana|banado|bana do|download|file|document|report|resume|invoice|business plan|marketing report)\b/i;
+const EXPLICIT_FILE_ACTION_PATTERN =
+  /\b(download|export|save as|save into|give me (a|an)? file|file mein|file me|document mein|document me|pdf mein|pdf me|word file|excel file|ppt file|pptx file|csv file|json file|txt file|docx file|xlsx file|download karke do|download kar ke do|download do|as a file|as pdf|as docx|as xlsx|as pptx|as csv|as json|as txt)\b/i;
+
+const WEBSITE_OR_APP_REQUEST_PATTERN =
+  /\b(website|webpage|web page|landing page|landing|page|ui|ux|frontend|dashboard|app|desktop app|saas|component|react app|next app|html|css)\b/i;
 
 const TYPE_PATTERNS: Array<{ type: GeneratedFileType; pattern: RegExp; category?: string }> = [
   { type: "pdf", pattern: /\b(pdf|pdf report|report pdf)\b/i },
@@ -27,7 +30,11 @@ const CATEGORY_PATTERNS: Array<{ category: string; pattern: RegExp; defaultType:
 
 export function detectFileIntent(prompt: string): FileIntent {
   const normalized = prompt.trim();
-  if (!normalized || !FILE_REQUEST_PATTERN.test(normalized)) {
+  if (!normalized || !EXPLICIT_FILE_ACTION_PATTERN.test(normalized)) {
+    return { isFileRequest: false, fileType: null, category: "general" };
+  }
+
+  if (WEBSITE_OR_APP_REQUEST_PATTERN.test(normalized)) {
     return { isFileRequest: false, fileType: null, category: "general" };
   }
 

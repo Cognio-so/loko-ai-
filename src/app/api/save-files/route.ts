@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-import { createSupabaseServerClient, getCurrentUser } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/supabase/server';
 import { getErrorMessage, sanitizeProjectTitle, unauthorizedResponse } from '@/lib/api';
+import {
+  getProjectsSetupErrorMessage,
+  isMissingProjectsTableError,
+  supabaseCreateProject,
+} from '@/lib/supabase/projects';
 import { guarded, preflightResponse, readJsonBody } from '@/lib/security';
 
 async function handlePost(req: Request) {
@@ -60,16 +65,21 @@ async function handlePost(req: Request) {
       await fs.writeFile(filePath, file.content, 'utf8');
     }
 
-    const supabase = await createSupabaseServerClient();
-    const { error: dbError } = await supabase.from('projects').insert({
-      user_id: user.id,
-      title: projectTitle || 'Untitled App',
-      description: description || null,
-      generated_code: files,
-      preview_url: previewHtml || null,
-    });
-
-    if (dbError) throw dbError;
+    try {
+      await supabaseCreateProject({
+        id: crypto.randomUUID(),
+        user_id: user.id,
+        title: projectTitle || 'Untitled App',
+        description: description || null,
+        generated_code: files,
+        preview_html: previewHtml || null,
+      });
+    } catch (error) {
+      if (!isMissingProjectsTableError(error)) {
+        throw error;
+      }
+      console.warn(getProjectsSetupErrorMessage());
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -78,6 +88,9 @@ async function handlePost(req: Request) {
 
   } catch (error: unknown) {
     console.error('LokoAI File Save Error:', error);
+    if (isMissingProjectsTableError(error)) {
+      return NextResponse.json({ error: getProjectsSetupErrorMessage() }, { status: 503 });
+    }
     return NextResponse.json({ error: getErrorMessage(error) || 'Failed to save files' }, { status: 500 });
   }
 }

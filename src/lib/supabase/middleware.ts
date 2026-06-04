@@ -10,6 +10,10 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  if (!isProtectedPath(request.nextUrl.pathname)) {
+    return response;
+  }
+
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {

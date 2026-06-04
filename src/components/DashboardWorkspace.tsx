@@ -1,17 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import {
   Bot,
   Check,
@@ -58,13 +50,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
-import IntegrationsPage from "@/app/integrations/page";
-import PartnersPage from "@/app/partners/page";
-import LaunchpadPage from "@/app/launchpad/page";
-import CollectionPage from "@/app/collection/page";
 import { assistants } from "@/app/collection/collection-data";
-import AffiliatePage from "@/app/affiliate/page";
-import PricingPage from "@/app/pricing/page";
 import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
 import { ModelPicker } from "@/components/ModelPicker";
 import UserMenu from "@/components/UserMenu";
@@ -129,6 +115,9 @@ type AgentActivityLog = {
   detail: string;
   kind: "thinking" | "tool" | "file" | "preview" | "done" | "error";
   createdAt: string;
+  command?: string;
+  output?: string[];
+  status?: "running" | "completed" | "error";
 };
 
 type ActivityDatum = {
@@ -139,17 +128,60 @@ type ActivityDatum = {
   count: number;
 };
 
-type ActivityTooltipProps = {
-  active?: boolean;
-  payload?: Array<{ payload?: ActivityDatum }>;
-};
-
 type GeneratedProjectResponse = {
   projectTitle?: string;
   description?: string;
   previewHtml?: string;
   files?: GeneratedCodeFile[];
+  mode?: string;
+  routeReason?: string;
+  workspace?: {
+    path?: string;
+    files?: string[];
+  } | null;
 };
+
+const DASHBOARD_HISTORY_STORAGE_KEY = "lokoai:dashboard-history";
+
+const LazyPanelFallback = () => (
+  <div className="flex min-h-[420px] items-center justify-center bg-[#f8fbff] text-sm font-semibold text-slate-500">
+    Loading workspace...
+  </div>
+);
+
+const ActivityChart = dynamic(() => import("@/components/dashboard/ActivityChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[240px] items-center justify-center rounded-[22px] border border-slate-100 bg-slate-50/80 text-xs font-bold text-slate-400">
+      Loading activity chart...
+    </div>
+  ),
+});
+
+const IntegrationsPage = dynamic(() => import("@/app/integrations/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
+const PartnersPage = dynamic(() => import("@/app/partners/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
+const LaunchpadPage = dynamic(() => import("@/app/launchpad/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
+const CollectionPage = dynamic(() => import("@/app/collection/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
+const AffiliatePage = dynamic(() => import("@/app/affiliate/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
+const PricingPage = dynamic(() => import("@/app/pricing/page"), {
+  ssr: false,
+  loading: LazyPanelFallback,
+});
 
 const ACCEPTED_ATTACHMENT_TYPES = [
   ".pdf",
@@ -169,15 +201,27 @@ const ACCEPTED_ATTACHMENT_TYPES = [
 const MAX_ATTACHMENT_SIZE = 15 * 1024 * 1024;
 
 const BUILD_REQUEST_PATTERN =
-  /\b(create|build|make|design|generate|develop|bna|banao|bnao).{0,60}\b(website|web app|landing page|page|dashboard|app|desktop app|ui|ux|component|saas)\b|\b(website|landing page|web app|dashboard|desktop app|saas page)\b/i;
+  /\b(create|build|make|design|generate|develop|craft|banake do|bna ke do|bana ke do|banao|bnao|bna|bana)\b.{0,80}\b(website|web app|landing page|webpage|web page|page|dashboard|app|desktop app|ui|ux|component|saas|frontend|react app|next app|portfolio)\b|\b(website|landing page|web app|webpage|web page|dashboard|desktop app|saas page|frontend ui|react app|next app)\b/i;
+
+const EXPLICIT_FILE_DOWNLOAD_PATTERN =
+  /\b(download|export|file mein|file me|as pdf|as docx|as xlsx|as pptx|excel file|word file|pdf file|download karke do|download kar ke do|as a file)\b/i;
+
+const VIDEO_REQUEST_PATTERN =
+  /\b(video|clip|movie|animation|animate|animated|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao|screen recording|screenrecording|camera movement|camera movements|cinematic shot|cinematic video|motion graphics|timelapse|time-lapse|fps|frame by frame)\b/i;
 
 function isBuildRequestPrompt(value: string) {
   const normalized = value.trim();
 
   return (
     BUILD_REQUEST_PATTERN.test(normalized) &&
+    !VIDEO_REQUEST_PATTERN.test(normalized) &&
+    !EXPLICIT_FILE_DOWNLOAD_PATTERN.test(normalized) &&
     !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(normalized)
   );
+}
+
+function isProjectsSetupErrorMessage(value: string) {
+  return /public\.projects|Supabase table .*projects.*missing|Run supabase\/schema\.sql/i.test(value);
 }
 
 function normalizeGeneratedFiles(value: unknown): GeneratedCodeFile[] {
@@ -193,6 +237,55 @@ function normalizeGeneratedFiles(value: unknown): GeneratedCodeFile[] {
       typeof item.content === "string"
     );
   });
+}
+
+function normalizeProject(value: unknown): Project | null {
+  if (!value || typeof value !== "object") return null;
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.id !== "string" || typeof record.title !== "string") return null;
+
+  return {
+    id: record.id,
+    title: record.title,
+    description: typeof record.description === "string" ? record.description : null,
+    prompt: typeof record.prompt === "string" ? record.prompt : null,
+    preview_html: typeof record.preview_html === "string" ? record.preview_html : null,
+    generated_code: normalizeGeneratedFiles(record.generated_code),
+    chat_messages: normalizeMessages(record.chat_messages),
+    created_at: typeof record.created_at === "string" ? record.created_at : new Date().toISOString(),
+    updated_at: typeof record.updated_at === "string" ? record.updated_at : new Date().toISOString(),
+  };
+}
+
+function loadLocalProjects(): Project[] {
+  try {
+    const raw = window.localStorage.getItem(DASHBOARD_HISTORY_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as unknown[]) : [];
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map(normalizeProject)
+      .filter((project): project is Project => Boolean(project))
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  } catch {
+    return [];
+  }
+}
+
+function persistLocalProjects(projects: Project[]) {
+  try {
+    window.localStorage.setItem(
+      DASHBOARD_HISTORY_STORAGE_KEY,
+      JSON.stringify(
+        [...projects]
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          .slice(0, 30)
+      )
+    );
+  } catch {
+    // ignore storage failures
+  }
 }
 
 function getDefaultGeneratedFile(project: Project | null) {
@@ -301,6 +394,22 @@ function normalizeMessages(value: unknown): ChatMessage[] {
         typeof item.content === "string"
     );
   });
+}
+
+function extractApiErrorMessage(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "AI response failed";
+
+  try {
+    const parsed = JSON.parse(trimmed) as { error?: unknown; message?: unknown };
+    if (typeof parsed.error === "string" && parsed.error.trim()) return parsed.error;
+    if (typeof parsed.message === "string" && parsed.message.trim()) return parsed.message;
+  } catch {
+    const titleMatch = trimmed.match(/<title>(.*?)<\/title>/i);
+    if (titleMatch?.[1]?.trim()) return titleMatch[1].trim();
+  }
+
+  return trimmed;
 }
 
 function formatTime(value: string) {
@@ -630,85 +739,6 @@ function FormattedMarkdownText({ content }: { content: string }) {
   );
 }
 
-function ActivityTooltip({ active, payload }: ActivityTooltipProps) {
-  if (!active || !payload?.length) return null;
-  const item = payload[0]?.payload as ActivityDatum | undefined;
-  if (!item) return null;
-
-  return (
-    <div className="pointer-events-none animate-in fade-in zoom-in-95 duration-150 rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 text-center shadow-[0_16px_45px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
-      <p className="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">
-        {item.month} {item.date}
-      </p>
-      <p className="mt-1 text-xl font-black leading-none text-slate-950">{item.count}</p>
-    </div>
-  );
-}
-
-function ActivityActiveDot({ cx, cy }: { cx?: number; cy?: number }) {
-  if (typeof cx !== "number" || typeof cy !== "number") return null;
-
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={10} fill="rgba(14,165,233,0.12)" />
-      <circle cx={cx} cy={cy} r={5} fill="#0ea5e9" stroke="#ffffff" strokeWidth={3} />
-    </g>
-  );
-}
-
-const EXECUTION_TIMELINE_STEPS = [
-  {
-    label: "Understanding Request",
-    detail: "Parsing user intent, task type, target output, and required mode.",
-    log: "$ agent.parse_request --mode auto",
-  },
-  {
-    label: "Planning",
-    detail: "Designing the execution path, UI plan, and response strategy.",
-    log: "$ agent.plan --timeline structured",
-  },
-  {
-    label: "Reading Files",
-    detail: "Checking attached files and local workspace context when available.",
-    log: "$ fs.read_context --safe",
-  },
-  {
-    label: "Loading Context",
-    detail: "Loading chat history, selected model, project state, and agent memory.",
-    log: "$ context.load --chat --project",
-  },
-  {
-    label: "Searching Resources",
-    detail: "Routing to knowledge, search, or local resources based on the request.",
-    log: "$ resources.search --relevant",
-  },
-  {
-    label: "Calling Tools",
-    detail: "Preparing model, generation, file, preview, or backend calls.",
-    log: "$ tools.call --stream",
-  },
-  {
-    label: "Executing Actions",
-    detail: "Running the selected action path and coordinating agent operations.",
-    log: "$ actions.execute --live",
-  },
-  {
-    label: "Generating Output",
-    detail: "Streaming tokens, code, files, UI, or preview output.",
-    log: "$ output.generate --streaming",
-  },
-  {
-    label: "Verification",
-    detail: "Checking generated content, response state, and workspace handoff.",
-    log: "$ verify.result --quality",
-  },
-  {
-    label: "Completed",
-    detail: "Final response is ready and execution state is closed.",
-    log: "$ agent.complete --success",
-  },
-] as const;
-
 function AgentStatusPanel({
   status,
   logs,
@@ -724,18 +754,15 @@ function AgentStatusPanel({
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const [expandedStep, setExpandedStep] = useState<string | null>("Understanding Request");
-  const hasError = status === "Error" || logs.some((log) => log.kind === "error");
-  const completedLabels = new Set(logs.map((log) => log.label));
-  const activeLog = [...logs].reverse().find((log) => log.kind !== "done" && log.kind !== "error");
-  const matchedActiveIndex = EXECUTION_TIMELINE_STEPS.findIndex((step) => step.label === activeLog?.label);
-  const activeIndex = status === "Completed"
-    ? EXECUTION_TIMELINE_STEPS.length - 1
-    : Math.max(0, matchedActiveIndex);
-  const actionCount = Math.min(
-    EXECUTION_TIMELINE_STEPS.length,
-    Math.max(logs.length, isRunning ? activeIndex + 1 : completedLabels.size)
-  );
+  const orderedLogs = logs;
+  const [expandedStep, setExpandedStep] = useState<string | null>(orderedLogs[0]?.id ?? null);
+  const hasError = status === "Error" || orderedLogs.some((log) => log.kind === "error" || log.status === "error");
+  const actionCount = orderedLogs.length;
+
+  useEffect(() => {
+    if (!orderedLogs.length) return;
+    setExpandedStep((current) => current ?? orderedLogs[orderedLogs.length - 1]?.id ?? null);
+  }, [orderedLogs]);
 
   return (
     <motion.div
@@ -772,7 +799,7 @@ function AgentStatusPanel({
         </div>
         <div className="flex items-center gap-2">
           <span className="hidden rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-slate-300 sm:inline-flex">
-            {actionCount}/{EXECUTION_TIMELINE_STEPS.length} steps
+            {actionCount} live events
           </span>
           <ChevronRight className={`h-4 w-4 text-slate-400 transition ${isOpen ? "rotate-90" : ""}`} />
         </div>
@@ -788,24 +815,22 @@ function AgentStatusPanel({
             className="border-t border-white/10"
           >
             <div className="space-y-2 px-4 py-4">
-              {EXECUTION_TIMELINE_STEPS.map((step, index) => {
-                const log = logs.find((item) => item.label === step.label);
-                const isStepCompleted = status === "Completed" || completedLabels.has(step.label) || index < activeIndex;
-                const isStepActive = isRunning && index === activeIndex && !hasError;
-                const isStepError = hasError && index === activeIndex;
-                const detail = log?.detail ?? step.detail;
-                const createdAt = log?.createdAt;
+              {orderedLogs.map((log, index) => {
+                const isStepCompleted = log.status === "completed" || log.kind === "done";
+                const isStepActive = log.status === "running";
+                const isStepError = log.status === "error" || log.kind === "error";
+                const createdAt = log.createdAt;
 
                 return (
                   <motion.div
-                    key={step.label}
+                    key={log.id}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2, delay: index * 0.025 }}
                   >
                     <button
                       type="button"
-                      onClick={() => setExpandedStep((current) => (current === step.label ? null : step.label))}
+                      onClick={() => setExpandedStep((current) => (current === log.id ? null : log.id))}
                       className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${
                         isStepError
                           ? "border-red-400/25 bg-red-500/10"
@@ -829,17 +854,17 @@ function AgentStatusPanel({
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center justify-between gap-3">
-                          <span className="truncate text-sm font-black text-slate-100">{step.label}</span>
+                          <span className="truncate text-sm font-black text-slate-100">{log.label}</span>
                           <span className="shrink-0 font-mono text-[10px] text-slate-500">
                             {createdAt ? formatTime(createdAt) : isStepActive ? "now" : "--:--"}
                           </span>
                         </span>
-                        <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-400">{detail}</span>
+                        <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-400">{log.detail}</span>
                       </span>
-                      <ChevronRight className={`mt-1 h-3.5 w-3.5 shrink-0 text-slate-500 transition ${expandedStep === step.label ? "rotate-90" : ""}`} />
+                      <ChevronRight className={`mt-1 h-3.5 w-3.5 shrink-0 text-slate-500 transition ${expandedStep === log.id ? "rotate-90" : ""}`} />
                     </button>
                     <AnimatePresence initial={false}>
-                      {expandedStep === step.label && (
+                      {expandedStep === log.id && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
@@ -849,7 +874,16 @@ function AgentStatusPanel({
                         >
                           <div className="ml-9 mt-2 rounded-2xl border border-white/10 bg-black/35 px-3 py-2 font-mono text-[11px] leading-5 text-slate-300">
                             <p className="text-slate-500">terminal</p>
-                            <p>{step.log}</p>
+                            {log.command ? <p>{log.command}</p> : null}
+                            {log.output?.length ? (
+                              <div className="mt-1 space-y-1">
+                                {log.output.map((line, lineIndex) => (
+                                  <p key={`${log.id}-${lineIndex}`} className="break-words text-slate-300">
+                                    {line}
+                                  </p>
+                                ))}
+                              </div>
+                            ) : null}
                             <p className={isStepError ? "text-red-300" : isStepCompleted ? "text-emerald-300" : isStepActive ? "text-sky-300" : "text-slate-500"}>
                               {isStepError ? "error: action failed, showing recoverable response" : isStepCompleted ? "ok: completed" : isStepActive ? "running..." : "waiting..."}
                             </p>
@@ -1011,62 +1045,7 @@ function DashboardOverview({
               <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-600">Last 30 days</span>
             </div>
             <div className="relative min-h-0 flex-1 rounded-[22px] border border-slate-100 bg-gradient-to-b from-slate-50/80 to-white px-2 pb-1 pt-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={activityDays} margin={{ top: 4, right: 14, bottom: 14, left: 0 }}>
-                  <defs>
-                    <linearGradient id="conversationActivityFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.18} />
-                      <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 6" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    interval={3}
-                    tickLine={false}
-                    axisLine={false}
-                    minTickGap={8}
-                    height={32}
-                    tick={({ x, y, payload }) => {
-                      const item = activityDays[payload.index];
-                      if (!item) return <g />;
-                      return (
-                        <g transform={`translate(${Number(x)},${Number(y) + 6})`}>
-                          <text textAnchor="middle" className="fill-slate-400 text-[10px] font-bold">
-                            <tspan x="0" dy="0">{item.month}</tspan>
-                            <tspan x="0" dy="12">{item.date}</tspan>
-                          </text>
-                        </g>
-                      );
-                    }}
-                  />
-                  <YAxis
-                    domain={[0, chartMax]}
-                    ticks={[0, 1, 2, 3, 4].filter((tick) => tick <= chartMax)}
-                    tickLine={false}
-                    axisLine={false}
-                    width={42}
-                    tick={{ fill: "#64748b", fontSize: 11, fontWeight: 700 }}
-                  />
-                  <Tooltip
-                    content={<ActivityTooltip />}
-                    cursor={{ stroke: "#cbd5e1", strokeWidth: 1 }}
-                    wrapperStyle={{ outline: "none", transition: "transform 160ms ease, opacity 160ms ease" }}
-                    position={{ y: 46 }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="#0ea5e9"
-                    strokeWidth={2.5}
-                    fill="url(#conversationActivityFill)"
-                    dot={false}
-                    activeDot={<ActivityActiveDot />}
-                    isAnimationActive
-                    animationDuration={700}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+              <ActivityChart activityDays={activityDays} chartMax={chartMax} />
             </div>
             </div>
           </section>
@@ -1191,11 +1170,38 @@ export default function DashboardWorkspace() {
   const [activeBuildProject, setActiveBuildProject] = useState<Project | null>(null);
   const [builderTab, setBuilderTab] = useState<BuilderTab>("preview");
   const [selectedBuilderFile, setSelectedBuilderFile] = useState("");
+  const [sandboxUrl, setSandboxUrl] = useState<string | null>(null);
+  const [isSandboxLoading, setIsSandboxLoading] = useState(false);
   const [agentStatus, setAgentStatus] = useState<AgentStatus>("Completed");
   const [activityLogs, setActivityLogs] = useState<AgentActivityLog[]>([]);
   const [agentStartedAt, setAgentStartedAt] = useState<number | null>(null);
   const [runtimeSeconds, setRuntimeSeconds] = useState(0);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
+
+  const syncProjectsState = useCallback((updater: (current: Project[]) => Project[]) => {
+    setProjects((current) => {
+      const next = updater(current)
+        .map((project) => ({
+          ...project,
+          generated_code: normalizeGeneratedFiles(project.generated_code),
+          chat_messages: normalizeMessages(project.chat_messages),
+        }))
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      persistLocalProjects(next);
+      return next;
+    });
+  }, []);
+
+  const upsertProjectHistory = useCallback((project: Project) => {
+    syncProjectsState((current) => {
+      const nextProject = {
+        ...project,
+        generated_code: normalizeGeneratedFiles(project.generated_code),
+        chat_messages: normalizeMessages(project.chat_messages),
+      };
+      return [nextProject, ...current.filter((item) => item.id !== nextProject.id)];
+    });
+  }, [syncProjectsState]);
 
   const loadProjects = useCallback(() => {
     setIsLoadingProjects(true);
@@ -1207,12 +1213,14 @@ export default function DashboardWorkspace() {
           generated_code: normalizeGeneratedFiles(project.generated_code),
           chat_messages: normalizeMessages(project.chat_messages),
         }));
-        setProjects(nextProjects);
+        const resolvedProjects = nextProjects.length ? nextProjects : loadLocalProjects();
+        setProjects(resolvedProjects);
+        persistLocalProjects(resolvedProjects);
         setIsLoadingProjects(false);
       })
       .catch((error) => {
         console.warn("Failed to load chats:", error);
-        setProjects([]);
+        setProjects(loadLocalProjects());
         setIsLoadingProjects(false);
       });
   }, []);
@@ -1249,19 +1257,130 @@ export default function DashboardWorkspace() {
     return () => window.clearInterval(intervalId);
   }, [agentStartedAt]);
 
-  function appendAgentLog(label: string, detail: string, kind: AgentActivityLog["kind"] = "thinking") {
+  function appendAgentLog(
+    label: string,
+    detail: string,
+    kind: AgentActivityLog["kind"] = "thinking",
+    meta?: Partial<AgentActivityLog>
+  ) {
+    const id = meta?.id ?? crypto.randomUUID();
     setActivityLogs((current) =>
       [
         ...current,
         {
-          id: crypto.randomUUID(),
+          id,
           label,
           detail,
           kind,
           createdAt: new Date().toISOString(),
+          command: meta?.command,
+          output: meta?.output,
+          status:
+            meta?.status ??
+            (kind === "error" ? "error" : "completed"),
         },
-      ].slice(-12)
+      ].slice(-40)
     );
+    return id;
+  }
+
+  function updateAgentLog(id: string, updates: Partial<AgentActivityLog>) {
+    setActivityLogs((current) =>
+      current.map((log) =>
+        log.id === id
+          ? {
+              ...log,
+              ...updates,
+              output: updates.output ?? log.output,
+            }
+          : log
+      )
+    );
+  }
+
+  async function spinUpSandbox(
+    files: GeneratedCodeFile[],
+    projectId: string,
+    mode: "create" | "update" = "create"
+  ) {
+    const hasReactApp = files.some((file) => file.path === "src/App.tsx" || file.path === "src/app.tsx");
+    if (!hasReactApp) return null;
+
+    setIsSandboxLoading(true);
+    setSandboxUrl((current) => (mode === "create" ? null : current));
+
+    const sandboxLogId = appendAgentLog(
+      mode === "create" ? "Starting live preview environment" : "Updating live preview environment",
+      mode === "create"
+        ? "Preparing sandbox runtime, dependency install, and development server."
+        : "Applying file changes to the existing sandbox and refreshing the preview.",
+      "preview",
+      {
+        command: mode === "create" ? "$ sandbox.create --runtime vite" : "$ sandbox.update --hmr",
+        status: "running",
+      }
+    );
+
+    try {
+      const response = await fetch("/api/sandbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          files,
+          projectId,
+          mode,
+        }),
+      });
+
+      const data = (await response.json().catch(() => ({}))) as {
+        previewUrl?: string | null;
+        logs?: Array<{ label?: string; detail?: string; command?: string; output?: string[]; status?: "completed" | "running" | "error" }>;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error || "Sandbox startup failed.");
+      }
+
+      if (data.logs?.length) {
+        data.logs.forEach((log) => {
+          appendAgentLog(
+            log.label || "Sandbox event",
+            log.detail || "Sandbox runtime emitted a new event.",
+            log.status === "error" ? "error" : log.status === "completed" ? "done" : "preview",
+            {
+              command: log.command,
+              output: log.output,
+              status: log.status ?? "completed",
+            }
+          );
+        });
+      }
+
+      if (data.previewUrl) {
+        setSandboxUrl(data.previewUrl);
+        updateAgentLog(sandboxLogId, {
+          detail: "Live development preview is ready.",
+          output: [`Preview URL: ${data.previewUrl}`],
+          status: "completed",
+        });
+      } else {
+        updateAgentLog(sandboxLogId, {
+          detail: "Sandbox finished without a live URL, so the inline HTML preview remains active.",
+          status: "completed",
+        });
+      }
+
+      return data.previewUrl ?? null;
+    } catch (error) {
+      updateAgentLog(sandboxLogId, {
+        detail: error instanceof Error ? error.message : "Sandbox startup failed.",
+        status: "error",
+      });
+      return null;
+    } finally {
+      setIsSandboxLoading(false);
+    }
   }
 
   function startNewChat() {
@@ -1269,6 +1388,7 @@ export default function DashboardWorkspace() {
     setMessages([]);
     setActiveBuildProject(null);
     setSelectedBuilderFile("");
+    setSandboxUrl(null);
     setPrompt("");
     setActiveView("chat");
     setIsSidebarOpen(false);
@@ -1282,6 +1402,7 @@ export default function DashboardWorkspace() {
     const hydratedProject = { ...project, generated_code: generatedCode };
     setActiveBuildProject(project.preview_html || generatedCode.length ? hydratedProject : null);
     setSelectedBuilderFile(generatedCode[0]?.path ?? "");
+    setSandboxUrl(null);
     setBuilderTab(project.preview_html ? "preview" : "code");
     setPrompt("");
     setActiveView("chat");
@@ -1292,16 +1413,19 @@ export default function DashboardWorkspace() {
     if (deletingProjectId) return;
     setDeletingProjectId(projectId);
     const previousProjects = projects;
-    setProjects((current) => current.filter((project) => project.id !== projectId));
+    syncProjectsState((current) => current.filter((project) => project.id !== projectId));
     if (activeChatId === projectId) startNewChat();
-    if (activeBuildProject?.id === projectId) setActiveBuildProject(null);
+    if (activeBuildProject?.id === projectId) {
+      setActiveBuildProject(null);
+      setSandboxUrl(null);
+    }
 
     try {
       const response = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Delete failed");
     } catch (error) {
       console.warn("Failed to delete chat:", error);
-      setProjects(previousProjects);
+      syncProjectsState(() => previousProjects);
     } finally {
       setDeletingProjectId(null);
     }
@@ -1392,11 +1516,19 @@ export default function DashboardWorkspace() {
 
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
-    appendAgentLog("Understanding Request", trimmed || "Analyzing uploaded file", "thinking");
-    appendAgentLog("Planning", isBuildRequestPrompt(trimmed) ? "Preparing builder execution plan" : "Preparing response strategy", "thinking");
-    appendAgentLog("Loading Context", "Loading chat history, selected model, and workspace state", "tool");
+    appendAgentLog("Understanding Request", trimmed || "Analyzing uploaded file", "thinking", {
+      command: "$ loko-ai.parse-request",
+    });
+    appendAgentLog("Planning", isBuildRequestPrompt(trimmed) ? "Preparing builder execution plan" : "Preparing response strategy", "thinking", {
+      command: "$ loko-ai.plan --dynamic",
+    });
+    appendAgentLog("Loading Context", "Loading chat history, selected model, and workspace state", "tool", {
+      command: "$ context.load --chat --workspace",
+    });
     if (attachmentToSend) {
-      appendAgentLog("Reading Files", attachmentToSend.name, "file");
+      appendAgentLog("Reading Files", attachmentToSend.name, "file", {
+        command: `$ files.inspect "${attachmentToSend.name}"`,
+      });
     }
     setPrompt("");
     setUploadedAttachment(null);
@@ -1405,8 +1537,15 @@ export default function DashboardWorkspace() {
     try {
       if (trimmed && isBuildRequestPrompt(trimmed) && !attachmentToSend) {
         setAgentStatus("Writing code...");
-        appendAgentLog("Calling Tools", "Starting project generation pipeline", "tool");
-        appendAgentLog("Executing Actions", "Planning project structure and UI system", "tool");
+        const generationLogId = appendAgentLog(
+          "Generating project with Loko AI",
+          "Sending your prompt to the live project generator and waiting for structured build artifacts.",
+          "tool",
+          {
+            command: "$ loko-ai.generate --stream --target project",
+            status: "running",
+          }
+        );
         const generateResponse = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1415,15 +1554,52 @@ export default function DashboardWorkspace() {
 
         if (!generateResponse.ok) {
           const errorText = await generateResponse.text();
-          throw new Error(errorText || "Project generation failed");
+          throw new Error(extractApiErrorMessage(errorText) || "Project generation failed");
         }
 
         const generated = (await generateResponse.json()) as GeneratedProjectResponse;
+        updateAgentLog(generationLogId, {
+          detail: `Loko AI finished project synthesis in ${generated.mode || "builder"} mode.`,
+          output: [
+            generated.routeReason ? `Route: ${generated.routeReason}` : "Route: builder",
+            generated.projectTitle ? `Project: ${generated.projectTitle}` : "Project title synthesized",
+          ].filter(Boolean),
+          status: "completed",
+        });
         setAgentStatus("Generating preview...");
-        appendAgentLog("Generating Output", generated.projectTitle || "Rendering workspace preview", "preview");
         const generatedFiles = normalizeGeneratedFiles(generated.files);
+        appendAgentLog(
+          "Generated code artifacts",
+          `${generatedFiles.length} files were produced dynamically for this project.`,
+          "file",
+          {
+            command: "$ artifacts.inspect --files",
+            output: generatedFiles.slice(0, 12).map((file) => `write ${file.path}`),
+            status: "completed",
+          }
+        );
+        if (generated.workspace?.path) {
+          appendAgentLog(
+            "Workspace files written",
+            "Generated source files were written into the local workspace folder.",
+            "file",
+            {
+              command: `$ workspace.write --path ${generated.workspace.path}`,
+              output: generated.workspace.files?.slice(0, 12) ?? [],
+              status: "completed",
+            }
+          );
+        }
         setAgentStatus("Editing files...");
-        appendAgentLog("Verification", `${generatedFiles.length} project files prepared`, "file");
+        const saveLogId = appendAgentLog(
+          "Persisting project state",
+          "Saving the generated project, chat transcript, and preview metadata.",
+          "tool",
+          {
+            command: "$ projects.save --upsert",
+            status: "running",
+          }
+        );
         const assistantFinal: ChatMessage = {
           ...assistantMessage,
           isStreaming: false,
@@ -1448,35 +1624,88 @@ export default function DashboardWorkspace() {
           }
         );
 
+        let hydratedProject: Project;
+
         if (!saveResponse.ok) {
           const errorText = await saveResponse.text();
-          throw new Error(errorText || "Project save failed");
+          const parsedError = extractApiErrorMessage(errorText) || "Project save failed";
+
+          if (!isProjectsSetupErrorMessage(parsedError)) {
+            throw new Error(parsedError);
+          }
+
+          setComposerNotice("Preview ready hai, but Supabase projects table missing hai so project save nahi hua.");
+          updateAgentLog(saveLogId, {
+            detail: "Supabase persistence is unavailable, so Loko AI switched to local in-browser history for this run.",
+            output: [parsedError],
+            status: "error",
+          });
+          hydratedProject = {
+            id: activeBuildProject?.id ?? crypto.randomUUID(),
+            title: projectPayload.title,
+            description: projectPayload.description,
+            prompt: projectPayload.prompt,
+            preview_html: projectPayload.preview_html,
+            generated_code: generatedFiles,
+            chat_messages: finalMessages,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+        } else {
+          const savedData = (await saveResponse.json()) as { project?: Project };
+          const savedProject = savedData.project;
+          if (!savedProject) throw new Error("Generated project was not returned.");
+          updateAgentLog(saveLogId, {
+            detail: "Project persistence completed successfully.",
+            output: [`Project ID: ${savedProject.id}`],
+            status: "completed",
+          });
+
+          hydratedProject = {
+            ...savedProject,
+            generated_code: normalizeGeneratedFiles(savedProject.generated_code),
+            chat_messages: normalizeMessages(savedProject.chat_messages),
+          };
         }
-
-        const savedData = (await saveResponse.json()) as { project?: Project };
-        const savedProject = savedData.project;
-        if (!savedProject) throw new Error("Generated project was not returned.");
-
-        const hydratedProject: Project = {
-          ...savedProject,
-          generated_code: normalizeGeneratedFiles(savedProject.generated_code),
-          chat_messages: normalizeMessages(savedProject.chat_messages),
-        };
 
         setMessages(finalMessages);
         setActiveChatId(hydratedProject.id);
         setActiveBuildProject(hydratedProject);
         setSelectedBuilderFile(getDefaultGeneratedFile(hydratedProject));
         setBuilderTab(hydratedProject.preview_html ? "preview" : "code");
+        upsertProjectHistory(hydratedProject);
+        const shouldStartSandbox = generatedFiles.some((file) => file.path === "src/App.tsx" || file.path === "src/app.tsx");
+        let resolvedPreviewMode = hydratedProject.preview_html ? "inline preview" : "code only";
+        if (shouldStartSandbox) {
+          setAgentStatus("Generating preview...");
+          const livePreviewUrl = await spinUpSandbox(generatedFiles, hydratedProject.id, shouldUpdateCurrentBuild ? "update" : "create");
+          if (livePreviewUrl) {
+            resolvedPreviewMode = "live sandbox";
+          }
+        }
         setAgentStatus("Completed");
-        appendAgentLog("Completed", "Preview and source files are ready", "done");
-        loadProjects();
+        appendAgentLog("Completed", "Preview, generated files, and execution workflow are fully ready.", "done", {
+          command: "$ loko-ai.complete --project-ready",
+          output: [
+            `Files generated: ${generatedFiles.length}`,
+            `Preview mode: ${resolvedPreviewMode}`,
+          ],
+          status: "completed",
+        });
+        if (saveResponse.ok) {
+          loadProjects();
+        }
         return;
       }
 
       setAgentStatus(attachmentToSend ? "Reading files..." : "Searching...");
-      appendAgentLog(attachmentToSend ? "Reading Files" : "Searching Resources", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool");
-      appendAgentLog("Calling Tools", "Connecting to the selected model provider", "tool");
+      appendAgentLog(attachmentToSend ? "Reading Files" : "Searching Resources", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool", {
+        command: attachmentToSend ? "$ files.extract-context" : "$ routing.select-model",
+      });
+      const providerLogId = appendAgentLog("Calling Tools", "Connecting to the selected model provider", "tool", {
+        command: `$ openrouter.chat --model ${selectedModelId}`,
+        status: "running",
+      });
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1491,15 +1720,12 @@ export default function DashboardWorkspace() {
 
       if (!response.ok || !response.body) {
         const errorText = await response.text();
-        let message = errorText || "AI response failed";
-        try {
-          const data = JSON.parse(errorText) as { error?: string };
-          message = data.error || message;
-        } catch {
-          // Keep the plain text provider error.
-        }
-        throw new Error(message);
+        throw new Error(extractApiErrorMessage(errorText));
       }
+      updateAgentLog(providerLogId, {
+        detail: "Connected to the model provider and waiting for streamed tokens.",
+        status: "completed",
+      });
 
       const nextChatId = response.headers.get("X-Chat-Id");
       if (nextChatId) setActiveChatId(nextChatId);
@@ -1507,15 +1733,20 @@ export default function DashboardWorkspace() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let hasStreamed = false;
+      let assistantText = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        assistantText += chunk;
         if (!hasStreamed) {
           hasStreamed = true;
           setAgentStatus("Writing code...");
-          appendAgentLog("Generating Output", "Tokens are arriving in real time", "thinking");
+          appendAgentLog("Generating Output", "Tokens are arriving in real time", "thinking", {
+            command: "$ stream.consume --tokens",
+            status: "running",
+          });
         }
         setMessages((current) =>
           current.map((message) =>
@@ -1531,12 +1762,31 @@ export default function DashboardWorkspace() {
           message.id === assistantId ? { ...message, isStreaming: false } : message
         )
       );
+      const resolvedChatId = nextChatId || activeChatId || crypto.randomUUID();
+      upsertProjectHistory({
+        id: resolvedChatId,
+        title: (trimmed || "New chat").slice(0, 64),
+        description: activeBuildProject?.description ?? null,
+        prompt: trimmed || null,
+        preview_html: activeBuildProject?.id === resolvedChatId ? activeBuildProject.preview_html : null,
+        generated_code: activeBuildProject?.id === resolvedChatId ? activeBuildProject.generated_code : [],
+        chat_messages: [
+          ...messages,
+          userMessage,
+          {
+            ...assistantMessage,
+            content: assistantText || "I could not generate a response. Please try again.",
+            isStreaming: false,
+          },
+        ],
+        created_at: activeBuildProject?.id === resolvedChatId ? activeBuildProject.created_at : new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
       appendAgentLog("Verification", "Checking final response state", "tool");
       setAgentStatus("Completed");
       appendAgentLog("Completed", "Response finished successfully", "done");
       loadProjects();
     } catch (error) {
-      console.warn("Chat send failed:", error);
       setAgentStatus("Error");
       appendAgentLog("Verification", "The provider returned an issue and the message was shown", "error");
       const errorMessage =
@@ -1555,6 +1805,26 @@ export default function DashboardWorkspace() {
             : message
         )
       );
+      upsertProjectHistory({
+        id: activeChatId || crypto.randomUUID(),
+        title: (trimmed || "New chat").slice(0, 64),
+        description: activeBuildProject?.description ?? null,
+        prompt: trimmed || null,
+        preview_html: activeBuildProject?.preview_html ?? null,
+        generated_code: activeBuildProject?.generated_code ?? [],
+        chat_messages: [
+          ...messages,
+          userMessage,
+          {
+            ...assistantMessage,
+            isStreaming: false,
+            isError: true,
+            content: errorMessage,
+          },
+        ],
+        created_at: activeBuildProject?.created_at ?? new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
     } finally {
       setIsSubmitting(false);
       setAgentStartedAt(null);
@@ -1908,6 +2178,8 @@ export default function DashboardWorkspace() {
                 {activeBuildProject && (
                   <BuildSidePanel
                     project={activeBuildProject}
+                    sandboxUrl={sandboxUrl}
+                    isSandboxLoading={isSandboxLoading}
                     activeTab={builderTab}
                     selectedFile={selectedBuilderFile}
                     onTabChange={setBuilderTab}
@@ -1942,6 +2214,8 @@ export default function DashboardWorkspace() {
 
 function BuildSidePanel({
   project,
+  sandboxUrl,
+  isSandboxLoading,
   activeTab,
   selectedFile,
   onTabChange,
@@ -1949,6 +2223,8 @@ function BuildSidePanel({
   onClose,
 }: {
   project: Project;
+  sandboxUrl: string | null;
+  isSandboxLoading: boolean;
   activeTab: BuilderTab;
   selectedFile: string;
   onTabChange: (tab: BuilderTab) => void;
@@ -1962,6 +2238,10 @@ function BuildSidePanel({
   const [isFileRailOpen, setIsFileRailOpen] = useState(true);
 
   function openPreviewInNewTab() {
+    if (sandboxUrl) {
+      window.open(sandboxUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
     if (!previewHtml) return;
     const url = URL.createObjectURL(new Blob([previewHtml], { type: "text/html" }));
     window.open(url, "_blank", "noopener,noreferrer");
@@ -2083,7 +2363,25 @@ function BuildSidePanel({
 
       {activeTab === "preview" ? (
         <div className="min-h-0 flex-1 bg-slate-100 p-3 dark:bg-slate-900/80">
-          {previewHtml ? (
+          {sandboxUrl ? (
+            <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10">
+              <iframe
+                key={`sandbox-${sandboxUrl}-${previewReloadKey}`}
+                title={`${project.title} live preview`}
+                src={sandboxUrl}
+                className="h-full w-full bg-white"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+              />
+            </div>
+          ) : isSandboxLoading ? (
+            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-300 bg-white/70 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950/40 dark:text-slate-400">
+              <Loader2 className="h-5 w-5 animate-spin text-sky-500" />
+              <div className="text-center">
+                <p className="font-semibold text-slate-700 dark:text-slate-200">Loko AI is building the live preview</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Installing dependencies, starting the dev server, and wiring the preview.</p>
+              </div>
+            </div>
+          ) : previewHtml ? (
             <div className="h-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-white/10">
               <iframe
                 key={previewReloadKey}
