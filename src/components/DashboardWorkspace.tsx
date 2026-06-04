@@ -54,6 +54,7 @@ import { assistants } from "@/app/collection/collection-data";
 import { FileCard, type FileCardData } from "@/components/file-card/FileCard";
 import { ModelPicker } from "@/components/ModelPicker";
 import UserMenu from "@/components/UserMenu";
+import { DASHBOARD_HISTORY_STORAGE_KEY, removeStoredProject } from "@/lib/project-history";
 import {
   DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
@@ -69,6 +70,7 @@ type ChatMessage = {
   createdAt: string;
   isStreaming?: boolean;
   isError?: boolean;
+  responseMode?: "build" | "code" | "details";
 };
 
 type GeneratedCodeFile = {
@@ -141,8 +143,6 @@ type GeneratedProjectResponse = {
   } | null;
 };
 
-const DASHBOARD_HISTORY_STORAGE_KEY = "lokoai:dashboard-history";
-
 const LazyPanelFallback = () => (
   <div className="flex min-h-[420px] items-center justify-center bg-[#f8fbff] text-sm font-semibold text-slate-500">
     Loading workspace...
@@ -209,6 +209,9 @@ const EXPLICIT_FILE_DOWNLOAD_PATTERN =
 const VIDEO_REQUEST_PATTERN =
   /\b(video|clip|movie|animation|animate|animated|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao|screen recording|screenrecording|camera movement|camera movements|cinematic shot|cinematic video|motion graphics|timelapse|time-lapse|fps|frame by frame)\b/i;
 
+const CODE_ONLY_REQUEST_PATTERN =
+  /\b(full\s+)?(code|source code|complete code|component code|script|function|api route|backend code|frontend code|html code|css code|javascript code|typescript code|react code|next\.?js code|python code|sql code|terminal code|code do|code de|code chahiye|code chaiye|code likh|code bna|code bana)\b/i;
+
 function isBuildRequestPrompt(value: string) {
   const normalized = value.trim();
 
@@ -218,6 +221,14 @@ function isBuildRequestPrompt(value: string) {
     !EXPLICIT_FILE_DOWNLOAD_PATTERN.test(normalized) &&
     !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(normalized)
   );
+}
+
+function isCodeOnlyRequestPrompt(value: string) {
+  return CODE_ONLY_REQUEST_PATTERN.test(value.trim()) && !isBuildRequestPrompt(value);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function isProjectsSetupErrorMessage(value: string) {
@@ -644,7 +655,7 @@ function CodeBlock({ language, code }: { language: string; code: string }) {
           className="h-[440px] w-full bg-white"
         />
       ) : (
-        <pre className="scrollbar-soft max-h-96 w-full overflow-auto bg-white p-4 text-xs font-normal leading-6 text-slate-700 selection:bg-sky-100">
+        <pre className="scrollbar-soft max-h-[520px] w-full overflow-auto bg-[#08111f] p-4 text-xs font-normal leading-6 text-sky-50 selection:bg-sky-400/30">
           <code className="whitespace-pre-wrap break-words">{code}</code>
         </pre>
       )}
@@ -1061,7 +1072,7 @@ function DashboardOverview({
                 ["Creative Writing", "moonshotai/kimi-k2.6:free", "from-emerald-500 to-teal-400"],
                 ["Research/Reasoning", "openai/gpt-oss-120b:free", "from-blue-500 to-sky-400"],
                 ["UI Analysis", "hermes-3-llama-405b", "from-slate-700 to-slate-500"],
-                ["Image Prompting", "gemini-2.5-flash-image", "from-orange-500 to-amber-400"],
+                ["Image Prompting", "Loko AI Image Studio", "from-orange-500 to-amber-400"],
               ].map(([label, model, tone]) => (
                 <div key={label} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-3 py-2.5">
                   <span className={`h-3 w-3 rounded-full bg-gradient-to-br ${tone} shadow-lg`} />
@@ -1213,7 +1224,7 @@ export default function DashboardWorkspace() {
           generated_code: normalizeGeneratedFiles(project.generated_code),
           chat_messages: normalizeMessages(project.chat_messages),
         }));
-        const resolvedProjects = nextProjects.length ? nextProjects : loadLocalProjects();
+        const resolvedProjects = nextProjects;
         setProjects(resolvedProjects);
         persistLocalProjects(resolvedProjects);
         setIsLoadingProjects(false);
@@ -1414,6 +1425,7 @@ export default function DashboardWorkspace() {
     setDeletingProjectId(projectId);
     const previousProjects = projects;
     syncProjectsState((current) => current.filter((project) => project.id !== projectId));
+    removeStoredProject(projectId);
     if (activeChatId === projectId) startNewChat();
     if (activeBuildProject?.id === projectId) {
       setActiveBuildProject(null);
@@ -1485,13 +1497,16 @@ export default function DashboardWorkspace() {
   async function handleSubmit(inputPrompt = prompt) {
     const trimmed = inputPrompt.trim();
     if ((!trimmed && !uploadedAttachment) || isSubmitting) return;
+    const isBuildIntent = Boolean(trimmed && isBuildRequestPrompt(trimmed) && !uploadedAttachment);
+    const isCodeIntent = Boolean(trimmed && isCodeOnlyRequestPrompt(trimmed) && !uploadedAttachment);
+    const responseMode: ChatMessage["responseMode"] = isBuildIntent ? "build" : isCodeIntent ? "code" : "details";
 
     setIsSubmitting(true);
     setComposerNotice("");
-    setIsActivityOpen(true);
+    setIsActivityOpen(isBuildIntent);
     setAgentStartedAt(Date.now());
     setRuntimeSeconds(0);
-    setAgentStatus(trimmed && isBuildRequestPrompt(trimmed) && !uploadedAttachment ? "Writing code..." : uploadedAttachment ? "Reading files..." : "Thinking...");
+    setAgentStatus(isBuildIntent ? "Writing code..." : uploadedAttachment ? "Reading files..." : isCodeIntent ? "Writing code..." : "Searching...");
     setActivityLogs([]);
     const attachmentToSend = uploadedAttachment;
     const userVisibleContent = [
@@ -1512,22 +1527,20 @@ export default function DashboardWorkspace() {
       content: "",
       createdAt: new Date().toISOString(),
       isStreaming: true,
+      responseMode,
     };
 
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
-    appendAgentLog("Understanding Request", trimmed || "Analyzing uploaded file", "thinking", {
-      command: "$ loko-ai.parse-request",
-    });
-    appendAgentLog("Planning", isBuildRequestPrompt(trimmed) ? "Preparing builder execution plan" : "Preparing response strategy", "thinking", {
-      command: "$ loko-ai.plan --dynamic",
-    });
-    appendAgentLog("Loading Context", "Loading chat history, selected model, and workspace state", "tool", {
-      command: "$ context.load --chat --workspace",
-    });
-    if (attachmentToSend) {
-      appendAgentLog("Reading Files", attachmentToSend.name, "file", {
-        command: `$ files.inspect "${attachmentToSend.name}"`,
+    if (isBuildIntent) {
+      appendAgentLog("Understanding Request", trimmed || "Analyzing uploaded file", "thinking", {
+        command: "$ loko-ai.parse-request",
+      });
+      appendAgentLog("Planning", "Preparing builder execution plan", "thinking", {
+        command: "$ loko-ai.plan --dynamic",
+      });
+      appendAgentLog("Loading Context", "Loading chat history, selected model, and workspace state", "tool", {
+        command: "$ context.load --chat --workspace",
       });
     }
     setPrompt("");
@@ -1535,7 +1548,7 @@ export default function DashboardWorkspace() {
     setUploadProgress(0);
 
     try {
-      if (trimmed && isBuildRequestPrompt(trimmed) && !attachmentToSend) {
+      if (isBuildIntent) {
         setAgentStatus("Writing code...");
         const generationLogId = appendAgentLog(
           "Generating project with Loko AI",
@@ -1698,20 +1711,28 @@ export default function DashboardWorkspace() {
         return;
       }
 
-      setAgentStatus(attachmentToSend ? "Reading files..." : "Searching...");
-      appendAgentLog(attachmentToSend ? "Reading Files" : "Searching Resources", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool", {
-        command: attachmentToSend ? "$ files.extract-context" : "$ routing.select-model",
-      });
-      const providerLogId = appendAgentLog("Calling Tools", "Connecting to the selected model provider", "tool", {
-        command: `$ openrouter.chat --model ${selectedModelId}`,
-        status: "running",
-      });
+      setAgentStatus(attachmentToSend ? "Reading files..." : isCodeIntent ? "Writing code..." : "Searching...");
+      if (responseMode === "details") {
+        await wait(1200);
+      }
+      let providerLogId = "";
+      if (isBuildIntent) {
+        appendAgentLog(attachmentToSend ? "Reading Files" : "Searching Resources", attachmentToSend ? "Extracting context for the model" : "Selecting the best response path", attachmentToSend ? "file" : "tool", {
+          command: attachmentToSend ? "$ files.extract-context" : "$ routing.select-model",
+        });
+        providerLogId = appendAgentLog("Calling Tools", "Connecting to the selected model provider", "tool", {
+          command: `$ openrouter.chat --model ${selectedModelId}`,
+          status: "running",
+        });
+      }
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId: activeChatId,
-          message: trimmed || "Analyze the uploaded file.",
+          message: isCodeIntent
+            ? `${trimmed}\n\nReturn the complete working code in one or more fenced code blocks. Include all required files, commands, and setup notes. Do not provide partial snippets unless the user explicitly asks for a snippet.`
+            : trimmed || "Analyze the uploaded file.",
           messages,
           selectedModel: selectedModelId,
           attachment: attachmentToSend,
@@ -1722,10 +1743,12 @@ export default function DashboardWorkspace() {
         const errorText = await response.text();
         throw new Error(extractApiErrorMessage(errorText));
       }
-      updateAgentLog(providerLogId, {
-        detail: "Connected to the model provider and waiting for streamed tokens.",
-        status: "completed",
-      });
+      if (providerLogId) {
+        updateAgentLog(providerLogId, {
+          detail: "Connected to the model provider and waiting for streamed tokens.",
+          status: "completed",
+        });
+      }
 
       const nextChatId = response.headers.get("X-Chat-Id");
       if (nextChatId) setActiveChatId(nextChatId);
@@ -1742,11 +1765,13 @@ export default function DashboardWorkspace() {
         assistantText += chunk;
         if (!hasStreamed) {
           hasStreamed = true;
-          setAgentStatus("Writing code...");
-          appendAgentLog("Generating Output", "Tokens are arriving in real time", "thinking", {
-            command: "$ stream.consume --tokens",
-            status: "running",
-          });
+          setAgentStatus(isCodeIntent ? "Writing code..." : "Completed");
+          if (isBuildIntent) {
+            appendAgentLog("Generating Output", "Tokens are arriving in real time", "thinking", {
+              command: "$ stream.consume --tokens",
+              status: "running",
+            });
+          }
         }
         setMessages((current) =>
           current.map((message) =>
@@ -1777,14 +1802,17 @@ export default function DashboardWorkspace() {
             ...assistantMessage,
             content: assistantText || "I could not generate a response. Please try again.",
             isStreaming: false,
+            responseMode,
           },
         ],
         created_at: activeBuildProject?.id === resolvedChatId ? activeBuildProject.created_at : new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
-      appendAgentLog("Verification", "Checking final response state", "tool");
       setAgentStatus("Completed");
-      appendAgentLog("Completed", "Response finished successfully", "done");
+      if (isBuildIntent) {
+        appendAgentLog("Verification", "Checking final response state", "tool");
+        appendAgentLog("Completed", "Response finished successfully", "done");
+      }
       loadProjects();
     } catch (error) {
       setAgentStatus("Error");
@@ -1800,6 +1828,7 @@ export default function DashboardWorkspace() {
                 ...message,
                 isStreaming: false,
                 isError: true,
+                responseMode,
                 content: errorMessage,
               }
             : message
@@ -1819,6 +1848,7 @@ export default function DashboardWorkspace() {
             ...assistantMessage,
             isStreaming: false,
             isError: true,
+            responseMode,
             content: errorMessage,
           },
         ],
@@ -2120,14 +2150,16 @@ export default function DashboardWorkspace() {
                                 onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
                               />
                               {message.role === "assistant" && message.isStreaming && (
-                                <AgentStatusPanel
-                                  status={agentStatus}
-                                  logs={activityLogs}
-                                  runtimeSeconds={runtimeSeconds}
-                                  isRunning={isSubmitting}
-                                  isOpen={isActivityOpen}
-                                  onToggle={() => setIsActivityOpen((open) => !open)}
-                                />
+                                message.responseMode === "build" ? (
+                                  <AgentStatusPanel
+                                    status={agentStatus}
+                                    logs={activityLogs}
+                                    runtimeSeconds={runtimeSeconds}
+                                    isRunning={isSubmitting}
+                                    isOpen={isActivityOpen}
+                                    onToggle={() => setIsActivityOpen((open) => !open)}
+                                  />
+                                ) : null
                               )}
                             </div>
                           ))}
@@ -2667,6 +2699,7 @@ function MessageBubble({
   onRetry: () => void;
 }) {
   const isUser = message.role === "user";
+  const shouldShowLoader = !isUser && message.isStreaming && !message.content;
 
   return (
     <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
@@ -2689,7 +2722,13 @@ function MessageBubble({
           )}
           <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium dark:text-slate-100" : "text-slate-700 dark:text-slate-200"} ${message.isError ? "text-red-500 font-medium dark:text-red-400" : ""}`}>
             <div className={!isUser ? "prose prose-slate max-w-none text-slate-700 dark:prose-invert dark:text-slate-200" : ""}>
-              <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
+              {shouldShowLoader && message.responseMode === "code" ? (
+                <TerminalCodeLoader />
+              ) : shouldShowLoader && message.responseMode === "details" ? (
+                <SearchAnswerLoader />
+              ) : (
+                <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
+              )}
             </div>
           </div>
 
@@ -2707,6 +2746,39 @@ function MessageBubble({
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SearchAnswerLoader() {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-sky-100 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm dark:border-sky-400/15 dark:bg-slate-950/70 dark:text-slate-300">
+      <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-500 dark:bg-sky-500/10">
+        <Search className="h-4 w-4 animate-pulse" />
+        <span className="absolute inset-0 rounded-xl border border-sky-300/40 animate-ping" />
+      </span>
+      <span>Searching details...</span>
+    </div>
+  );
+}
+
+function TerminalCodeLoader() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#08111f] text-sky-50 shadow-[0_18px_50px_rgba(2,8,23,0.22)]">
+      <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-4 py-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+        <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+        <span className="ml-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Loko AI Terminal</span>
+      </div>
+      <div className="space-y-2 px-4 py-4 font-mono text-xs leading-6">
+        <p><span className="text-emerald-300">$</span> loko-ai.create-code --complete</p>
+        <p className="text-sky-200">Generating full working code...</p>
+        <p className="inline-flex items-center gap-2 text-slate-400">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          Preparing files, commands, and setup notes
+        </p>
       </div>
     </div>
   );

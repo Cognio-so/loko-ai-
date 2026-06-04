@@ -11,8 +11,8 @@ const MODEL_LOGOS: Record<string, string> = {
   "GPT-4o Mini": "/models/openai.svg",
   "GPT-5 Image Mini": "/models/openai.svg",
 
-  "Loko AI 2.5 Flash": "/models/gemini.svg",
-  "Loko AI 2.5 Flash Image": "/models/gemini.svg",
+  "Gemini 2.5 Flash": "/models/gemini.svg",
+  "Gemini 2.5 Flash Image": "/models/gemini.svg",
   "Gemma 4 26B": "/models/gemma.svg",
 
   "Llama 3.3 70B": "/models/meta.svg",
@@ -81,12 +81,12 @@ const MODEL_LOGO_THEMES: Record<string, { tint: string; filter: string; bg: stri
     filter: "none",
     bg: "#ffffff",
   },
-  "Loko AI 2.5 Flash": {
+  "Gemini 2.5 Flash": {
     tint: "#8e75ff",
     filter: "none",
     bg: "#ffffff",
   },
-  "Loko AI 2.5 Flash Image": {
+  "Gemini 2.5 Flash Image": {
     tint: "#8e75ff",
     filter: "none",
     bg: "#ffffff",

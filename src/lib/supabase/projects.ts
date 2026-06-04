@@ -21,20 +21,40 @@ export interface SupabaseProject {
 type SupabaseErrorLike = {
   code?: string;
   message?: string;
+  details?: string;
+  hint?: string;
 };
 
 export function isMissingProjectsTableError(error: unknown) {
   if (!error || typeof error !== "object") return false;
 
   const maybeError = error as SupabaseErrorLike;
+  const text = [
+    maybeError.message,
+    maybeError.details,
+    maybeError.hint,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     maybeError.code === "PGRST205" ||
-    maybeError.message?.includes("Could not find the table 'public.projects' in the schema cache") === true
+    maybeError.code === "42P01" ||
+    /public\.projects|relation .*projects.* does not exist|schema cache/i.test(text)
   );
 }
 
 export function getProjectsSetupErrorMessage() {
   return "Supabase table `public.projects` is missing. Run `supabase/schema.sql` in the Supabase SQL Editor, then retry.";
+}
+
+export function getSupabaseErrorMessage(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return error instanceof Error ? error.message : "Unknown Supabase error";
+  }
+
+  const maybeError = error as SupabaseErrorLike;
+  return maybeError.message || maybeError.details || maybeError.hint || "Unknown Supabase error";
 }
 
 function parseJsonArray(value: unknown): unknown[] {
@@ -80,8 +100,11 @@ export async function supabaseListProjects(limit = 50, offset = 0): Promise<Supa
     .range(offset, offset + limit - 1);
 
   if (error) {
-    console.error("Error listing projects from Supabase:", error);
-    throw error;
+    const message = isMissingProjectsTableError(error)
+      ? getProjectsSetupErrorMessage()
+      : getSupabaseErrorMessage(error);
+    console.warn("Projects list unavailable:", message);
+    return [];
   }
 
   return (data ?? []).map(toSupabaseProject);

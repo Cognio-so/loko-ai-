@@ -4,6 +4,7 @@ import { Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { removeStoredProject } from "@/lib/project-history";
 
 interface Project {
   id: string;
@@ -28,6 +29,7 @@ export default function ProjectList({ initialProjects }: { initialProjects: Proj
       setError(data.error || "Failed to delete project");
     } else {
       setProjects((items) => items.filter((item) => item.id !== id));
+      removeStoredProject(id);
     }
 
     setDeletingId(null);

@@ -9,18 +9,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getCurrentUser } from "@/lib/supabase";
+import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase";
 import AvatarUploadClient from "./AvatarUploadClient";
+
+function readText(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/profile");
 
   const email = user.email ?? "Signed in user";
-  const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+  const supabase = await createSupabaseServerClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username,avatar_url")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const avatarUrl =
+    readText(profile?.avatar_url) ||
+    readText(user.user_metadata?.avatar_url) ||
+    readText(user.user_metadata?.picture);
   const displayName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
+    readText(profile?.username) ||
+    readText(user.user_metadata?.full_name) ||
+    readText(user.user_metadata?.name) ||
     email.split("@")[0] ||
     "Account";
   const initials = email.charAt(0).toUpperCase();
@@ -33,17 +48,14 @@ export default async function ProfilePage() {
     : "Recently";
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-sky-500">
-            Account
-          </p>
-          <h1 className="text-4xl font-bold tracking-tight text-slate-950 dark:text-white">
-            Profile
+          <h1 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+            Profile Settings
           </h1>
-          <p className="mt-3 text-sm text-slate-500 dark:text-gray-400">
-            Review your LokoAI account details and jump back into your workspace.
+          <p className="mt-2 text-sm text-slate-500 dark:text-gray-400">
+            Manage your profile information.
           </p>
         </div>
         <Button asChild>
@@ -54,28 +66,36 @@ export default async function ProfilePage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.25fr]">
+        <Card className="border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-slate-950/80">
           <CardHeader className="text-center">
             <AvatarUploadClient initialAvatar={avatarUrl} displayName={displayName} initials={initials} />
             <div>
-              <CardTitle>{displayName}</CardTitle>
+              <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
+                <span className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-1 text-[10px] font-black uppercase text-white shadow-lg shadow-blue-500/20">
+                  Admin
+                </span>
+                <span className="rounded-full bg-gradient-to-r from-fuchsia-600 via-violet-600 to-blue-600 px-3 py-1 text-[10px] font-black uppercase text-white shadow-lg shadow-violet-500/20">
+                  Premium Loko
+                </span>
+              </div>
+              <CardTitle className="text-2xl font-black">{displayName}</CardTitle>
               <CardDescription className="mt-1">{email}</CardDescription>
             </div>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-600 dark:text-sky-300">
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-1.5 text-xs font-bold text-violet-700 dark:text-violet-300">
               <ShieldCheck className="h-3.5 w-3.5" />
-              Active account
+              Verified premium account
             </span>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-slate-950/80">
           <CardHeader>
-            <CardTitle>Account Details</CardTitle>
+            <CardTitle>Profile Information</CardTitle>
             <CardDescription>
-              These details come from your authenticated Supabase session.
+              Update your personal information and profile details.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
