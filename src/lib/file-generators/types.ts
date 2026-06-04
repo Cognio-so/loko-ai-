@@ -31,6 +31,14 @@ export type PresentationSlide = {
   title: string;
   bullets: string[];
   speakerNotes?: string;
+  visual?: string;
+  layout?: "title" | "section" | "content" | "two-column" | "table" | "chart" | "image" | "conclusion";
+  table?: FileTable;
+  chart?: {
+    title: string;
+    labels: string[];
+    values: number[];
+  };
 };
 
 export type StructuredFileContent = {
@@ -46,6 +54,8 @@ export type StructuredFileContent = {
     requestedBy: string;
     generatedAt: string;
     category: string;
+    slideCount?: number;
+    theme?: "light" | "dark";
   };
 };
 
@@ -56,4 +66,5 @@ export type StoredGeneratedFile = {
   downloadUrl: string;
   title: string;
   size: number;
+  presentationId?: string;
 };

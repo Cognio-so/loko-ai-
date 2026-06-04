@@ -1,7 +1,7 @@
 import { type FileIntent, type GeneratedFileType, SUPPORTED_FILE_TYPES } from "@/lib/file-generators/types";
 
 const EXPLICIT_FILE_ACTION_PATTERN =
-  /\b(download|export|save as|save into|give me (a|an)? file|file mein|file me|document mein|document me|pdf mein|pdf me|word file|excel file|ppt file|pptx file|csv file|json file|txt file|docx file|xlsx file|download karke do|download kar ke do|download do|as a file|as pdf|as docx|as xlsx|as pptx|as csv|as json|as txt)\b/i;
+  /\b(download|export|save as|save into|give me (a|an)? file|create|make|generate|file mein|file me|document mein|document me|pdf mein|pdf me|word file|excel file|ppt file|pptx file|powerpoint|presentation|pitch deck|slide deck|slides|csv file|json file|txt file|docx file|xlsx file|download karke do|download kar ke do|download do|as a file|as pdf|as docx|as xlsx|as pptx|as csv|as json|as txt)\b/i;
 
 const WEBSITE_OR_APP_REQUEST_PATTERN =
   /\b(website|webpage|web page|landing page|landing|page|ui|ux|frontend|dashboard|app|desktop app|saas|component|react app|next app|html|css)\b/i;
@@ -34,12 +34,13 @@ export function detectFileIntent(prompt: string): FileIntent {
     return { isFileRequest: false, fileType: null, category: "general" };
   }
 
-  if (WEBSITE_OR_APP_REQUEST_PATTERN.test(normalized)) {
+  const explicitType = TYPE_PATTERNS.find((item) => item.pattern.test(normalized));
+  const categoryMatch = CATEGORY_PATTERNS.find((item) => item.pattern.test(normalized));
+
+  if (WEBSITE_OR_APP_REQUEST_PATTERN.test(normalized) && explicitType?.type !== "pptx") {
     return { isFileRequest: false, fileType: null, category: "general" };
   }
 
-  const explicitType = TYPE_PATTERNS.find((item) => item.pattern.test(normalized));
-  const categoryMatch = CATEGORY_PATTERNS.find((item) => item.pattern.test(normalized));
   const fileType = explicitType?.type ?? categoryMatch?.defaultType ?? null;
 
   if (!fileType || !SUPPORTED_FILE_TYPES.includes(fileType)) {

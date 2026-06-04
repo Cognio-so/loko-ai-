@@ -16,9 +16,9 @@ type ModelPickerProps = {
   onModelChange: (modelId: string) => void;
 };
 
-type FilterKey = "All" | "Chat" | "Coding" | "Reasoning" | "Search" | "Image" | "Free" | "Paid";
+type FilterKey = "All" | "Recommended" | "Free" | "Premium" | "Chat" | "Coding" | "Reasoning" | "Search" | "Image";
 
-const FILTERS: FilterKey[] = ["All", "Chat", "Coding", "Reasoning", "Search", "Image", "Free", "Paid"];
+const FILTERS: FilterKey[] = ["All", "Recommended", "Free", "Premium", "Chat", "Coding", "Reasoning", "Search", "Image"];
 
 function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?: "sm" | "md" }) {
   const src = getModelLogo(model.name);
@@ -50,7 +50,8 @@ function ModelLogo({ model, size = "md" }: { model: OpenRouterModelOption; size?
 function matchesFilter(model: OpenRouterModelOption, filter: FilterKey) {
   if (filter === "All") return true;
   if (filter === "Free") return Boolean(model.free);
-  if (filter === "Paid") return !model.free;
+  if (filter === "Premium") return !model.free && !model.recommended; // Premium models are not free and not recommended
+  if (filter === "Recommended") return Boolean(model.recommended);
   if (filter === "Coding") return model.categories.includes("Coding Models") || model.type === "Coding";
   if (filter === "Search") return model.categories.includes("Search Models") || model.type === "Search";
   if (filter === "Chat") return model.categories.includes("Chat Models") || model.type === "Chat";
@@ -71,18 +72,18 @@ function ModelGridCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`group flex min-h-14 w-full items-center gap-3 rounded-[18px] border px-4 py-3 text-left transition duration-300 ${
+      className={`group flex min-h-[64px] w-full items-center gap-3 rounded-[16px] border px-3 py-3 text-left transition-all duration-200 sm:px-4 ${
         isSelected
-          ? "border-sky-500 bg-sky-50 shadow-[0_12px_34px_rgba(14,165,233,0.20)]"
-          : "border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)] hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-[0_14px_32px_rgba(15,23,42,0.10)]"
+          ? "border-sky-500 bg-gradient-to-br from-sky-50 to-blue-100 shadow-[0_12px_34px_rgba(14,165,233,0.20)]"
+          : "border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.05)] hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-[0_14px_32px_rgba(15,23,42,0.10)]"
       }`}
     >
       <ModelLogo model={model} />
       <div className="min-w-0 flex-1">
-        <p className="line-clamp-2 break-words text-[15px] font-medium leading-tight text-slate-900">{model.name}</p>
+        <p className="line-clamp-2 break-words text-sm font-medium leading-snug text-slate-900 sm:text-[15px]">{model.name}</p>
       </div>
       {isSelected && (
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white shadow-md">
           <Check className="h-3.5 w-3.5" />
         </span>
       )}
@@ -126,32 +127,40 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
     window.localStorage.setItem(SELECTED_MODEL_STORAGE_KEY, modelId);
     setIsOpen(false);
     setQuery("");
+
+    // Persist to database
+    fetch("/api/user/model", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ modelId }),
+    }).catch((error) => console.error("Error saving selected model to DB:", error));
   }
 
   return (
-    <div className="relative min-w-0">
+    <div className="relative min-w-0 shrink-0">
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="group inline-flex h-9 max-w-[112px] items-center gap-1.5 rounded-full border border-slate-200 bg-white py-0.5 pl-1 pr-2 text-[12px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950 sm:h-10 sm:max-w-[210px] sm:gap-2 sm:pl-1.5 sm:pr-2.5 sm:text-[13px]"
+        className="group inline-flex h-9 max-w-[168px] items-center gap-1.5 rounded-full border border-slate-200 bg-white py-0.5 pl-1 pr-2 text-[12px] font-medium text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-slate-950 sm:h-10 sm:max-w-[260px] sm:gap-2 sm:pl-1.5 sm:pr-2.5 sm:text-[13px]"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
       >
         <ModelLogo model={selectedModel} size="sm" />
-        <span className="hidden truncate sm:inline">{selectedModel.name}</span>
-        <span className="inline truncate sm:hidden">Model</span>
+        <span className="truncate">{selectedModel.name}</span>
         <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-slate-950/35 p-3 backdrop-blur-sm sm:p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/20 p-3 backdrop-blur-md sm:p-6"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setIsOpen(false);
           }}
         >
           <div
-            className="flex max-h-[calc(100dvh-2rem)] w-full max-w-[1080px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100dvh-3rem)]"
+            className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[1040px] animate-in fade-in-0 zoom-in-95 flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_32px_90px_rgba(15,23,42,0.28)] duration-200 sm:max-h-[calc(100dvh-3rem)] sm:rounded-[28px]"
             role="dialog"
             aria-modal="true"
             aria-label="Select model"
@@ -162,7 +171,7 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-slate-700"
                   aria-label="Close model picker"
                 >
                   <X className="h-5 w-5" />
@@ -180,13 +189,13 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
                 />
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="scrollbar-soft mt-3 flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
                 {FILTERS.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setFilter(item)}
-                    className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
+                    className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-300 ${
                       filter === item
                         ? "bg-[#2f63bf] text-white shadow-sm"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -198,9 +207,9 @@ export function ModelPicker({ selectedModelId, onModelChange }: ModelPickerProps
               </div>
             </div>
 
-            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-5 py-4 sm:px-6">
+            <div className="scrollbar-soft min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
               {filteredModels.length ? (
-                <div className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 pb-5 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredModels.map((model) => (
                     <ModelGridCard
                       key={model.id}

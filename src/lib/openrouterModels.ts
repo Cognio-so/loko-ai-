@@ -27,6 +27,7 @@ export type OpenRouterModelOption = {
   type: "Chat" | "Coding" | "Search" | "Image" | "Reasoning";
   categories: ModelCategory[];
   free?: boolean;
+  recommended?: boolean;
 };
 
 export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
@@ -37,6 +38,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models", "Search Models", "Coding Models"],
     free: true,
+    recommended: true,
   },
   {
     id: "anthropic/claude-opus-4.8-fast",
@@ -80,6 +82,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models", "Coding Models"],
     free: true,
+    recommended: true,
   },
   {
     id: "openai/gpt-4o-mini",
@@ -87,6 +90,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     provider: "OpenAI",
     type: "Chat",
     categories: ["Chat Models", "Search Models", "Coding Models"],
+    recommended: true,
   },
   {
     id: "meta-llama/llama-3.3-70b-instruct:free",
@@ -95,6 +99,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models"],
     free: true,
+    recommended: true,
   },
   {
     id: "qwen/qwen3-coder:free",
@@ -103,6 +108,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Coding",
     categories: ["Coding Models"],
     free: true,
+    recommended: true,
   },
   {
     id: "z-ai/glm-4.5-air:free",
@@ -119,6 +125,7 @@ export const OPENROUTER_MODEL_OPTIONS: OpenRouterModelOption[] = [
     type: "Chat",
     categories: ["Chat Models"],
     free: true,
+    recommended: true,
   },
   {
     id: "arcee-ai/trinity-large-thinking",

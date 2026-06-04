@@ -90,7 +90,7 @@ type Project = {
   updated_at: string;
 };
 
-type View = "chat" | "dashboard" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
+type View = "chat" | "dashboard" | "presentations" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
 
 type UploadedAttachment = {
   name: string;
@@ -141,6 +141,20 @@ type GeneratedProjectResponse = {
     path?: string;
     files?: string[];
   } | null;
+};
+
+type PresentationHistoryItem = {
+  id: string;
+  title: string;
+  prompt: string;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  slide_count: number;
+  theme: "light" | "dark";
+  is_shared: boolean;
+  created_at: string;
+  updated_at: string;
 };
 
 const LazyPanelFallback = () => (
@@ -305,6 +319,7 @@ function getDefaultGeneratedFile(project: Project | null) {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: Compass, view: "dashboard" as View },
+  { label: "Presentations", href: "/presentations", icon: Notebook, view: "presentations" as View },
   { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
   { label: "Partners", href: "/partners", icon: Users, view: "partners" as View },
   { label: "Launchpad", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
@@ -315,9 +330,9 @@ const navItems = [
 
 const quickActions = [
   {
-    title: "Create slides",
+    title: "Generate PPT",
     prompt:
-      "Create modern professional presentation slides with beautiful layouts, animations, icons, editable content sections, and premium design.",
+      "Create a 12-slide PowerPoint PPTX presentation on Artificial Intelligence with professional slide titles, content, charts, tables, image placeholders, conclusion, and a downloadable PPT file.",
   },
   {
     title: "Build website",
@@ -778,41 +793,41 @@ function AgentStatusPanel({
   return (
     <motion.div
       layout
-      className="overflow-hidden rounded-[24px] border border-slate-800 bg-slate-950 text-slate-100 shadow-[0_24px_80px_rgba(2,8,23,0.28)] ring-1 ring-white/5"
+      className="overflow-hidden rounded-[22px] border border-slate-200 bg-white text-slate-900 shadow-[0_18px_50px_rgba(15,23,42,0.10)]"
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-white/[0.04]"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
         aria-expanded={isOpen}
       >
         <div className="flex min-w-0 items-center gap-3">
           <span
-            className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border ${
+            className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border bg-white ${
               hasError
-                ? "border-red-400/30 bg-red-500/10 text-red-300 shadow-[0_0_35px_rgba(248,113,113,0.20)]"
+                ? "border-red-200 text-red-500"
                 : isRunning
-                  ? "border-sky-400/30 bg-sky-500/10 text-sky-300 shadow-[0_0_35px_rgba(14,165,233,0.28)]"
-                  : "border-emerald-400/25 bg-emerald-500/10 text-emerald-300"
+                  ? "border-sky-200 text-sky-500"
+                  : "border-emerald-200 text-emerald-500"
             }`}
           >
-            {isRunning && !hasError && <span className="absolute inset-0 animate-ping rounded-2xl bg-sky-400/20" />}
+            {isRunning && !hasError && <span className="absolute inset-0 animate-ping rounded-xl border border-sky-200" />}
             {hasError ? <X className="relative h-4 w-4" /> : isRunning ? <Loader2 className="relative h-4 w-4 animate-spin" /> : <Check className="relative h-4 w-4" />}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-sm font-black text-white">
+            <p className="truncate text-sm font-semibold text-slate-950">
               {hasError ? "Execution error" : isRunning ? status : "Completed"}
             </p>
-            <p className="truncate text-xs font-medium text-slate-400">
+            <p className="truncate text-xs font-normal text-slate-500">
               {isRunning ? `Running for ${runtimeSeconds}s` : `Finished in ${runtimeSeconds}s`} · {actionCount} actions
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="hidden rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-bold text-slate-300 sm:inline-flex">
+          <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 sm:inline-flex">
             {actionCount} live events
           </span>
-          <ChevronRight className={`h-4 w-4 text-slate-400 transition ${isOpen ? "rotate-90" : ""}`} />
+          <ChevronRight className={`h-4 w-4 text-slate-500 transition ${isOpen ? "rotate-90" : ""}`} />
         </div>
       </button>
 
@@ -823,7 +838,7 @@ function AgentStatusPanel({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="border-t border-white/10"
+            className="border-t border-slate-200 bg-slate-50/40"
           >
             <div className="space-y-2 px-4 py-4">
               {orderedLogs.map((log, index) => {
@@ -844,35 +859,35 @@ function AgentStatusPanel({
                       onClick={() => setExpandedStep((current) => (current === log.id ? null : log.id))}
                       className={`flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition ${
                         isStepError
-                          ? "border-red-400/25 bg-red-500/10"
+                          ? "border-red-200 bg-white"
                           : isStepActive
-                            ? "border-sky-400/25 bg-sky-500/10 shadow-[0_0_28px_rgba(14,165,233,0.10)]"
+                            ? "border-sky-200 bg-white shadow-sm"
                             : isStepCompleted
-                              ? "border-emerald-400/15 bg-emerald-500/[0.06]"
-                              : "border-white/8 bg-white/[0.03] hover:bg-white/[0.05]"
+                              ? "border-slate-200 bg-white"
+                              : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                     >
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-900">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white">
                         {isStepError ? (
-                          <X className="h-3.5 w-3.5 text-red-300" />
+                          <X className="h-3.5 w-3.5 text-red-500" />
                         ) : isStepActive ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-300" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" />
                         ) : isStepCompleted ? (
-                          <Check className="h-3.5 w-3.5 text-emerald-300" />
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
                         ) : (
-                          <span className="h-2 w-2 rounded-full bg-slate-600" />
+                          <span className="h-2 w-2 rounded-full bg-slate-300" />
                         )}
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center justify-between gap-3">
-                          <span className="truncate text-sm font-black text-slate-100">{log.label}</span>
-                          <span className="shrink-0 font-mono text-[10px] text-slate-500">
+                          <span className="truncate text-sm font-semibold text-slate-950">{log.label}</span>
+                          <span className="shrink-0 font-mono text-[10px] text-slate-400">
                             {createdAt ? formatTime(createdAt) : isStepActive ? "now" : "--:--"}
                           </span>
                         </span>
-                        <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-400">{log.detail}</span>
+                        <span className="mt-1 block line-clamp-2 text-xs leading-5 text-slate-600">{log.detail}</span>
                       </span>
-                      <ChevronRight className={`mt-1 h-3.5 w-3.5 shrink-0 text-slate-500 transition ${expandedStep === log.id ? "rotate-90" : ""}`} />
+                      <ChevronRight className={`mt-1 h-3.5 w-3.5 shrink-0 text-slate-400 transition ${expandedStep === log.id ? "rotate-90" : ""}`} />
                     </button>
                     <AnimatePresence initial={false}>
                       {expandedStep === log.id && (
@@ -883,19 +898,19 @@ function AgentStatusPanel({
                           transition={{ duration: 0.18 }}
                           className="overflow-hidden"
                         >
-                          <div className="ml-9 mt-2 rounded-2xl border border-white/10 bg-black/35 px-3 py-2 font-mono text-[11px] leading-5 text-slate-300">
-                            <p className="text-slate-500">terminal</p>
+                          <div className="ml-9 mt-2 rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-[11px] leading-5 text-slate-700 shadow-sm">
+                            <p className="text-slate-400">terminal</p>
                             {log.command ? <p>{log.command}</p> : null}
                             {log.output?.length ? (
                               <div className="mt-1 space-y-1">
                                 {log.output.map((line, lineIndex) => (
-                                  <p key={`${log.id}-${lineIndex}`} className="break-words text-slate-300">
+                                  <p key={`${log.id}-${lineIndex}`} className="break-words text-slate-700">
                                     {line}
                                   </p>
                                 ))}
                               </div>
                             ) : null}
-                            <p className={isStepError ? "text-red-300" : isStepCompleted ? "text-emerald-300" : isStepActive ? "text-sky-300" : "text-slate-500"}>
+                            <p className={isStepError ? "text-red-500" : isStepCompleted ? "text-emerald-600" : isStepActive ? "text-sky-600" : "text-slate-500"}>
                               {isStepError ? "error: action failed, showing recoverable response" : isStepCompleted ? "ok: completed" : isStepActive ? "running..." : "waiting..."}
                             </p>
                           </div>
@@ -1149,6 +1164,247 @@ function DashboardOverview({
             </div>
           </section>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function PresentationsView() {
+  const [presentations, setPresentations] = useState<PresentationHistoryItem[]>([]);
+  const [topic, setTopic] = useState("Create a 12-slide presentation on Artificial Intelligence");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [slideCount, setSlideCount] = useState(12);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [toast, setToast] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const loadPresentations = useCallback(() => {
+    setIsLoading(true);
+    fetch("/api/presentations")
+      .then((response) => response.json())
+      .then((data: { presentations?: PresentationHistoryItem[] }) => {
+        setPresentations(data.presentations ?? []);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.warn("Failed to load presentations:", error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    loadPresentations();
+  }, [loadPresentations]);
+
+  async function generatePresentation() {
+    const prompt = topic.trim();
+    if (!prompt || isGenerating) return;
+    setIsGenerating(true);
+    setToast("Generating PowerPoint...");
+
+    try {
+      const response = await fetch("/api/presentations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, slideCount, theme }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to generate presentation.");
+      setToast("Presentation ready. Download is available.");
+      loadPresentations();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Presentation generation failed.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  async function updatePresentation(id: string, updates: { title?: string; is_shared?: boolean }) {
+    const response = await fetch(`/api/presentations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Update failed.");
+    setPresentations((current) => current.map((item) => (item.id === id ? data.presentation : item)));
+  }
+
+  async function deletePresentation(id: string) {
+    const previous = presentations;
+    setPresentations((current) => current.filter((item) => item.id !== id));
+    try {
+      const response = await fetch(`/api/presentations/${id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Delete failed.");
+      setToast("Presentation deleted.");
+    } catch (error) {
+      console.warn("Failed to delete presentation:", error);
+      setPresentations(previous);
+      setToast("Delete failed. Please try again.");
+    }
+  }
+
+  async function saveRename(id: string) {
+    const title = editingTitle.trim();
+    if (!title) return;
+    try {
+      await updatePresentation(id, { title });
+      setEditingId(null);
+      setEditingTitle("");
+      setToast("Presentation renamed.");
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : "Rename failed.");
+    }
+  }
+
+  return (
+    <div className="min-h-full bg-[#f8fbff] px-4 py-6 text-slate-950 sm:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-500">AI PowerPoint Generator</p>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Presentations</h1>
+          </div>
+          {toast ? (
+            <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
+              {toast}
+            </div>
+          ) : null}
+        </div>
+
+        <section className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-[0_16px_44px_rgba(15,23,42,0.08)]">
+          <textarea
+            value={topic}
+            onChange={(event) => setTopic(event.target.value)}
+            className="min-h-28 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-sky-300 focus:bg-white"
+            placeholder="Create a PPT on Artificial Intelligence"
+          />
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600">
+              Slides
+              <input
+                type="number"
+                min={3}
+                max={30}
+                value={slideCount}
+                onChange={(event) => setSlideCount(Math.min(30, Math.max(3, Number(event.target.value) || 12)))}
+                className="w-14 bg-transparent text-sm font-semibold text-slate-950 outline-none"
+              />
+            </label>
+            <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+              {(["light", "dark"] as const).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  onClick={() => setTheme(item)}
+                  className={`h-8 rounded-lg px-3 text-xs font-semibold capitalize transition ${theme === item ? "bg-white text-sky-600 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => void generatePresentation()}
+              disabled={isGenerating || !topic.trim()}
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Notebook className="h-4 w-4" />}
+              Generate PPT
+            </button>
+          </div>
+        </section>
+
+        <section className="mt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-slate-950">Presentation History</h2>
+            <button type="button" onClick={loadPresentations} className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-slate-500 hover:bg-white hover:text-slate-900">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh
+            </button>
+          </div>
+
+          {isLoading ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">Loading presentations...</div>
+          ) : presentations.length ? (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {presentations.map((item) => (
+                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600 ring-1 ring-orange-100">
+                      <Notebook className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {editingId === item.id ? (
+                        <input
+                          value={editingTitle}
+                          onChange={(event) => setEditingTitle(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") void saveRename(item.id);
+                            if (event.key === "Escape") setEditingId(null);
+                          }}
+                          className="h-9 w-full rounded-lg border border-slate-200 px-2 text-sm font-semibold outline-none focus:border-sky-300"
+                          autoFocus
+                        />
+                      ) : (
+                        <p className="truncate text-sm font-semibold text-slate-950">{item.title}</p>
+                      )}
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">{item.prompt}</p>
+                      <p className="mt-2 text-[11px] font-medium text-slate-400">
+                        {item.slide_count} slides · {item.theme} · {formatFileSize(item.file_size)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <a href={item.file_url} download className="inline-flex h-9 items-center gap-2 rounded-xl bg-slate-950 px-3 text-xs font-semibold text-white hover:bg-sky-600">
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Download
+                    </a>
+                    {editingId === item.id ? (
+                      <button type="button" onClick={() => void saveRename(item.id)} className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                        Save
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(item.id);
+                          setEditingTitle(item.title);
+                        }}
+                        className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Rename
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => void updatePresentation(item.id, { is_shared: !item.is_shared }).then(() => setToast(item.is_shared ? "Sharing disabled." : "Share link enabled.")).catch((error) => setToast(error instanceof Error ? error.message : "Share update failed."))}
+                      className="inline-flex h-9 items-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      {item.is_shared ? "Shared" : "Share"}
+                    </button>
+                    <button type="button" onClick={() => void deletePresentation(item.id)} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-red-100 px-3 text-xs font-semibold text-red-600 hover:bg-red-50">
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+              No presentations yet. Generate a PPT to see it here.
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
@@ -2230,6 +2486,7 @@ export default function DashboardWorkspace() {
                     onOpenAgent={(slug) => router.push(`/collection/${slug}`)}
                   />
                 )}
+                {activeView === "presentations" && <PresentationsView />}
                 {activeView === "partners" && <PartnersPage />}
                 {activeView === "launchpad" && <LaunchpadPage />}
                 {activeView === "collection" && <CollectionPage />}
@@ -2588,7 +2845,7 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex min-w-0 flex-col overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 sm:rounded-[26px] sm:shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
+    <div className="relative flex min-w-0 flex-col overflow-visible rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 sm:rounded-[26px] sm:shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
@@ -2625,7 +2882,7 @@ function Composer({
       </div>
       
       <div className="flex min-w-0 items-center justify-between gap-1.5 px-2.5 pb-2.5 pt-1.5 sm:gap-2 sm:px-3 sm:pb-3 sm:pt-2">
-        <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-visible sm:gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button 
