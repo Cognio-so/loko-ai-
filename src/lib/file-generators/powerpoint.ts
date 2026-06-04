@@ -105,7 +105,7 @@ function addBullets(slide: pptxgen.Slide, bullets: string[], theme: Theme, x: nu
     breakLine: false,
     fit: "shrink",
     valign: "top",
-    paraSpaceAfterPt: 8,
+    paraSpaceAfter: 8,
     margin: 0.02,
   });
 }
@@ -119,7 +119,7 @@ function addVisualPanel(slide: pptxgen.Slide, theme: Theme, label: string) {
     rectRadius: 0.14,
     fill: { color: theme.panel },
     line: { color: theme.line, transparency: 20 },
-    shadow: { type: "outer", color: "0F172A", opacity: 0.12, blur: 1, angle: 45, distance: 1 },
+    shadow: { type: "outer", color: "0F172A", opacity: 0.12, blur: 1, angle: 45, offset: 1 },
   });
   slide.addShape(pptxgen.ShapeType.rect, {
     x: 8.38,
@@ -169,6 +169,9 @@ function normalizeTable(table: FileTable | undefined, fallbackTitle: string): Fi
 function addTableSlide(slide: pptxgen.Slide, data: PresentationSlide, theme: Theme) {
   addTitle(slide, data.title, theme);
   const table = normalizeTable(data.table, data.title);
+  const rows: pptxgen.TableRow[] = [table.headers, ...table.rows.slice(0, 6)].map((row) =>
+    row.map((text) => ({ text }))
+  );
   slide.addText(table.title, {
     x: 0.75,
     y: 1.68,
@@ -180,7 +183,7 @@ function addTableSlide(slide: pptxgen.Slide, data: PresentationSlide, theme: The
     color: theme.text,
     margin: 0,
   });
-  slide.addTable([table.headers, ...table.rows.slice(0, 6)], {
+  slide.addTable(rows, {
     x: 0.75,
     y: 2.12,
     w: 11.85,
@@ -191,9 +194,7 @@ function addTableSlide(slide: pptxgen.Slide, data: PresentationSlide, theme: The
     fontFace: "Aptos",
     fontSize: 12,
     margin: 0.08,
-    valign: "mid",
-    fit: "shrink",
-    autoFit: true,
+    valign: "middle",
     rowH: 0.48,
   });
 }
@@ -339,9 +340,9 @@ function addConclusion(slide: pptxgen.Slide, data: PresentationSlide, content: S
   });
 }
 
-function buildSlideList(content: StructuredFileContent) {
+function buildSlideList(content: StructuredFileContent): PresentationSlide[] {
   const target = content.metadata.slideCount ?? 12;
-  const source = content.slides.length ? content.slides : content.sections.map((section) => ({
+  const source: PresentationSlide[] = content.slides.length ? content.slides : content.sections.map((section) => ({
     title: section.heading,
     bullets: section.bullets.length ? section.bullets : section.paragraphs,
     table: section.table,
@@ -367,11 +368,9 @@ export async function generatePptx(content: StructuredFileContent) {
   pptx.company = "LokoAI";
   pptx.subject = content.subtitle;
   pptx.title = content.title;
-  pptx.lang = "en-US";
   pptx.theme = {
     headFontFace: "Aptos Display",
     bodyFontFace: "Aptos",
-    lang: "en-US",
   };
 
   const theme = THEMES[content.metadata.theme ?? "light"];

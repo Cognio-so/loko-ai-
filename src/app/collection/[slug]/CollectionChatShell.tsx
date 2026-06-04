@@ -5,13 +5,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   OPENROUTER_MODEL_OPTIONS,
-  DEFAULT_SELECTED_OPENROUTER_MODEL,
   SELECTED_MODEL_STORAGE_KEY,
   getOpenRouterModelById,
 } from "@/lib/openrouterModels";
 import { getModelLogo, getModelLogoTheme } from "@/config/modelLogos";
 import {
-  Bot,
   FolderOpen,
   Grid3X3,
   History,
@@ -34,12 +32,21 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { CollectionAgentLogo } from "@/components/CollectionAgentLogo";
+import UserMenu from "@/components/UserMenu";
 import { useAuth } from "@/hooks/useAuth";
-import { getAssistant, type CollectionAssistant } from "../collection-data";
+import { getAssistant, resolveAssistantModel, type CollectionAssistant } from "../collection-data";
 
 type ChatMessage = {
   role: "assistant" | "user";
   content: string;
+};
+
+type PrivateHistoryItem = {
+  id: string;
+  title: string;
+  updatedAt: string;
+  messages: ChatMessage[];
 };
 
 const navItems = [
@@ -52,52 +59,23 @@ const navItems = [
   { label: "Pricing", href: "/pricing", icon: Zap },
 ];
 
-function AssistantLogo({ assistant, size = "md" }: { assistant: CollectionAssistant; size?: "sm" | "md" | "lg" }) {
-  const Icon = assistant.icon;
-  const sizeClass = size === "lg" ? "h-16 w-16" : size === "sm" ? "h-7 w-7" : "h-12 w-12";
-  const iconClass = size === "lg" ? "h-7 w-7" : size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5";
-  const shellRadius = size === "sm" ? "rounded-xl" : "rounded-2xl";
-  const innerRadius = size === "sm" ? "rounded-[10px]" : "rounded-[14px]";
-
-  return (
-    <div
-      className={`relative flex ${sizeClass} shrink-0 items-center justify-center ${shellRadius} bg-gradient-to-br ${assistant.accent} p-[2px] shadow-lg shadow-slate-200/70 dark:shadow-black/30`}
-    >
-      <div className={`relative flex h-full w-full items-center justify-center overflow-hidden ${innerRadius} bg-white text-slate-950 dark:bg-slate-950 dark:text-white`}>
-        <div className={`absolute inset-0 bg-gradient-to-br ${assistant.accent} opacity-15`} />
-        <div className="absolute -right-3 -top-3 h-8 w-8 rounded-full bg-white/60 blur-sm dark:bg-white/20" />
-        <Icon className={`relative ${iconClass}`} />
-      </div>
-      <span
-        className={`absolute -bottom-1 -right-1 rounded-md bg-gradient-to-br ${assistant.accent} px-1.5 py-0.5 text-[9px] font-black leading-none tracking-wide text-white shadow-sm ring-2 ring-white dark:ring-slate-900 ${size === "sm" ? "hidden" : ""}`}
-      >
-        {assistant.logoText}
-      </span>
-    </div>
-  );
-}
-
-function AgentChatHero({ assistant, showName }: { assistant: CollectionAssistant; showName: boolean }) {
+function AgentChatHero({ assistant, modelName }: { assistant: CollectionAssistant; modelName: string }) {
   return (
     <div className="flex flex-col items-center justify-center pb-8 pt-8 text-center sm:pt-10">
-      <div className="relative">
-        <div className="absolute inset-0 rounded-[28px] bg-sky-400/20 blur-2xl" />
-        <div className="relative animate-in fade-in zoom-in-95 duration-500">
-          <AssistantLogo assistant={assistant} size="lg" />
+      <div className="flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 shadow-sm ring-1 ring-slate-100">
+        <CollectionAgentLogo assistant={assistant} />
+        <div className="min-w-0 text-left">
+          <h2 className="truncate text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">
+            {assistant.name}
+          </h2>
+          <p className="truncate text-xs font-medium text-slate-500">
+            {modelName}
+          </p>
         </div>
       </div>
-      <div
-        className={`mt-4 min-h-[42px] transition-all duration-700 ${
-          showName ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
-        }`}
-      >
-        <h2 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-          {assistant.name}
-        </h2>
-        <p className="mt-1 text-sm font-medium text-slate-500">
-          {assistant.specializations.slice(0, 3).join(" • ")}
-        </p>
-      </div>
+      <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-500">
+        {assistant.specializations.slice(0, 3).join(" • ")}
+      </p>
     </div>
   );
 }
@@ -105,7 +83,7 @@ function AgentChatHero({ assistant, showName }: { assistant: CollectionAssistant
 export default function CollectionChatShell({ slug }: { slug: string }) {
   const assistant = getAssistant(slug) ?? getAssistant("brief-buddy")!;
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
@@ -115,38 +93,58 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAgentName, setShowAgentName] = useState(false);
+  const [privateHistory, setPrivateHistory] = useState<PrivateHistoryItem[]>([]);
+  const assistantModel = useMemo(() => resolveAssistantModel(assistant), [assistant]);
 
-  const userName = useMemo(() => {
-    return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Guest user";
-  }, [user]);
-
-  const userEmail = user?.email || "Sign in to sync chats";
-  const userInitial = userName.trim().charAt(0).toUpperCase() || "A";
+  const privateHistoryKey = useMemo(() => {
+    const owner = user?.id || user?.email || "local";
+    return `lokoai:collection-private-history:${owner}:${assistant.slug}`;
+  }, [assistant.slug, user?.email, user?.id]);
 
   function startNewChat() {
     setMessages([{ role: "assistant", content: assistant.welcome }]);
     setPrompt("");
-    setShowAgentName(false);
     setIsSidebarOpen(false);
   }
 
   useEffect(() => {
-    setShowAgentName(false);
-    const timer = window.setTimeout(() => setShowAgentName(true), 2000);
-    return () => window.clearTimeout(timer);
-  }, [assistant.slug]);
+    setSelectedModelId(assistantModel.id);
+  }, [assistantModel.id, slug]);
 
   useEffect(() => {
     try {
-      const storageKey = `${SELECTED_MODEL_STORAGE_KEY}:${slug}`;
-      const stored = window.localStorage.getItem(storageKey);
-      if (stored) setSelectedModelId(stored);
-      else setSelectedModelId(DEFAULT_SELECTED_OPENROUTER_MODEL);
-    } catch (e) {
-      setSelectedModelId(DEFAULT_SELECTED_OPENROUTER_MODEL);
+      const stored = window.localStorage.getItem(privateHistoryKey);
+      const parsed = stored ? (JSON.parse(stored) as PrivateHistoryItem[]) : [];
+      const validHistory = Array.isArray(parsed) ? parsed.slice(0, 12) : [];
+      setPrivateHistory(validHistory);
+      setMessages(validHistory[0]?.messages?.length ? validHistory[0].messages : [{ role: "assistant", content: assistant.welcome }]);
+    } catch {
+      setPrivateHistory([]);
+      setMessages([{ role: "assistant", content: assistant.welcome }]);
     }
-  }, [slug]);
+  }, [assistant.welcome, privateHistoryKey]);
+
+  useEffect(() => {
+    const firstUserMessage = messages.find((message) => message.role === "user" && message.content.trim());
+    if (!firstUserMessage) return;
+
+    const historyItem: PrivateHistoryItem = {
+      id: `${assistant.slug}:current`,
+      title: firstUserMessage.content.trim().slice(0, 64),
+      updatedAt: new Date().toISOString(),
+      messages,
+    };
+
+    setPrivateHistory((current) => {
+      const nextHistory = [historyItem, ...current.filter((item) => item.id !== historyItem.id)].slice(0, 12);
+      try {
+        window.localStorage.setItem(privateHistoryKey, JSON.stringify(nextHistory));
+      } catch {
+        // Private browser storage may be unavailable; chat should still work.
+      }
+      return nextHistory;
+    });
+  }, [assistant.slug, messages, privateHistoryKey]);
 
   useEffect(() => {
     try {
@@ -175,7 +173,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
         body: JSON.stringify({
           message: text,
           messages,
-          selectedModel: selectedModelId,
+          selectedModel: selectedModelId ?? assistantModel.id,
           agent: slug,
         }),
       });
@@ -245,7 +243,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
     recognition.start();
   }
 
-  const selectedModelForMenu = getOpenRouterModelById(selectedModelId || "");
+  const selectedModelForMenu = getOpenRouterModelById(selectedModelId || assistantModel.id);
   const selectedModelLogo = selectedModelForMenu ? getModelLogo(selectedModelForMenu.name) : null;
   const selectedModelLogoTheme = selectedModelForMenu ? getModelLogoTheme(selectedModelForMenu.name) : null;
 
@@ -332,19 +330,38 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
             <div className="min-h-0 flex-1 overflow-y-auto px-1">
               <div className="mb-3 flex items-center justify-between px-3 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                <span>Recent History</span>
+                <span>Private History</span>
                 <History className="h-3.5 w-3.5 opacity-50" />
               </div>
-              <Link
-                href={`/collection/${assistant.slug}`}
-                className="flex items-center gap-3 rounded-xl bg-white border border-slate-100 px-3 py-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:border-slate-200 hover:shadow-md"
-              >
-                <AssistantLogo assistant={assistant} size="sm" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-900">{assistant.name}</p>
-                  <p className="truncate text-[11px] text-slate-400">Currently active</p>
-                </div>
-              </Link>
+              <div className="space-y-2">
+                {privateHistory.length ? (
+                  privateHistory.slice(0, 4).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setMessages(item.messages);
+                        setIsSidebarOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-3 text-left shadow-sm ring-1 ring-slate-100 transition hover:border-slate-200 hover:shadow-md"
+                    >
+                      <CollectionAgentLogo assistant={assistant} size="sm" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900">{item.title}</p>
+                        <p className="truncate text-[11px] text-slate-400">{assistant.name} private chat</p>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-3 py-3 text-left shadow-sm ring-1 ring-slate-100">
+                    <CollectionAgentLogo assistant={assistant} size="sm" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-slate-900">{assistant.name}</p>
+                      <p className="truncate text-[11px] text-slate-400">No private chats yet</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-6 space-y-3 border-t border-slate-100 pt-6">
@@ -367,25 +384,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 </button>
               </div>
 
-              <div className="rounded-2xl bg-white border border-slate-100 p-3 shadow-sm ring-1 ring-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">
-                    {userInitial}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
-                    <p className="truncate text-[11px] text-slate-400">{userEmail}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void signOut()}
-                  className="mt-3 flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-bold text-slate-500 transition hover:bg-red-50 hover:text-red-600"
-                >
-                  <Bot className="h-3.5 w-3.5" />
-                  Sign out
-                </button>
-              </div>
+              <UserMenu variant="sidebar" />
             </div>
           </div>
         </aside>
@@ -411,7 +410,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                 <Menu className="h-5 w-5" />
               </button>
               <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1.5 shadow-sm">
-                <AssistantLogo assistant={assistant} size="sm" />
+                <CollectionAgentLogo assistant={assistant} size="sm" />
                 <div>
                   <h1 className="text-sm font-bold tracking-tight text-slate-900">{assistant.name}</h1>
                 </div>
@@ -427,7 +426,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
           <section className="flex flex-1 flex-col overflow-y-auto">
             <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-12 sm:px-6 lg:px-8">
-              <AgentChatHero assistant={assistant} showName={showAgentName} />
+              <AgentChatHero assistant={assistant} modelName={selectedModelForMenu?.name ?? assistantModel.name} />
               <div className="flex-1 space-y-10">
                 {messages.map((message, index) => (
                   <div
@@ -437,7 +436,7 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
                     <div className={`flex gap-4 max-w-[90%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                       {message.role === "assistant" && (
                         <div className="mt-1 shrink-0">
-                          <AssistantLogo assistant={assistant} size="sm" />
+                          <CollectionAgentLogo assistant={assistant} size="sm" />
                         </div>
                       )}
                       
@@ -464,6 +463,12 @@ export default function CollectionChatShell({ slug }: { slug: string }) {
 
               <div className="sticky bottom-0 mt-12 bg-white/80 pb-10 pt-4 backdrop-blur-md">
                 <div className="mx-auto max-w-2xl px-4">
+                  <div className="mb-3 flex justify-center">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-3 py-2 shadow-sm ring-1 ring-slate-100">
+                      <CollectionAgentLogo assistant={assistant} size="sm" />
+                      <span className="text-sm font-black text-slate-900">{assistant.name}</span>
+                    </div>
+                  </div>
                   <div className="relative flex items-center gap-3 rounded-3xl border border-slate-200 bg-white shadow-lg transition-all focus-within:border-sky-400 focus-within:ring-4 focus-within:ring-sky-50 px-5 py-4">
                     {/* Plus button */}
                     <button

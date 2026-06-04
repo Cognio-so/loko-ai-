@@ -11,6 +11,7 @@ import {
   Target,
   WandSparkles,
 } from "lucide-react";
+import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { SKILL_PROMPTS } from "@/lib/skillPrompts";
 
 export type CollectionAssistant = {
@@ -29,7 +30,55 @@ export type CollectionAssistant = {
   skillPrompt?: string;
 };
 
-export const assistants: CollectionAssistant[] = [
+const MODEL_BY_AGENT_WORD = [
+  {
+    words: ["image", "video", "camera", "thumbnail", "poster", "cinematic", "lighting", "midjourney", "flux"],
+    modelId: "google/gemini-2.5-flash-image",
+  },
+  {
+    words: ["code", "coding", "frontend", "full-stack", "fullstack", "next.js", "react", "node", "typescript", "api", "database", "backend"],
+    modelId: "qwen/qwen3-coder:free",
+  },
+  {
+    words: ["research", "seo", "keyword", "competitor", "market", "search", "report", "analysis", "cluster"],
+    modelId: "google/gemini-2.5-flash",
+  },
+  {
+    words: ["ui", "ux", "design", "audit", "accessibility", "wireframe", "layout", "spacing", "typography", "interface"],
+    modelId: "arcee-ai/trinity-large-thinking",
+  },
+  {
+    words: ["sales", "lead", "outreach", "hook", "headline", "ad copy", "ctr", "caption", "reels", "marketing", "growth"],
+    modelId: "openai/gpt-4o-mini",
+  },
+  {
+    words: ["brief", "prompt", "writing", "voice", "tone", "draft", "productivity", "planning", "assistant"],
+    modelId: "moonshotai/kimi-k2.6:free",
+  },
+] as const;
+
+export function resolveAssistantModel(assistant: Pick<CollectionAssistant, "slug" | "name" | "description" | "modelId" | "specializations">) {
+  const text = [
+    assistant.slug,
+    assistant.name,
+    assistant.description,
+    ...assistant.specializations,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const matchedRule = MODEL_BY_AGENT_WORD.find((rule) => rule.words.some((word) => text.includes(word)));
+  const matchedModel = getOpenRouterModelById(matchedRule?.modelId);
+  const configuredModel = getOpenRouterModelById(assistant.modelId);
+  const model = matchedModel ?? configuredModel ?? getOpenRouterModelById("moonshotai/kimi-k2.6:free")!;
+
+  return {
+    id: model.id,
+    name: model.name,
+  };
+}
+
+const rawAssistants: CollectionAssistant[] = [
   {
     slug: "brief-buddy",
     name: "Brief Buddy",
@@ -329,6 +378,15 @@ export const assistants: CollectionAssistant[] = [
     skillPrompt: SKILL_PROMPTS.lokoAi,
   },
 ];
+
+export const assistants: CollectionAssistant[] = rawAssistants.map((assistant) => {
+  const model = resolveAssistantModel(assistant);
+  return {
+    ...assistant,
+    model: model.name,
+    modelId: model.id,
+  };
+});
 
 export function getAssistant(slug: string) {
   return assistants.find((assistant) => assistant.slug === slug);
