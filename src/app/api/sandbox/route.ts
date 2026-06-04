@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Sandbox } from "e2b";
-import { dbUpdateProject } from "@/lib/db";
+import { supabaseUpdateProject } from "@/lib/supabase/projects";
+import { guarded, preflightResponse, readJsonBody } from "@/lib/security";
 
 const PROJECT_DIR = "/home/user/project";
 const VITE_PORT = 5173;
@@ -35,7 +36,7 @@ async function waitForVite(sandbox: Sandbox, maxAttempts = 20): Promise<boolean>
   return false;
 }
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const apiKey = process.env.E2B_API_KEY;
 
   if (!apiKey) {
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
   };
 
   try {
-    body = await req.json();
+    body = await readJsonBody<typeof body>(req, 2_000_000);
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
@@ -197,7 +198,7 @@ export default defineConfig({
         // falls back to the self-contained HTML preview instead of showing
         // the E2B "Closed Port Error" page.
         if (projectId) {
-          try { dbUpdateProject(projectId, { sandbox_id: sandbox.sandboxId }); } catch { /* ignore */ }
+          try { await supabaseUpdateProject(projectId, { sandbox_id: sandbox.sandboxId }); } catch { /* ignore */ }
         }
         return NextResponse.json({ sandboxId: sandbox.sandboxId, previewUrl: null, isNew: true });
       }
@@ -239,7 +240,7 @@ export default defineConfig({
     // Otherwise fall back gracefully — the client will render the HTML preview.
     if (!isNewSandbox && !viteReadyForReconnect) {
       if (projectId) {
-        try { dbUpdateProject(projectId, { sandbox_id: sandbox.sandboxId }); } catch { /* ignore */ }
+        try { await supabaseUpdateProject(projectId, { sandbox_id: sandbox.sandboxId }); } catch { /* ignore */ }
       }
       return NextResponse.json({ sandboxId: sandbox.sandboxId, previewUrl: null, isNew: false });
     }
@@ -249,7 +250,7 @@ export default defineConfig({
     // Persist the sandbox_id to the project so it can be revived on next visit
     if (projectId) {
       try {
-        dbUpdateProject(projectId, { sandbox_id: sandbox.sandboxId });
+        await supabaseUpdateProject(projectId, { sandbox_id: sandbox.sandboxId });
       } catch (e) {
         console.warn("Failed to save sandbox_id to project:", e);
       }
@@ -275,3 +276,6 @@ export default defineConfig({
     );
   }
 }
+
+export const POST = guarded(handlePost, 8);
+export const OPTIONS = preflightResponse;

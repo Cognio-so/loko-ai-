@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getGeminiResponse } from "@/lib/gemini";
 import { getOpenRouterResponse } from "@/lib/openrouter";
 import { getOpenRouterAgentResponse } from "@/lib/openrouterAgent";

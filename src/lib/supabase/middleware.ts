@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { getSupabaseConfig, isProtectedPath } from "./config";
+import { getSupabaseServerConfig, isProtectedPath } from "./config";
 
 export async function updateSession(request: NextRequest) {
-  const { url, anonKey, configured } = getSupabaseConfig();
+  const { url, anonKey, configured } = getSupabaseServerConfig();
   let response = NextResponse.next({ request });
 
   if (!configured) {

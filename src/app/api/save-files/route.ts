@@ -3,13 +3,19 @@ import fs from 'fs/promises';
 import path from 'path';
 import { createSupabaseServerClient, getCurrentUser } from '@/lib/supabase';
 import { getErrorMessage, sanitizeProjectTitle, unauthorizedResponse } from '@/lib/api';
+import { guarded, preflightResponse, readJsonBody } from '@/lib/security';
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   try {
     const user = await getCurrentUser();
     if (!user) return unauthorizedResponse();
 
-    const { files, projectTitle, description, previewHtml } = await req.json();
+    const { files, projectTitle, description, previewHtml } = await readJsonBody<{
+      files?: Array<{ path: string; content: string }>;
+      projectTitle?: string;
+      description?: string;
+      previewHtml?: string;
+    }>(req);
 
     if (!files || !Array.isArray(files)) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 });
@@ -75,3 +81,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: getErrorMessage(error) || 'Failed to save files' }, { status: 500 });
   }
 }
+
+export const POST = guarded(handlePost, 20);
+export const OPTIONS = preflightResponse;

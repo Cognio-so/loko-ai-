@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { dbGetProject, dbUpdateProject, dbDeleteProject } from "@/lib/db";
+import { unauthorizedResponse } from "@/lib/api";
+import { getCurrentUser } from "@/lib/supabase/server";
+import {
+  supabaseCreateProject,
+  supabaseDeleteProject,
+  supabaseGetProject,
+  supabaseUpdateProject,
+} from "@/lib/supabase/projects";
+import { guarded, preflightResponse, readJsonBody } from "@/lib/security";
 
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorizedResponse();
+
     const { id } = await params;
-    const project = dbGetProject(id);
+    const project = await supabaseGetProject(id);
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
@@ -18,13 +29,16 @@ export async function GET(
   }
 }
 
-export async function PUT(
+async function handlePut(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorizedResponse();
+
     const { id } = await params;
-    const body = await req.json() as {
+    const body = await readJsonBody<{
       title?: string;
       description?: string | null;
       prompt?: string | null;
@@ -32,14 +46,14 @@ export async function PUT(
       generated_code?: unknown[];
       chat_messages?: unknown[];
       sandbox_id?: string | null;
-    };
+    }>(req, 2_000_000);
 
     // Auto-create if it doesn't exist yet (PUT is idempotent)
-    const existing = dbGetProject(id);
+    const existing = await supabaseGetProject(id);
     if (!existing) {
-      const { dbCreateProject } = await import("@/lib/db");
-      dbCreateProject({
+      await supabaseCreateProject({
         id,
+        user_id: user.id,
         title: body.title ?? "Untitled Design",
         description: body.description ?? null,
         prompt: body.prompt ?? null,
@@ -49,7 +63,7 @@ export async function PUT(
       });
     }
 
-    const project = dbUpdateProject(id, {
+    const project = await supabaseUpdateProject(id, {
       ...(body.title !== undefined && { title: body.title }),
       ...(body.description !== undefined && { description: body.description }),
       ...(body.prompt !== undefined && { prompt: body.prompt }),
@@ -66,16 +80,23 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
+async function handleDelete(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser();
+    if (!user) return unauthorizedResponse();
+
     const { id } = await params;
-    dbDeleteProject(id);
+    await supabaseDeleteProject(id);
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("Project DELETE error:", err);
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
   }
 }
+
+export const PUT = guarded(handlePut, 30);
+export const DELETE = guarded(handleDelete, 20);
+export const OPTIONS = preflightResponse;

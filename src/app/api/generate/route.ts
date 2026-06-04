@@ -6,6 +6,7 @@ import { getOfflineGeneratedProject } from "@/lib/openrouter";
 import { detectPromptMode } from "@/lib/promptRouter";
 import { writeGeneratedProjectToWorkspace } from "@/lib/fileGenerationEngine";
 import { buildIntentInstructions } from "@/lib/generationIntent";
+import { guarded, preflightResponse, readJsonBody, validatePrompt } from "@/lib/security";
 
 const GENERATION_TIMEOUT_MS = 28000;
 
@@ -150,12 +151,14 @@ function parseAIJson(content: string) {
   }
 }
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   try {
-    const { prompt } = await req.json();
+    const { prompt: rawPrompt } = await readJsonBody<{ prompt?: string }>(req);
+    const prompt = typeof rawPrompt === "string" ? rawPrompt.trim() : "";
 
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    const promptError = validatePrompt(prompt, 20_000);
+    if (promptError) {
+      return NextResponse.json({ error: promptError }, { status: 400 });
     }
 
     const promptRoute = detectPromptMode(prompt);
@@ -258,3 +261,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = guarded(handlePost, 12);
+export const OPTIONS = preflightResponse;

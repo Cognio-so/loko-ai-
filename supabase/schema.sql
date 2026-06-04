@@ -1,5 +1,5 @@
 -- LokoAI Public Schema
--- No authentication required - all projects are public
+-- Authenticated, owner-scoped project storage with RLS
 -- Run this in Supabase SQL Editor
 
 create extension if not exists "pgcrypto";
@@ -12,21 +12,25 @@ drop table if exists public.profiles cascade;
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
+  username text,
   full_name text,
   avatar_url text,
-  created_at timestamptz not null default now()
+  theme text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete set null, -- nullable: supports anonymous creation
+  user_id uuid not null references auth.users(id) on delete cascade,
   title text not null default 'Untitled Design',
   description text,
   prompt text, -- original user prompt that created this design
   generated_code jsonb not null default '[]'::jsonb,
   preview_html text, -- Full self-contained HTML for live preview
   chat_messages jsonb not null default '[]'::jsonb, -- Chat history per project
-  session_key text, -- anonymous session tracking
+  session_key text,
+  sandbox_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -49,22 +53,27 @@ create policy "Profiles are updatable by owner"
 on public.profiles for update
 using (auth.uid() = id) with check (auth.uid() = id);
 
--- Projects policies - FULLY PUBLIC (no auth required)
+-- Projects policies - owner-scoped access only
 drop policy if exists "Projects are publicly readable" on public.projects;
-create policy "Projects are publicly readable"
-on public.projects for select using (true);
+drop policy if exists "Projects are readable by owner" on public.projects;
+create policy "Projects are readable by owner"
+on public.projects for select using (auth.uid() = user_id);
 
 drop policy if exists "Projects are publicly insertable" on public.projects;
-create policy "Projects are publicly insertable"
-on public.projects for insert with check (true);
+drop policy if exists "Projects are insertable by owner" on public.projects;
+create policy "Projects are insertable by owner"
+on public.projects for insert with check (auth.uid() = user_id);
 
 drop policy if exists "Projects are publicly updatable" on public.projects;
-create policy "Projects are publicly updatable"
-on public.projects for update using (true) with check (true);
+drop policy if exists "Projects are updatable by owner" on public.projects;
+create policy "Projects are updatable by owner"
+on public.projects for update
+using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 drop policy if exists "Projects are publicly deletable" on public.projects;
-create policy "Projects are publicly deletable"
-on public.projects for delete using (true);
+drop policy if exists "Projects are deletable by owner" on public.projects;
+create policy "Projects are deletable by owner"
+on public.projects for delete using (auth.uid() = user_id);
 
 -- Auto-update updated_at
 create or replace function public.update_updated_at()
@@ -80,22 +89,30 @@ create trigger projects_updated_at
 before update on public.projects
 for each row execute function public.update_updated_at();
 
+drop trigger if exists profiles_updated_at on public.profiles;
+create trigger profiles_updated_at
+before update on public.profiles
+for each row execute function public.update_updated_at();
+
 -- Profile creation trigger
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
+  insert into public.profiles (id, email, username, full_name, avatar_url)
   values (
     new.id,
     new.email,
+    coalesce(new.raw_user_meta_data->>'username', new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     coalesce(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'name'),
     new.raw_user_meta_data->>'avatar_url'
   )
   on conflict (id) do update set
     email = excluded.email,
+    username = coalesce(public.profiles.username, excluded.username),
     full_name = excluded.full_name,
-    avatar_url = excluded.avatar_url;
+    avatar_url = excluded.avatar_url,
+    updated_at = now();
   return new;
 end;
 $$;

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runBuilderCommand } from "@/lib/terminalExecutor";
+import { guarded, preflightResponse, readJsonBody } from "@/lib/security";
 
 type TerminalRequestBody = {
   command?: string;
@@ -8,7 +9,7 @@ type TerminalRequestBody = {
   timeoutMs?: number;
 };
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   if (process.env.BUILDER_TERMINAL_API_ENABLED !== "true") {
     return NextResponse.json(
       { error: "Builder terminal API is disabled." },
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
 
   let body: TerminalRequestBody;
   try {
-    body = (await req.json()) as TerminalRequestBody;
+    body = await readJsonBody<TerminalRequestBody>(req, 100_000);
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
@@ -43,3 +44,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = guarded(handlePost, 5);
+export const OPTIONS = preflightResponse;

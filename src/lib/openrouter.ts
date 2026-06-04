@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 import { getLocalGeneratedProject } from "@/lib/localGeneratedProject";
 

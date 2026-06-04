@@ -5,6 +5,7 @@ import { getAIResponse } from "@/lib/ai";
 import { getErrorMessage } from "@/lib/api";
 import { buildIntentInstructions, detectGenerationIntent } from "@/lib/generationIntent";
 import { getLocalGeneratedProject } from "@/lib/localGeneratedProject";
+import { guarded, preflightResponse, readJsonBody, validatePrompt } from "@/lib/security";
 
 const GENERATION_TIMEOUT_MS = 90000;
 
@@ -599,20 +600,22 @@ ${htmlPreview}
 
 // ─── Route handler ────────────────────────────────────────────────────────────
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   try {
-    const body = await req.json() as {
+    const body = await readJsonBody<{
       prompt?: string;
       mode?: "generate" | "edit";
       existingFiles?: Array<{ path: string; content: string }>;
       existingHtml?: string;
       projectId?: string;
-    };
+    }>(req, 2_000_000);
 
-    const { prompt, mode = "generate", existingFiles, existingHtml, projectId } = body;
+    const { prompt: rawPrompt, mode = "generate", existingFiles, existingHtml, projectId } = body;
+    const prompt = typeof rawPrompt === "string" ? rawPrompt.trim() : "";
 
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    const promptError = validatePrompt(prompt, 20_000);
+    if (promptError) {
+      return NextResponse.json({ error: promptError }, { status: 400 });
     }
 
     const designDocs = getDesignSystemDocs();
@@ -879,3 +882,6 @@ Generate BOTH previewHtml AND the full Vite+React file structure.`;
     );
   }
 }
+
+export const POST = guarded(handlePost, 8);
+export const OPTIONS = preflightResponse;

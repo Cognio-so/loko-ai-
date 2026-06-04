@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { dbCreateProject, dbGetProject, dbUpdateProject } from "@/lib/db";
+import { supabaseCreateProject, supabaseGetProject, supabaseUpdateProject } from "@/lib/supabase/projects";
 import { processUploadedChatFile, type ProcessedChatFile, type UploadedChatFile } from "@/lib/file-analysis";
 import { createFileMessage, createGeneratedFileFromPrompt, getFileIntent } from "@/lib/file-generators";
 import { LOKO_AI_CORE_STANDARD } from "@/lib/lokoAiStandards";
@@ -7,6 +7,8 @@ import { getOpenRouterModelById } from "@/lib/openrouterModels";
 import { getOpenRouterConfig } from "@/lib/openrouterConfig";
 import { normalizeOpenRouterModelId } from "@/lib/openrouterModelAliases";
 import { checkAgentSpecialization, getAgentSystemPrompt } from "@/lib/agentSpecialization";
+import { getCurrentUser } from "@/lib/supabase/server";
+import { guarded, preflightResponse, readJsonBody, validatePrompt } from "@/lib/security";
 
 type ChatRole = "user" | "assistant";
 
@@ -769,17 +771,18 @@ async function requestOpenRouterStream(
   };
 }
 
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   let body: ChatRequestBody;
   try {
-    body = (await req.json()) as ChatRequestBody;
-  } catch {
-    return jsonError("Invalid JSON request body.");
+    body = await readJsonBody<ChatRequestBody>(req);
+  } catch (error) {
+    return jsonError(error instanceof Error ? error.message : "Invalid JSON request body.");
   }
 
-  const userText = body.message?.trim();
-  if (!userText) {
-    return jsonError("Message is required.");
+  const userText = typeof body.message === "string" ? body.message.trim() : "";
+  const promptError = validatePrompt(userText, 20_000);
+  if (promptError) {
+    return jsonError(promptError);
   }
 
   // Check agent specialization
@@ -808,7 +811,10 @@ export async function POST(req: Request) {
     createdAt: now,
   };
 
-  const existingProject = body.chatId ? dbGetProject(body.chatId) : null;
+  const currentUser = await getCurrentUser();
+  const userId = currentUser?.id ?? null;
+
+  const existingProject = body.chatId ? await supabaseGetProject(body.chatId) : null;
   const previousMessages = existingProject
     ? normalizeMessages(existingProject.chat_messages)
     : normalizeMessages(body.messages);
@@ -818,14 +824,15 @@ export async function POST(req: Request) {
   const messagesBeforeAi = [...previousMessages, userMessage];
 
   if (existingProject) {
-    dbUpdateProject(chatId, {
+    await supabaseUpdateProject(chatId, {
       title,
       prompt: userText,
       chat_messages: messagesBeforeAi,
     });
   } else {
-    dbCreateProject({
+    await supabaseCreateProject({
       id: chatId,
+      user_id: userId,
       title,
       prompt: userText,
       chat_messages: messagesBeforeAi,
@@ -847,7 +854,7 @@ export async function POST(req: Request) {
         createdAt: new Date().toISOString(),
       };
 
-      dbUpdateProject(chatId, {
+      await supabaseUpdateProject(chatId, {
         chat_messages: [...messagesBeforeAi, assistantMessage],
       });
 
@@ -901,7 +908,7 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    dbUpdateProject(chatId, {
+    await supabaseUpdateProject(chatId, {
       chat_messages: [...messagesBeforeAi, assistantMessage],
     });
 
@@ -983,7 +990,7 @@ export async function POST(req: Request) {
           createdAt: new Date().toISOString(),
         };
 
-        dbUpdateProject(chatId, {
+        await supabaseUpdateProject(chatId, {
           chat_messages: [...messagesBeforeAi, assistantMessage],
         });
 
@@ -1001,3 +1008,6 @@ export async function POST(req: Request) {
     },
   });
 }
+
+export const POST = guarded(handlePost, 10);
+export const OPTIONS = preflightResponse;
