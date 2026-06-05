@@ -6,6 +6,7 @@ import { getOfflineGeneratedProject } from "@/lib/openrouter";
 import { detectPromptMode } from "@/lib/promptRouter";
 import { writeGeneratedProjectToWorkspace } from "@/lib/fileGenerationEngine";
 import { buildIntentInstructions } from "@/lib/generationIntent";
+import { isPremiumSaasCodebasePrompt } from "@/lib/premiumSaasProject";
 import { guarded, preflightResponse, readJsonBody, validatePrompt } from "@/lib/security";
 
 const GENERATION_TIMEOUT_MS = 28000;
@@ -151,10 +152,64 @@ function parseAIJson(content: string) {
   }
 }
 
+type ExistingGeneratedProject = {
+  id?: string;
+  title?: string;
+  description?: string | null;
+  prompt?: string | null;
+  preview_html?: string | null;
+  generated_code?: Array<{ path?: string; content?: string }>;
+};
+
+function buildGenerationUserPrompt(prompt: string, existingProject?: ExistingGeneratedProject | null) {
+  if (!existingProject) return prompt;
+
+  const files = Array.isArray(existingProject.generated_code)
+    ? existingProject.generated_code
+        .filter((file) => typeof file?.path === "string" && typeof file?.content === "string")
+        .slice(0, 12)
+        .map((file) => ({
+          path: file.path,
+          content: String(file.content).slice(0, 45_000),
+        }))
+    : [];
+
+  return `
+EDIT EXISTING PROJECT. Do not create a new unrelated project.
+
+User change request:
+${prompt}
+
+Current project metadata:
+${JSON.stringify(
+  {
+    id: existingProject.id,
+    title: existingProject.title,
+    description: existingProject.description,
+    originalPrompt: existingProject.prompt,
+  },
+  null,
+  2
+)}
+
+Current preview HTML:
+${String(existingProject.preview_html ?? "").slice(0, 60_000)}
+
+Current files:
+${JSON.stringify(files, null, 2)}
+
+Return the same project after applying the requested change. Preserve the existing design direction and only change what the user asked for unless the change requires a small supporting adjustment.
+`.trim();
+}
+
 async function handlePost(req: Request) {
   try {
-    const { prompt: rawPrompt } = await readJsonBody<{ prompt?: string }>(req);
+    const { prompt: rawPrompt, existingProject } = await readJsonBody<{
+      prompt?: string;
+      existingProject?: ExistingGeneratedProject | null;
+    }>(req, 2_000_000);
     const prompt = typeof rawPrompt === "string" ? rawPrompt.trim() : "";
+    const isEditingExistingProject = Boolean(existingProject?.preview_html || existingProject?.generated_code?.length);
 
     const promptError = validatePrompt(prompt, 20_000);
     if (promptError) {
@@ -163,14 +218,20 @@ async function handlePost(req: Request) {
 
     const promptRoute = detectPromptMode(prompt);
     const intentInstructions = buildIntentInstructions(prompt);
+    const generationPrompt = buildGenerationUserPrompt(prompt, existingProject);
+    const wantsViteReactStack = /vite|react\s*\+\s*typescript|tailwind|framer motion/i.test(prompt);
+    const wantsLargeSaasCodebase = isPremiumSaasCodebasePrompt(prompt);
     const systemPrompt = `
       You are an advanced AI Website Builder and AI IDE similar to Lovable, V0, and Bolt.
-      Your job is to generate complete modern websites and web applications from user prompts.
+      Your job is to generate and edit complete modern websites and web applications from user prompts.
 
       ${LOKO_AI_CORE_STANDARD}
 
       CURRENT MODE: ${promptRoute.mode.toUpperCase()}
       ROUTER REASON: ${promptRoute.reason}
+      EXISTING PROJECT EDIT MODE: ${isEditingExistingProject ? "YES" : "NO"}
+      REQUESTED STACK: ${wantsViteReactStack ? "React + TypeScript + Vite + Tailwind CSS + Framer Motion" : "Use the best stack requested by the user; default to React + TypeScript when unspecified"}
+      LARGE SAAS CODEBASE MODE: ${wantsLargeSaasCodebase ? "YES" : "NO"}
 
       ${PREMIUM_UI_DESIGN_STANDARD}
 
@@ -181,18 +242,25 @@ async function handlePost(req: Request) {
 
       IMPORTANT:
       - Always generate full working code
+      - Obey the user's requested framework and tooling. If the user asks for Vite, generate a Vite project, not Next.js
+      - Do not keep everything inside App.tsx
+      - Split pages, sections, components, hooks, utilities, data, services, assets, layouts, providers, and styles into separate files
+      - If LARGE SAAS CODEBASE MODE is YES, generate at least 50 files and include production configuration files
+      - If EXISTING PROJECT EDIT MODE is YES, update the existing project instead of creating a new page or separate code answer
+      - If editing, preserve the existing layout, copy, routes, filenames, and visual language unless the user explicitly asks to change them
+      - If editing, return every changed file as a full file and include unchanged core files needed to run the project
+      - If editing, return an updated previewHtml that visibly reflects the user's change
       - Always create modern responsive UI
       - Always use production-ready structure
       - Always generate preview-ready applications
       - Always create and update files automatically
 
-      Use ONLY these technologies:
-      - Next.js (App Router)
-      - React
-      - TypeScript
-      - Tailwind CSS
-      - Shadcn UI
-      - Framer Motion
+      Technology rules:
+      - If the user asks for React + TypeScript + Vite, include package.json, index.html, vite.config.ts, tsconfig files, Tailwind config, PostCSS config, src/main.tsx, and a routed src/App.tsx
+      - If the user asks for Next.js, use Next.js App Router
+      - Use Tailwind CSS for styling unless the user asks otherwise
+      - Use Framer Motion for animation when requested
+      - Use SVG/TSX components for generated logos, product illustrations, icons, and dashboard mockups
 
       Frontend Rules:
       - Use functional React components
@@ -220,10 +288,15 @@ async function handlePost(req: Request) {
     `;
 
     const content = await Promise.race([
-      getAIResponse(systemPrompt, prompt, true),
+      getAIResponse(systemPrompt, generationPrompt, true),
       new Promise<string>((resolve) =>
         setTimeout(
-          () => resolve(JSON.stringify(getOfflineGeneratedProject(prompt))),
+          () => resolve(JSON.stringify(isEditingExistingProject ? {
+            projectTitle: existingProject?.title || "Updated Project",
+            description: existingProject?.description || "Updated existing project",
+            files: existingProject?.generated_code ?? [],
+            previewHtml: existingProject?.preview_html ?? "",
+          } : getOfflineGeneratedProject(prompt))),
           GENERATION_TIMEOUT_MS
         )
       ),
@@ -236,7 +309,7 @@ async function handlePost(req: Request) {
     const result = parseAIJson(content);
     let workspaceWrite = null;
 
-    if (promptRoute.mode === "builder" && Array.isArray(result.files)) {
+    if (promptRoute.mode === "builder" && Array.isArray(result.files) && !isEditingExistingProject) {
       workspaceWrite = writeGeneratedProjectToWorkspace(result, {
         projectId: crypto.randomUUID().slice(0, 8),
       });
@@ -244,6 +317,7 @@ async function handlePost(req: Request) {
 
     return NextResponse.json({
       ...result,
+      isEdit: isEditingExistingProject,
       mode: promptRoute.mode,
       routeReason: promptRoute.reason,
       workspace: workspaceWrite

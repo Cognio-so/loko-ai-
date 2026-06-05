@@ -33,6 +33,7 @@ type ChatRequestBody = {
   message?: string;
   messages?: ChatMessage[];
   selectedModel?: string;
+  responseMode?: "build" | "code" | "details";
   attachment?: UploadedChatFile | null;
   agent?: string;
   agentName?: string;
@@ -99,7 +100,10 @@ const VIDEO_PATTERN =
   /\b(video|clip|movie|animation|animate|animated|reel|short video|text to video|image to video|generate video|create video|video bana|video banao|video bna|video bnao|screen recording|screenrecording|camera movement|camera movements|cinematic shot|cinematic video|motion graphics|timelapse|time-lapse|fps|frame by frame)\b/i;
 
 const PROMPT_REQUEST_PATTERN =
-  /\b(prompt|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|client.*mang)\b/i;
+  /\b(prompt|prompty|prompti|copywriting|client prompt|image prompt|give.*prompt|write.*prompt|prompt bana|prompt do|prompt de|prompt likh|prompt send|safe page|likh ke|likhkar|client.*mang)\b/i;
+
+const ANSWER_ONLY_REQUEST_PATTERN =
+  /\b(sawal|question|answer|jawab|batao|batana|kaise|kya|kyu|why|how|explain|samjhao|guide|suggest|idea|prompt|prompty|prompti|prompt likh|prompt de|prompt send|send karo|likh ke|likhkar|safe page|copy do|details?|search|find|lookup)\b/i;
 
 const WORKFLOW_PATTERN =
   /\b(create|build|generate|explain|design).{0,40}\b(workflow|process flow|sop|step by step|business workflow|ai workflow|automation workflow|system architecture|user journey|customer flow|app workflow|website workflow)\b|\b(workflow|process flow|sop|step by step|system architecture|user journey|customer flow)\b/i;
@@ -254,10 +258,12 @@ async function rememberAssistantMessage(params: {
 
 function selectModelsForPrompt(
   prompt: string,
-  config: ReturnType<typeof getOpenRouterConfig>
+  config: ReturnType<typeof getOpenRouterConfig>,
+  answerOnly = false
 ) {
   if (!config.enableSmartRouting) return config.fallbackModels;
   if (isSearchPrompt(prompt)) return config.searchModels;
+  if (answerOnly) return config.fallbackModels;
   if (isImagePrompt(prompt)) {
     return Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
   }
@@ -292,7 +298,7 @@ function isWebsitePrompt(prompt: string) {
 }
 
 function isBuildRequestPrompt(prompt: string) {
-  return BUILD_REQUEST_PATTERN.test(prompt) && !isExplicitFileDownloadPrompt(prompt);
+  return BUILD_REQUEST_PATTERN.test(prompt) && !isAnswerOnlyRequestPrompt(prompt) && !isExplicitFileDownloadPrompt(prompt);
 }
 
 function isExplicitFileDownloadPrompt(prompt: string) {
@@ -309,6 +315,10 @@ function isPromptRequest(prompt: string) {
   return PROMPT_REQUEST_PATTERN.test(prompt);
 }
 
+function isAnswerOnlyRequestPrompt(prompt: string) {
+  return ANSWER_ONLY_REQUEST_PATTERN.test(prompt);
+}
+
 function getCurrentDateForPrompt() {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kolkata",
@@ -320,7 +330,8 @@ function getCurrentDateForPrompt() {
 
 function getOpenRouterTools(
   userText: string,
-  config: ReturnType<typeof getOpenRouterConfig>
+  config: ReturnType<typeof getOpenRouterConfig>,
+  answerOnly = false
 ): OpenRouterTool[] | undefined {
   const tools: OpenRouterTool[] = [];
 
@@ -336,7 +347,7 @@ function getOpenRouterTools(
     });
   }
 
-  if (isImagePrompt(userText) && !isVideoPrompt(userText)) {
+  if (!answerOnly && isImagePrompt(userText) && !isVideoPrompt(userText)) {
     const imageModel = process.env.OPENROUTER_IMAGE_GENERATION_MODEL?.trim();
     const normalizedImageModel = imageModel ? normalizeOpenRouterModelId(imageModel) : "";
     tools.push({
@@ -417,18 +428,22 @@ function buildOpenRouterPayload(
   config: ReturnType<typeof getOpenRouterConfig>,
   processedFile?: ProcessedChatFile | null,
   agentSlug?: string,
-  memorySystemPrompt?: string
+  memorySystemPrompt?: string,
+  answerOnly = false
 ) {
   const searchInstruction = isVerifiedResearchPrompt(userText)
     ? ` For current facts, websites, companies, AI tools, startups, software, apps, GitHub repositories, APIs, pricing, documentation, tutorials, changelogs, and URLs: ${config.enableWebSearch ? "use web search before answering and prefer official sources first" : "web search is disabled, so do not invent live facts, URLs, pricing, repositories, docs, or changelogs"}. ${config.enableCitations ? "Cite sources with markdown links." : ""} Never hallucinate URLs. If sources do not confirm a claim, label it unverified. When relevant, structure the answer with Name, Official URL, Description, Features, Pricing, Docs, GitHub, Integrations, Latest Info, Best Use Cases, and Notes.`
     : "";
   const promptInstruction = isPromptRequest(userText)
-    ? " If the user asks for a prompt, provide a clean copy-ready prompt in the response language selected from the latest user message and include useful details without asking unnecessary follow-up questions."
+    ? " If the user asks for a prompt, provide ONLY a clean copy-ready prompt plus short helpful notes if needed. Do not create a webpage, do not provide HTML, do not provide CSS/JS/React code, and do not wrap it as a preview."
     : "";
-  const imageInstruction = isImagePrompt(userText) && !isVideoPrompt(userText)
+  const answerOnlyInstruction = answerOnly
+    ? " IMPORTANT OUTPUT MODE: Answer-only/details mode. The user is asking for information, search results, an explanation, or a copy-ready prompt. Do NOT generate code. Do NOT output fenced code blocks. Do NOT output HTML/CSS/JS/React. Do NOT create a self-contained HTML page. Do NOT mention preview. Do NOT produce a downloadable file. Give concise useful details in normal chat text only."
+    : "";
+  const imageInstruction = !answerOnly && isImagePrompt(userText) && !isVideoPrompt(userText)
     ? " If the user asks to create an image, you must generate a real image. Never answer with ASCII art, code, a code block, a text sketch, or a copy-paste placeholder. Use the image generation tool and return the generated image in markdown image format."
     : "";
-  const websiteInstruction = isWebsitePrompt(userText)
+  const websiteInstruction = !answerOnly && isWebsitePrompt(userText)
     ? " If the user asks for a website, page, app UI, dashboard, landing page, or HTML/CSS/React frontend, act as an elite senior UI/UX designer, product designer, frontend architect, and full-stack engineer. First provide a concise UI/UX plan, component hierarchy, color system, spacing system, typography strategy, responsive strategy, and visual design direction. Then produce visually polished, complete, responsive UI code. Prefer a single self-contained HTML document in a fenced ```html code block when the chat preview will render it. The preview must never look like raw default HTML, beginner UI, boring templates, debug boards, generic placeholder screens, or image concept boards for website requests. Use modern typography, polished spacing, realistic sections, premium cards, tasteful gradients, accessible contrast, smooth interactions, production shadows, and responsive breakpoints."
     : "";
   const workflowInstruction = isWorkflowPrompt(userText)
@@ -507,7 +522,7 @@ Create a numbered roadmap from start to finish.
 
 If an uploaded file is present, analyze the uploaded file first and base the workflow on that file content.`
     : "";
-  const tools = getOpenRouterTools(userText, config);
+  const tools = getOpenRouterTools(userText, config, answerOnly);
   const languageInstruction = getResponseLanguageInstruction(userText);
   const agentInstruction = agentSlug ? `\n\n${getAgentSystemPrompt(agentSlug)}` : "";
   const memoryInstruction = memorySystemPrompt
@@ -522,9 +537,9 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         ? `\n\nUploaded file:\n${processedFile.fileSummary}\n\nExtracted file content:\n${processedFile.extractedText}\n\nAnswer based on the uploaded file. If extraction is incomplete, clearly mention the limitation.`
         : "";
       const text = `${message.content}${fileInstruction}`;
-      content = isImagePrompt(userText) && !isVideoPrompt(userText)
+      content = !answerOnly && isImagePrompt(userText) && !isVideoPrompt(userText)
         ? enhanceImagePrompt(text)
-        : isWebsitePrompt(userText)
+        : isWebsitePrompt(userText) && !answerOnly
           ? enhanceWebsitePrompt(text)
           : text;
 
@@ -551,7 +566,7 @@ If an uploaded file is present, analyze the uploaded file first and base the wor
         content:
           `${LOKO_AI_CORE_STANDARD}
 
-You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${agentInstruction}${memoryInstruction}${searchInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
+You are LokoAI, a helpful AI assistant and premium product UI builder. Today's date is ${getCurrentDateForPrompt()} (Asia/Kolkata). ${languageInstruction} Choose response language from the latest user message only, not from older chat history. Do not switch languages unless the latest user message explicitly asks for a different language or translation. Answer directly and accurately. If you do not know or cannot verify something, say that clearly instead of inventing facts. Use markdown when useful. For code, use fenced code blocks with language names.${agentInstruction}${memoryInstruction}${searchInstruction}${answerOnlyInstruction}${promptInstruction}${imageInstruction}${websiteInstruction}${workflowInstruction}`,
       },
       ...preparedMessages,
     ],
@@ -852,7 +867,8 @@ async function requestOpenRouterStream(
   config: ReturnType<typeof getOpenRouterConfig>,
   processedFile?: ProcessedChatFile | null,
   agentSlug?: string,
-  memorySystemPrompt?: string
+  memorySystemPrompt?: string,
+  answerOnly = false
 ): Promise<
   | { upstream: Response; model: string }
   | { error: string; status: number }
@@ -871,7 +887,7 @@ async function requestOpenRouterStream(
           "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:302",
           "X-Title": "LokoAI",
         },
-        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile, agentSlug, memorySystemPrompt)),
+        body: JSON.stringify(buildOpenRouterPayload(model, messagesBeforeAi, userText, config, processedFile, agentSlug, memorySystemPrompt, answerOnly)),
       });
     } catch (error) {
       lastErrorText = error instanceof Error ? error.message : "AI provider request failed.";
@@ -1059,8 +1075,10 @@ async function handlePost(req: Request) {
     });
   }
 
+  const config = getOpenRouterConfig();
+  const answerOnly = body.responseMode === "details" || isAnswerOnlyRequestPrompt(userText);
   const fileIntent = getFileIntent(userText);
-  if (fileIntent.isFileRequest && !isWebsitePrompt(userText) && !isBuildRequestPrompt(userText)) {
+  if (!answerOnly && fileIntent.isFileRequest && !isWebsitePrompt(userText) && !isBuildRequestPrompt(userText)) {
     try {
       const generatedFile = await createGeneratedFileFromPrompt(userText);
       if (!generatedFile) {
@@ -1109,13 +1127,12 @@ async function handlePost(req: Request) {
     return jsonError("OPENROUTER_API_KEY is missing in .env.local.", 500);
   }
 
-  const config = getOpenRouterConfig();
   const requestedModel = getOpenRouterModelById(body.selectedModel);
   const selectedModels = Array.from(
-    new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config)])
+    new Set([...(requestedModel ? [requestedModel.id] : []), ...selectModelsForPrompt(userText, config, answerOnly)])
   );
 
-  if (isVideoPrompt(userText)) {
+  if (!answerOnly && isVideoPrompt(userText)) {
     const videoResult = await requestOpenRouterVideo(apiKey, userText, processedFile);
 
     if ("error" in videoResult) {
@@ -1152,7 +1169,7 @@ async function handlePost(req: Request) {
     });
   }
 
-  if (isImagePrompt(userText)) {
+  if (!answerOnly && isImagePrompt(userText)) {
     const imageModels = Array.from(new Set(["google/gemini-2.5-flash-image", ...config.imageModels, ...IMAGE_CAPABLE_MODELS]));
     const imageResult = await requestOpenRouterImage(
       config.chatCompletionsUrl,
@@ -1206,7 +1223,8 @@ async function handlePost(req: Request) {
     config,
     processedFile,
     body.agent,
-    memorySystemPrompt
+    memorySystemPrompt,
+    answerOnly
   );
 
   if ("error" in streamResult) {

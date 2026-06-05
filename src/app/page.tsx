@@ -184,18 +184,30 @@ const clientBrands = [
 ];
 
 const integrationTools = [
-  { name: "Gmail", icon: GmailIcon, card: "border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50 dark:border-red-500/20 dark:from-red-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(234,67,53,0.12)] dark:text-white" },
-  { name: "Google Meet", icon: GoogleMeetIcon, card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-sky-50 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(0,168,47,0.12)] dark:text-white" },
-  { name: "Calendly", icon: CalendlyIcon, card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:border-blue-500/20 dark:from-blue-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(0,107,255,0.12)] dark:text-white" },
-  { name: "YouTube", icon: YoutubeIcon, card: "border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-red-50 dark:border-rose-500/20 dark:from-rose-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(255,0,0,0.12)] dark:text-white" },
-  { name: "LinkedIn", icon: LinkedinIcon, card: "border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:border-sky-500/20 dark:from-sky-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(10,102,194,0.12)] dark:text-white" },
-  { name: "Twitter X", icon: TwitterIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900 dark:text-white" },
-  { name: "WhatsApp", icon: WhatsappIcon, card: "border-green-200/70 bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:border-green-500/20 dark:from-green-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(37,211,102,0.12)] dark:text-white" },
-  { name: "Notion", icon: NotionIcon, card: "border-zinc-200/80 bg-gradient-to-br from-zinc-100 via-white to-zinc-50 dark:border-white/10 dark:from-zinc-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(24,24,27,0.10)] text-zinc-900 dark:text-white" },
-  { name: "Slack", icon: SlackIcon, card: "border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-cyan-50 dark:border-fuchsia-500/20 dark:from-fuchsia-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(54,197,240,0.12)] dark:text-white" },
-  { name: "GitHub", icon: GithubIcon, card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(15,23,42,0.10)] text-slate-900 dark:text-white" },
-  { name: "HubSpot", icon: HubspotIcon, card: "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:border-orange-500/20 dark:from-orange-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(255,122,89,0.12)] dark:text-white" },
-  { name: "Shopify", icon: ShopifyIcon, card: "border-lime-200/70 bg-gradient-to-br from-lime-50 via-white to-green-50 dark:border-lime-500/20 dark:from-lime-500/10 dark:via-slate-900/50 dark:to-slate-950 shadow-[0_10px_24px_rgba(149,191,71,0.12)] dark:text-white" }
+  { name: "Gmail", icon: GmailIcon, description: "Connect and automate email workflows.", accent: "from-red-500 to-orange-400", card: "border-red-200/70 bg-gradient-to-br from-red-50 via-white to-orange-50 dark:border-red-500/25 dark:from-red-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(234,67,53,0.14)]" },
+  { name: "Google Meet", icon: GoogleMeetIcon, description: "Schedule and manage meetings effortlessly.", accent: "from-emerald-500 to-cyan-400", card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 dark:border-emerald-500/25 dark:from-emerald-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(0,168,47,0.14)]" },
+  { name: "Calendly", icon: CalendlyIcon, description: "Automate appointment booking and events.", accent: "from-blue-600 to-cyan-400", card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:border-blue-500/25 dark:from-blue-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(0,107,255,0.14)]" },
+  { name: "YouTube", icon: YoutubeIcon, description: "Manage videos and content workflows.", accent: "from-red-600 to-rose-400", card: "border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-red-50 dark:border-rose-500/25 dark:from-rose-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(255,0,0,0.14)]" },
+  { name: "LinkedIn", icon: LinkedinIcon, description: "Automate professional networking tasks.", accent: "from-sky-700 to-blue-400", card: "border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:border-sky-500/25 dark:from-sky-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(10,102,194,0.14)]" },
+  { name: "Twitter X", icon: TwitterIcon, description: "Monitor and publish social content.", accent: "from-slate-950 to-slate-500", card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 text-slate-900 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/70 dark:to-black shadow-[0_16px_40px_rgba(15,23,42,0.14)]" },
+  { name: "WhatsApp", icon: WhatsappIcon, description: "Automate messaging and customer support.", accent: "from-green-500 to-emerald-300", card: "border-green-200/70 bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:border-green-500/25 dark:from-green-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(37,211,102,0.14)]" },
+  { name: "Notion", icon: NotionIcon, description: "Sync notes, docs, and knowledge bases.", accent: "from-zinc-950 to-zinc-500", card: "border-zinc-200/80 bg-gradient-to-br from-zinc-100 via-white to-zinc-50 text-zinc-900 dark:border-white/10 dark:from-zinc-800 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(24,24,27,0.14)]" },
+  { name: "Slack", icon: SlackIcon, description: "Connect team communication workflows.", accent: "from-fuchsia-500 via-cyan-400 to-emerald-400", card: "border-fuchsia-200/60 bg-gradient-to-br from-fuchsia-50 via-white to-cyan-50 dark:border-fuchsia-500/25 dark:from-fuchsia-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(54,197,240,0.14)]" },
+  { name: "GitHub", icon: GithubIcon, description: "Manage repositories and code automation.", accent: "from-slate-900 to-gray-500", card: "border-slate-200/80 bg-gradient-to-br from-slate-100 via-white to-slate-50 text-slate-900 dark:border-white/10 dark:from-slate-800 dark:via-slate-900/70 dark:to-black shadow-[0_16px_40px_rgba(15,23,42,0.14)]" },
+  { name: "HubSpot", icon: HubspotIcon, description: "Automate sales and marketing operations.", accent: "from-orange-500 to-amber-300", card: "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-amber-50 dark:border-orange-500/25 dark:from-orange-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(255,122,89,0.14)]" },
+  { name: "Shopify", icon: ShopifyIcon, description: "Manage products, orders, and stores.", accent: "from-lime-600 to-green-400", card: "border-lime-200/70 bg-gradient-to-br from-lime-50 via-white to-green-50 dark:border-lime-500/25 dark:from-lime-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(149,191,71,0.14)]" },
+  { name: "OpenAI", icon: Sparkles, description: "Access powerful AI models and assistants.", accent: "from-zinc-950 to-emerald-400", card: "border-zinc-200/80 bg-gradient-to-br from-zinc-100 via-white to-emerald-50 text-zinc-900 dark:border-white/10 dark:from-black dark:via-slate-900/80 dark:to-emerald-950/30 shadow-[0_16px_40px_rgba(15,23,42,0.16)]" },
+  { name: "Anthropic", icon: Sparkles, description: "Integrate Claude AI capabilities.", accent: "from-stone-600 to-amber-200", card: "border-stone-200/80 bg-gradient-to-br from-stone-100 via-white to-amber-50 text-stone-900 dark:border-stone-400/20 dark:from-stone-900 dark:via-slate-900/80 dark:to-amber-950/20 shadow-[0_16px_40px_rgba(120,113,108,0.16)]" },
+  { name: "Meta Llama", icon: Sparkles, description: "Deploy open-source LLM workflows.", accent: "from-blue-600 to-cyan-400", card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:border-blue-500/25 dark:from-blue-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(59,130,246,0.14)]" },
+  { name: "Cohere", icon: Sparkles, description: "Enterprise language intelligence platform.", accent: "from-emerald-800 to-green-400", card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-green-50 dark:border-emerald-500/25 dark:from-emerald-600/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(22,101,52,0.14)]" },
+  { name: "Vercel", icon: Sparkles, description: "Deploy and host modern applications.", accent: "from-black to-slate-500", card: "border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-slate-100 text-slate-950 dark:border-white/10 dark:from-white/10 dark:via-slate-900/80 dark:to-black shadow-[0_16px_40px_rgba(15,23,42,0.14)]" },
+  { name: "Supabase", icon: Sparkles, description: "Open-source backend and database platform.", accent: "from-emerald-500 to-lime-300", card: "border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-lime-50 dark:border-emerald-500/25 dark:from-emerald-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(62,207,142,0.14)]" },
+  { name: "Pinecone", icon: Sparkles, description: "High-performance vector search engine.", accent: "from-orange-500 to-yellow-300", card: "border-orange-200/70 bg-gradient-to-br from-orange-50 via-white to-yellow-50 dark:border-orange-500/25 dark:from-orange-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(249,115,22,0.14)]" },
+  { name: "LangChain", icon: Sparkles, description: "Build advanced AI agent workflows.", accent: "from-emerald-700 to-teal-300", card: "border-teal-200/70 bg-gradient-to-br from-teal-50 via-white to-emerald-50 dark:border-teal-500/25 dark:from-teal-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(20,184,166,0.14)]" },
+  { name: "Deloitte", icon: Sparkles, description: "Trusted enterprise transformation partner.", accent: "from-lime-600 to-green-300", card: "border-lime-200/70 bg-gradient-to-br from-lime-50 via-white to-green-50 dark:border-lime-500/25 dark:from-lime-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(132,204,22,0.14)]" },
+  { name: "Zomato", icon: Sparkles, description: "Restaurant and delivery ecosystem.", accent: "from-red-600 to-pink-400", card: "border-red-200/70 bg-gradient-to-br from-red-50 via-white to-pink-50 dark:border-red-500/25 dark:from-red-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(220,38,38,0.14)]" },
+  { name: "BHASHINI", icon: Sparkles, description: "Multilingual AI and language services.", accent: "from-blue-700 to-sky-300", card: "border-blue-200/70 bg-gradient-to-br from-blue-50 via-white to-sky-50 dark:border-blue-500/25 dark:from-blue-500/10 dark:via-slate-900/70 dark:to-slate-950 shadow-[0_16px_40px_rgba(37,99,235,0.14)]" },
+  { name: "LokoAI", icon: Sparkles, description: "Unified AI workspace with models, agents, search, integrations, documents, code execution, image generation, workflows, memory, and automation.", accent: "from-sky-500 via-violet-500 to-cyan-300", card: "border-cyan-200/70 bg-gradient-to-br from-sky-50 via-white to-violet-50 dark:border-cyan-500/25 dark:from-sky-500/10 dark:via-slate-900/70 dark:to-violet-950/40 shadow-[0_16px_44px_rgba(6,182,212,0.18)]" }
 ];
 
 const testimonials = [
@@ -336,22 +348,48 @@ const heroParticles = [
   { left: "88%", top: "38%", size: "h-1 w-1", delay: 1.9, duration: 6.8 },
 ];
 
+function getBrandCardClass(name: string) {
+  const key = name.toLowerCase();
+  if (key.includes("llama")) return "border-[#d7e5ff] bg-[#f7fbff] shadow-[inset_0_0_0_1px_rgba(24,119,242,0.06),0_12px_34px_rgba(24,119,242,0.10)]";
+  if (key.includes("cohere")) return "border-[#cfe9d7] bg-[#f7fff9] shadow-[inset_0_0_0_1px_rgba(44,92,56,0.06),0_12px_34px_rgba(44,92,56,0.10)]";
+  if (key.includes("vercel")) return "border-slate-300 bg-white shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06),0_12px_34px_rgba(15,23,42,0.10)]";
+  if (key.includes("supabase")) return "border-[#b8ead6] bg-[#f4fffa] shadow-[inset_0_0_0_1px_rgba(62,207,142,0.08),0_12px_34px_rgba(62,207,142,0.14)]";
+  if (key.includes("pinecone")) return "border-[#ffd8a8] bg-[#fffaf1] shadow-[inset_0_0_0_1px_rgba(245,124,0,0.08),0_12px_34px_rgba(245,124,0,0.12)]";
+  if (key.includes("langchain")) return "border-[#bfe8d6] bg-[#f5fffa] shadow-[inset_0_0_0_1px_rgba(0,153,102,0.08),0_12px_34px_rgba(0,153,102,0.12)]";
+  if (key.includes("deloitte")) return "border-[#cae7a5] bg-[#fbfff6] shadow-[inset_0_0_0_1px_rgba(134,188,37,0.08),0_12px_34px_rgba(134,188,37,0.12)]";
+  if (key.includes("zomato")) return "border-[#ffd0d6] bg-[#fff8f9] shadow-[inset_0_0_0_1px_rgba(226,55,68,0.08),0_12px_34px_rgba(226,55,68,0.12)]";
+  if (key.includes("bhashini")) return "border-[#d5e4f5] bg-[#f8fbff] shadow-[inset_0_0_0_1px_rgba(17,43,74,0.08),0_12px_34px_rgba(17,43,74,0.10)]";
+  return "border-slate-200 bg-white shadow-[0_12px_34px_rgba(15,23,42,0.08)]";
+}
+
+function getBrandTextClass(name: string) {
+  const key = name.toLowerCase();
+  if (key.includes("llama")) return "text-[#1877F2]";
+  if (key.includes("cohere")) return "text-[#2C5C38]";
+  if (key.includes("vercel")) return "text-[#111827]";
+  if (key.includes("supabase")) return "text-[#3ECF8E]";
+  if (key.includes("pinecone")) return "text-[#F57C00]";
+  if (key.includes("langchain")) return "text-[#009966]";
+  if (key.includes("deloitte")) return "text-[#86BC25]";
+  if (key.includes("zomato")) return "text-[#E23744]";
+  if (key.includes("bhashini")) return "text-[#112B4A]";
+  return "text-slate-900";
+}
+
 export default function Home() {
   const [isYearly, setIsYearly] = useState(false);
   const router = useRouter();
   const goToLogin = () => router.push("/dashboard");
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900 dark:bg-slate-950 dark:text-white">
-      <div className="absolute inset-0 bg-grid-pattern opacity-70 pointer-events-none" />
-      <div className="absolute left-[-5rem] top-16 h-[260px] w-[260px] rounded-full bg-sky-300/20 blur-[100px] pointer-events-none sm:left-[-8rem] sm:h-[480px] sm:w-[480px] sm:blur-[150px]" />
-      <div className="absolute right-[-5rem] top-28 h-[240px] w-[240px] rounded-full bg-cyan-300/18 blur-[100px] pointer-events-none sm:right-[-7rem] sm:h-[460px] sm:w-[460px] sm:blur-[150px]" />
-      <div className="absolute bottom-20 left-1/2 h-[280px] w-[280px] -translate-x-1/2 rounded-full bg-blue-200/18 blur-[120px] pointer-events-none sm:h-[560px] sm:w-[560px] sm:blur-[170px]" />
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-white via-sky-50/35 to-white text-slate-900 dark:bg-slate-950 dark:text-white">
       <section
         id="home-hero"
-        className="relative z-10 flex min-h-[calc(100svh-5rem)] w-full items-center justify-center overflow-hidden px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8"
+        className="relative z-10 flex min-h-[calc(100svh-5rem)] w-full items-center justify-center overflow-hidden border-b border-slate-100 bg-white px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.13),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.82),rgba(240,249,255,0.62)_54%,rgba(255,255,255,0.95))] pointer-events-none dark:bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.18),transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.94))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.09)_1px,transparent_1px)] bg-[size:28px_28px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle,rgba(14,165,233,0.17)_1px,transparent_1.5px)] bg-[size:28px_28px] opacity-70" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.08),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.54),rgba(248,252,255,0.48)_58%,rgba(255,255,255,0.88))] dark:bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.18),transparent_40%),linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.94))]" />
         {heroParticles.map((particle, index) => (
           <motion.span
             key={index}
@@ -368,7 +406,12 @@ export default function Home() {
           transition={{ duration: 0.72, ease: "easeOut" }}
           className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center justify-center"
         >
-          <div className="relative flex min-h-[104px] items-center justify-center">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm backdrop-blur">
+            <span className="text-sky-500">✓</span>
+            Build, launch, and manage AI work in one place
+          </div>
+
+          <div className="relative flex min-h-[96px] items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.82, filter: "blur(10px)" }}
               animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: [0, -8, 0] }}
@@ -384,7 +427,7 @@ export default function Home() {
                 type="button"
                 aria-label="Open LokoAI dashboard"
                 onClick={goToLogin}
-                className="group relative flex h-16 w-16 items-center justify-center rounded-2xl border border-sky-200/80 bg-white/80 text-sky-500 shadow-[0_24px_80px_rgba(14,165,233,0.24)] outline-none backdrop-blur-xl transition-transform duration-300 hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-300 dark:border-white/15 dark:bg-white/10 dark:text-sky-200 sm:h-[74px] sm:w-[74px]"
+                className="group relative flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-200/80 bg-white/82 text-sky-500 shadow-[0_20px_60px_rgba(14,165,233,0.18)] outline-none backdrop-blur-xl transition-transform duration-300 hover:scale-105 focus-visible:ring-2 focus-visible:ring-sky-300 dark:border-white/15 dark:bg-white/10 dark:text-sky-200 sm:h-16 sm:w-16"
               >
                 <span className="absolute inset-[-18px] rounded-[2rem] bg-sky-300/35 blur-2xl transition-opacity duration-300 group-hover:opacity-90" />
                 <span className="absolute inset-0 rounded-[inherit] bg-gradient-to-br from-white via-sky-50 to-cyan-100/70 opacity-95 dark:from-white/25 dark:via-sky-300/15 dark:to-cyan-200/10" />
@@ -402,8 +445,8 @@ export default function Home() {
               transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.85 }}
               className="ml-4 overflow-hidden sm:ml-5"
             >
-              <span className="block whitespace-nowrap bg-gradient-to-r from-slate-950 via-sky-600 to-cyan-500 bg-clip-text text-[clamp(2.7rem,9vw,5.6rem)] font-black leading-none tracking-normal text-transparent drop-shadow-[0_18px_50px_rgba(14,165,233,0.20)] dark:from-white dark:via-sky-200 dark:to-cyan-300">
-                LokoAI
+              <span className="block whitespace-nowrap text-[clamp(2.8rem,8vw,5.2rem)] font-semibold leading-none tracking-normal text-slate-900 dark:text-white">
+                Loko<span className="text-sky-500">AI</span>
               </span>
             </motion.div>
           </div>
@@ -412,12 +455,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 18, filter: "blur(10px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.78, ease: "easeOut", delay: 1.85 }}
-            className="relative mt-8 w-full max-w-3xl sm:mt-10"
+            className="relative mt-7 w-full max-w-3xl sm:mt-9"
           >
-            <p className="mx-auto max-w-2xl text-[clamp(1.2rem,3vw,2rem)] font-semibold leading-snug text-slate-700 dark:text-slate-200">
+            <p className="mx-auto max-w-2xl text-[clamp(1.25rem,2.7vw,1.95rem)] font-medium leading-[1.24] text-slate-700 dark:text-slate-200">
               Your friendly AI partner for building, creating, and growing ideas faster.
             </p>
-            <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-slate-500 dark:text-slate-400 sm:text-lg">
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-500 dark:text-slate-400 sm:text-lg">
               LokoAI turns your imagination into beautiful digital experiences with clarity, speed, and a little everyday magic.
             </p>
           </motion.div>
@@ -433,13 +476,13 @@ export default function Home() {
         <div className="relative w-full flex overflow-hidden">
           <div className="flex gap-4 animate-marquee py-2 whitespace-nowrap will-change-transform">
             {clientBrands.map((brand, idx) => (
-              <div key={`b1-${idx}`} className={`pointer-events-none inline-flex h-[64px] min-w-[160px] items-center justify-center rounded-[18px] border px-5 py-4 backdrop-blur-sm select-none sm:h-[74px] sm:min-w-[210px] sm:rounded-[22px] sm:px-8 sm:py-5 ${brand.bg}`}>
-                <span className={`${brand.font} ${brand.color} text-base sm:text-lg md:text-xl`}>{brand.name}</span>
+              <div key={`b1-${idx}`} className={`pointer-events-none inline-flex h-[64px] min-w-[160px] items-center justify-center rounded-[18px] border px-5 py-4 backdrop-blur-sm select-none transition sm:h-[74px] sm:min-w-[210px] sm:rounded-[22px] sm:px-8 sm:py-5 ${getBrandCardClass(brand.name)}`}>
+                <span className={`${brand.font} ${getBrandTextClass(brand.name)} text-base sm:text-lg md:text-xl`}>{brand.name}</span>
               </div>
             ))}
             {clientBrands.map((brand, idx) => (
-              <div key={`b2-${idx}`} className={`pointer-events-none inline-flex h-[64px] min-w-[160px] items-center justify-center rounded-[18px] border px-5 py-4 backdrop-blur-sm select-none sm:h-[74px] sm:min-w-[210px] sm:rounded-[22px] sm:px-8 sm:py-5 ${brand.bg}`}>
-                <span className={`${brand.font} ${brand.color} text-base sm:text-lg md:text-xl`}>{brand.name}</span>
+              <div key={`b2-${idx}`} className={`pointer-events-none inline-flex h-[64px] min-w-[160px] items-center justify-center rounded-[18px] border px-5 py-4 backdrop-blur-sm select-none transition sm:h-[74px] sm:min-w-[210px] sm:rounded-[22px] sm:px-8 sm:py-5 ${getBrandCardClass(brand.name)}`}>
+                <span className={`${brand.font} ${getBrandTextClass(brand.name)} text-base sm:text-lg md:text-xl`}>{brand.name}</span>
               </div>
             ))}
           </div>
@@ -464,10 +507,10 @@ export default function Home() {
             </button>
           </motion.div>
           <div className="grid grid-cols-2 gap-3 md:hidden">
-            {integrationTools.map((tool) => (
+            {integrationTools.slice(0, 12).map((tool) => (
               <div key={tool.name} className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-3xl border p-4 text-center backdrop-blur-sm ${tool.card}`}>
                 <tool.icon className="h-8 w-8" />
-                <span className="text-xs font-bold text-slate-700">{tool.name}</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-white">{tool.name}</span>
               </div>
             ))}
           </div>

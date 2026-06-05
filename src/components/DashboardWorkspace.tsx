@@ -226,11 +226,32 @@ const VIDEO_REQUEST_PATTERN =
 const CODE_ONLY_REQUEST_PATTERN =
   /\b(full\s+)?(code|source code|complete code|component code|script|function|api route|backend code|frontend code|html code|css code|javascript code|typescript code|react code|next\.?js code|python code|sql code|terminal code|code do|code de|code chahiye|code chaiye|code likh|code bna|code bana)\b/i;
 
+const PROJECT_EDIT_REQUEST_PATTERN =
+  /\b(add|change|update|edit|modify|replace|remove|delete|fix|make|turn|convert|move|rename|improve|redesign|increase|decrease|hide|show|set|apply|include|insert|create|banao|bnao|bna|bana|lagao|jodo|add karo|change kar|badal|hata|remove kar|delete kar|fix kar|sahi kar|button|section|color|colour|text|copy|image|card|navbar|hero|footer|pricing|form|logo|animation|responsive|mobile)\b/i;
+
+const ANSWER_ONLY_REQUEST_PATTERN =
+  /\b(sawal|question|answer|jawab|batao|batana|kaise|kya|kyu|why|how|explain|samjhao|guide|suggest|idea|prompt|prompty|prompti|prompt likh|prompt de|prompt send|send karo|likh ke|likhkar|safe page|copy do)\b/i;
+
+function isAnswerOnlyRequestPrompt(value: string) {
+  const normalized = value.trim();
+  if (!ANSWER_ONLY_REQUEST_PATTERN.test(normalized)) return false;
+
+  const directBuildCommand =
+    /\b(create|build|make|design|generate|develop|craft|banake do|bna ke do|bana ke do|banao|bnao)\b.{0,80}\b(website|web app|landing page|webpage|web page|dashboard|app|desktop app|ui|component|saas|frontend)\b/i;
+  const wantsPromptOrExplanation =
+    /\b(prompt|prompty|prompti|sawal|question|answer|jawab|batao|kaise|kya|explain|samjhao|guide|suggest|likh ke|likhkar|send karo|safe page|copy do)\b/i;
+  const startsWithBuildVerb = /^\s*(create|build|make|design|generate|develop|craft|banao|bnao)\b/i.test(normalized);
+
+  if (wantsPromptOrExplanation.test(normalized)) return true;
+  return !(startsWithBuildVerb && directBuildCommand.test(normalized));
+}
+
 function isBuildRequestPrompt(value: string) {
   const normalized = value.trim();
 
   return (
     BUILD_REQUEST_PATTERN.test(normalized) &&
+    !isAnswerOnlyRequestPrompt(normalized) &&
     !VIDEO_REQUEST_PATTERN.test(normalized) &&
     !EXPLICIT_FILE_DOWNLOAD_PATTERN.test(normalized) &&
     !/\b(pdf|docx|word|excel|xlsx|pptx|csv|resume|invoice|video|image|photo)\b/i.test(normalized)
@@ -239,6 +260,11 @@ function isBuildRequestPrompt(value: string) {
 
 function isCodeOnlyRequestPrompt(value: string) {
   return CODE_ONLY_REQUEST_PATTERN.test(value.trim()) && !isBuildRequestPrompt(value);
+}
+
+function isProjectEditRequestPrompt(value: string) {
+  const normalized = value.trim();
+  return PROJECT_EDIT_REQUEST_PATTERN.test(normalized) && !isAnswerOnlyRequestPrompt(normalized) && !EXPLICIT_FILE_DOWNLOAD_PATTERN.test(normalized);
 }
 
 function wait(ms: number) {
@@ -318,14 +344,14 @@ function getDefaultGeneratedFile(project: Project | null) {
 }
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Compass, view: "dashboard" as View },
-  { label: "Presentations", href: "/presentations", icon: Notebook, view: "presentations" as View },
-  { label: "Integrations", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
-  { label: "Partners", href: "/partners", icon: Users, view: "partners" as View },
-  { label: "Launchpad", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
-  { label: "Collection", href: "/collection", icon: FileText, view: "collection" as View },
-  { label: "Affiliate", href: "/affiliate", icon: Trophy, view: "affiliate" as View },
-  { label: "Pricing", href: "/pricing", icon: Zap, view: "pricing" as View },
+  { label: "Dashboard", href: "/dashboard", icon: Compass, view: "chat" as View },
+  { label: "Deck Studio", href: "/presentations", icon: Notebook, view: "presentations" as View },
+  { label: "Connect Hub", href: "/integrations", icon: Grid3X3, view: "integrations" as View },
+  { label: "Partner Network", href: "/partners", icon: Users, view: "partners" as View },
+  { label: "Launch Lab", href: "/launchpad", icon: Rocket, view: "launchpad" as View },
+  { label: "Agent Library", href: "/collection", icon: FileText, view: "collection" as View },
+  { label: "Growth Hub", href: "/affiliate", icon: Trophy, view: "affiliate" as View },
+  { label: "Plans", href: "/pricing", icon: Zap, view: "pricing" as View },
 ];
 
 const quickActions = [
@@ -556,13 +582,20 @@ function parseFileCardData(value: string): FileCardData | null {
   return null;
 }
 
-function MarkdownTextContent({ content }: { content: string }) {
+function MarkdownTextContent({ content, renderCodeBlocks = true }: { content: string; renderCodeBlocks?: boolean }) {
   const parts = content.split(/```([\w-]*)\n([\s\S]*?)```/g);
 
   return (
     <div className="space-y-3 text-sm leading-7">
       {parts.map((part, index) => {
         if (index % 3 === 2) {
+          if (!renderCodeBlocks) {
+            return (
+              <div key={index} className="whitespace-pre-wrap">
+                <MarkdownText content={part} />
+              </div>
+            );
+          }
           const language = parts[index - 1] || "code";
           return <CodeBlock key={index} language={language} code={part} />;
         }
@@ -579,7 +612,7 @@ function MarkdownTextContent({ content }: { content: string }) {
   );
 }
 
-function MarkdownContent({ content }: { content: string }) {
+function MarkdownContent({ content, renderCodeBlocks = true }: { content: string; renderCodeBlocks?: boolean }) {
   const segments = content.split(/<loko-file>([\s\S]*?)<\/loko-file>/g);
 
   return (
@@ -590,7 +623,7 @@ function MarkdownContent({ content }: { content: string }) {
           return file ? <FileCard key={index} file={file} /> : null;
         }
 
-        return segment.trim() ? <MarkdownTextContent key={index} content={segment} /> : null;
+        return segment.trim() ? <MarkdownTextContent key={index} content={segment} renderCodeBlocks={renderCodeBlocks} /> : null;
       })}
     </div>
   );
@@ -1271,7 +1304,7 @@ function PresentationsView() {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-500">AI PowerPoint Generator</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Presentations</h1>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Deck Studio</h1>
           </div>
           {toast ? (
             <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
@@ -1420,6 +1453,7 @@ export default function DashboardWorkspace() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<View>("chat");
+  const [activeNavLabel, setActiveNavLabel] = useState("Dashboard");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [prompt, setPrompt] = useState("");
@@ -1480,7 +1514,10 @@ export default function DashboardWorkspace() {
           generated_code: normalizeGeneratedFiles(project.generated_code),
           chat_messages: normalizeMessages(project.chat_messages),
         }));
-        const resolvedProjects = nextProjects;
+          const localProjects = loadLocalProjects();
+          const resolvedProjects = Array.from(
+            new Map([...localProjects, ...nextProjects].map((project) => [project.id, project])).values()
+          ).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
         setProjects(resolvedProjects);
         persistLocalProjects(resolvedProjects);
         setIsLoadingProjects(false);
@@ -1658,6 +1695,7 @@ export default function DashboardWorkspace() {
     setSandboxUrl(null);
     setPrompt("");
     setActiveView("chat");
+    setActiveNavLabel("Dashboard");
     setIsSidebarOpen(false);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
@@ -1673,6 +1711,7 @@ export default function DashboardWorkspace() {
     setBuilderTab(project.preview_html ? "preview" : "code");
     setPrompt("");
     setActiveView("chat");
+    setActiveNavLabel("Projects");
     setIsSidebarOpen(false);
   }
 
@@ -1753,8 +1792,15 @@ export default function DashboardWorkspace() {
   async function handleSubmit(inputPrompt = prompt) {
     const trimmed = inputPrompt.trim();
     if ((!trimmed && !uploadedAttachment) || isSubmitting) return;
-    const isBuildIntent = Boolean(trimmed && isBuildRequestPrompt(trimmed) && !uploadedAttachment);
-    const isCodeIntent = Boolean(trimmed && isCodeOnlyRequestPrompt(trimmed) && !uploadedAttachment);
+    const isProjectEditIntent = Boolean(
+      trimmed &&
+        activeBuildProject &&
+        (activeBuildProject.preview_html || activeBuildProject.generated_code.length) &&
+        isProjectEditRequestPrompt(trimmed) &&
+        !uploadedAttachment
+    );
+    const isBuildIntent = Boolean((trimmed && isBuildRequestPrompt(trimmed) && !uploadedAttachment) || isProjectEditIntent);
+    const isCodeIntent = Boolean(trimmed && isCodeOnlyRequestPrompt(trimmed) && !uploadedAttachment && !isProjectEditIntent);
     const responseMode: ChatMessage["responseMode"] = isBuildIntent ? "build" : isCodeIntent ? "code" : "details";
 
     setIsSubmitting(true);
@@ -1807,18 +1853,32 @@ export default function DashboardWorkspace() {
       if (isBuildIntent) {
         setAgentStatus("Writing code...");
         const generationLogId = appendAgentLog(
-          "Generating project with Loko AI",
-          "Sending your prompt to the live project generator and waiting for structured build artifacts.",
+          isProjectEditIntent ? "Updating current project with Loko AI" : "Generating project with Loko AI",
+          isProjectEditIntent
+            ? "Sending the current project files and your change request to the builder so the existing preview is patched."
+            : "Sending your prompt to the live project generator and waiting for structured build artifacts.",
           "tool",
           {
-            command: "$ loko-ai.generate --stream --target project",
+            command: isProjectEditIntent ? "$ loko-ai.edit --target current-project" : "$ loko-ai.generate --stream --target project",
             status: "running",
           }
         );
         const generateResponse = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: trimmed }),
+          body: JSON.stringify({
+            prompt: trimmed,
+            existingProject: isProjectEditIntent
+              ? {
+                  id: activeBuildProject?.id,
+                  title: activeBuildProject?.title,
+                  description: activeBuildProject?.description,
+                  prompt: activeBuildProject?.prompt,
+                  preview_html: activeBuildProject?.preview_html,
+                  generated_code: activeBuildProject?.generated_code,
+                }
+              : null,
+          }),
         });
 
         if (!generateResponse.ok) {
@@ -1837,13 +1897,17 @@ export default function DashboardWorkspace() {
         });
         setAgentStatus("Generating preview...");
         const generatedFiles = normalizeGeneratedFiles(generated.files);
+        const resolvedGeneratedFiles =
+          isProjectEditIntent && !generatedFiles.length
+            ? normalizeGeneratedFiles(activeBuildProject?.generated_code)
+            : generatedFiles;
         appendAgentLog(
-          "Generated code artifacts",
-          `${generatedFiles.length} files were produced dynamically for this project.`,
+          isProjectEditIntent ? "Updated code artifacts" : "Generated code artifacts",
+          `${resolvedGeneratedFiles.length} files are ready for this project.`,
           "file",
           {
             command: "$ artifacts.inspect --files",
-            output: generatedFiles.slice(0, 12).map((file) => `write ${file.path}`),
+            output: resolvedGeneratedFiles.slice(0, 12).map((file) => `${isProjectEditIntent ? "update" : "write"} ${file.path}`),
             status: "completed",
           }
         );
@@ -1872,18 +1936,20 @@ export default function DashboardWorkspace() {
         const assistantFinal: ChatMessage = {
           ...assistantMessage,
           isStreaming: false,
-          content: `Build ready: ${generated.projectTitle || "Generated project"}\n\nI opened the workspace on the right with live preview, code, and files. Keep chatting here to update this same project.`,
+          content: isProjectEditIntent
+            ? `Updated: ${generated.projectTitle || activeBuildProject?.title || "Current project"}\n\nI applied the change to the project preview on the right. Keep chatting here to refine this same page.`
+            : `Build ready: ${generated.projectTitle || "Generated project"}\n\nI opened the workspace on the right with live preview, code, and files. Keep chatting here to update this same project.`,
         };
         const finalMessages = [...messages, userMessage, assistantFinal];
         const projectPayload = {
-          title: generated.projectTitle || trimmed.slice(0, 64) || "Generated Project",
-          description: generated.description || "AI generated project",
+          title: generated.projectTitle || activeBuildProject?.title || trimmed.slice(0, 64) || "Generated Project",
+          description: generated.description || activeBuildProject?.description || "AI generated project",
           prompt: trimmed,
-          preview_html: generated.previewHtml || null,
-          generated_code: generatedFiles,
+          preview_html: generated.previewHtml || activeBuildProject?.preview_html || null,
+          generated_code: resolvedGeneratedFiles,
           chat_messages: finalMessages,
         };
-        const shouldUpdateCurrentBuild = Boolean(activeBuildProject?.id && activeChatId === activeBuildProject.id);
+        const shouldUpdateCurrentBuild = Boolean(activeBuildProject?.id && (activeChatId === activeBuildProject.id || isProjectEditIntent));
         const saveResponse = await fetch(
           shouldUpdateCurrentBuild ? `/api/projects/${activeBuildProject!.id}` : "/api/projects",
           {
@@ -1903,7 +1969,7 @@ export default function DashboardWorkspace() {
             throw new Error(parsedError);
           }
 
-          setComposerNotice("Preview ready hai, but Supabase projects table missing hai so project save nahi hua.");
+          setComposerNotice("");
           updateAgentLog(saveLogId, {
             detail: "Supabase persistence is unavailable, so Loko AI switched to local in-browser history for this run.",
             output: [parsedError],
@@ -1915,7 +1981,7 @@ export default function DashboardWorkspace() {
             description: projectPayload.description,
             prompt: projectPayload.prompt,
             preview_html: projectPayload.preview_html,
-            generated_code: generatedFiles,
+            generated_code: resolvedGeneratedFiles,
             chat_messages: finalMessages,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -1943,11 +2009,11 @@ export default function DashboardWorkspace() {
         setSelectedBuilderFile(getDefaultGeneratedFile(hydratedProject));
         setBuilderTab(hydratedProject.preview_html ? "preview" : "code");
         upsertProjectHistory(hydratedProject);
-        const shouldStartSandbox = generatedFiles.some((file) => file.path === "src/App.tsx" || file.path === "src/app.tsx");
+        const shouldStartSandbox = resolvedGeneratedFiles.some((file) => file.path === "src/App.tsx" || file.path === "src/app.tsx");
         let resolvedPreviewMode = hydratedProject.preview_html ? "inline preview" : "code only";
         if (shouldStartSandbox) {
           setAgentStatus("Generating preview...");
-          const livePreviewUrl = await spinUpSandbox(generatedFiles, hydratedProject.id, shouldUpdateCurrentBuild ? "update" : "create");
+          const livePreviewUrl = await spinUpSandbox(resolvedGeneratedFiles, hydratedProject.id, shouldUpdateCurrentBuild ? "update" : "create");
           if (livePreviewUrl) {
             resolvedPreviewMode = "live sandbox";
           }
@@ -1956,7 +2022,8 @@ export default function DashboardWorkspace() {
         appendAgentLog("Completed", "Preview, generated files, and execution workflow are fully ready.", "done", {
           command: "$ loko-ai.complete --project-ready",
           output: [
-            `Files generated: ${generatedFiles.length}`,
+            `Files ready: ${resolvedGeneratedFiles.length}`,
+            isProjectEditIntent ? "Project update applied" : "New project created",
             `Preview mode: ${resolvedPreviewMode}`,
           ],
           status: "completed",
@@ -1984,15 +2051,16 @@ export default function DashboardWorkspace() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chatId: activeChatId,
-          message: isCodeIntent
-            ? `${trimmed}\n\nReturn the complete working code in one or more fenced code blocks. Include all required files, commands, and setup notes. Do not provide partial snippets unless the user explicitly asks for a snippet.`
-            : trimmed || "Analyze the uploaded file.",
-          messages,
-          selectedModel: selectedModelId,
-          attachment: attachmentToSend,
-        }),
+          body: JSON.stringify({
+            chatId: activeChatId,
+            message: isCodeIntent
+              ? `${trimmed}\n\nReturn the complete working code in one or more fenced code blocks. Include all required files, commands, and setup notes. Do not provide partial snippets unless the user explicitly asks for a snippet.`
+              : trimmed || "Analyze the uploaded file.",
+            messages,
+            selectedModel: selectedModelId,
+            responseMode,
+            attachment: attachmentToSend,
+          }),
       });
 
       if (!response.ok || !response.body) {
@@ -2044,13 +2112,14 @@ export default function DashboardWorkspace() {
         )
       );
       const resolvedChatId = nextChatId || activeChatId || crypto.randomUUID();
+      const shouldKeepActivePreview = responseMode !== "details" && activeBuildProject?.id === resolvedChatId;
       upsertProjectHistory({
         id: resolvedChatId,
         title: (trimmed || "New chat").slice(0, 64),
-        description: activeBuildProject?.description ?? null,
+        description: shouldKeepActivePreview ? activeBuildProject.description : null,
         prompt: trimmed || null,
-        preview_html: activeBuildProject?.id === resolvedChatId ? activeBuildProject.preview_html : null,
-        generated_code: activeBuildProject?.id === resolvedChatId ? activeBuildProject.generated_code : [],
+        preview_html: shouldKeepActivePreview ? activeBuildProject.preview_html : null,
+        generated_code: shouldKeepActivePreview ? activeBuildProject.generated_code : [],
         chat_messages: [
           ...messages,
           userMessage,
@@ -2061,7 +2130,7 @@ export default function DashboardWorkspace() {
             responseMode,
           },
         ],
-        created_at: activeBuildProject?.id === resolvedChatId ? activeBuildProject.created_at : new Date().toISOString(),
+        created_at: shouldKeepActivePreview ? activeBuildProject.created_at : new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
       setAgentStatus("Completed");
@@ -2237,22 +2306,25 @@ export default function DashboardWorkspace() {
 
             <div className="mb-6 space-y-1 border-t border-slate-100 pt-6">
               <p className="mb-3 px-4 text-[11px] font-normal uppercase tracking-[0.1em] text-slate-400">Navigation</p>
-              <div className="space-y-0.5">
-                {navItems.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => setActiveView(item.view)}
-                    className={`flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
-                      activeView === item.view
-                        ? "bg-white text-sky-600 shadow-sm border border-slate-100"
-                        : "text-slate-500 hover:bg-white hover:text-slate-900"
-                    }`}
-                  >
-                    <item.icon className={`h-4 w-4 ${activeView === item.view ? "text-sky-500" : ""}`} />
-                    {item.label}
-                  </button>
-                ))}
+                <div className="space-y-0.5">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        setActiveView(item.view);
+                        setActiveNavLabel(item.label);
+                      }}
+                      className={`flex h-10 w-full items-center gap-3 rounded-xl px-4 text-sm font-medium transition ${
+                        activeNavLabel === item.label
+                          ? "bg-white text-sky-600 shadow-sm border border-slate-100"
+                          : "text-slate-500 hover:bg-white hover:text-slate-900"
+                      }`}
+                    >
+                      <item.icon className={`h-4 w-4 ${activeNavLabel === item.label ? "text-sky-500" : ""}`} />
+                      {item.label}
+                    </button>
+                  ))}
               </div>
             </div>
 
@@ -2312,12 +2384,15 @@ export default function DashboardWorkspace() {
             className="hidden"
             onChange={handleFileInputChange}
           />
-          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-100 bg-white/80 px-3 backdrop-blur-md transition-colors duration-300 sm:h-16 sm:px-8 dark:border-white/10 dark:bg-slate-950/80">
+          <header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-100 bg-white/80 px-3 backdrop-blur-md transition-colors duration-300 sm:h-16 sm:px-8 dark:border-[#374151] dark:bg-[#111827] dark:text-[#F9FAFB]">
             <div className="flex items-center gap-2 sm:gap-4">
               <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
               </button>
-              <button type="button" onClick={() => setActiveView("chat")} className="hidden rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:inline-flex" aria-label="Dashboard menu">
+              <button type="button" onClick={() => {
+                setActiveView("chat");
+                setActiveNavLabel("Dashboard");
+              }} className="hidden rounded-full p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:inline-flex" aria-label="Dashboard menu">
                 <Compass className="h-5 w-5" />
               </button>
             </div>
@@ -2330,7 +2405,7 @@ export default function DashboardWorkspace() {
               <button
                 type="button"
                 onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 sm:h-9 sm:w-9 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 sm:h-9 sm:w-9 dark:border-[#374151] dark:bg-[#1F2937] dark:text-[#F9FAFB] dark:hover:bg-[#1F2937] dark:hover:text-[#F9FAFB]"
                 aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
                 title={theme === "dark" ? "Light mode" : "Night mode"}
               >
@@ -2340,7 +2415,7 @@ export default function DashboardWorkspace() {
           </header>
 
           <section
-            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent transition-colors duration-300 dark:workspace-dark-bg dark:workspace-dark-grid dark:workspace-dark-noise ${isDraggingFile ? "bg-sky-50/60 dark:bg-sky-950/20" : ""}`}
+            className={`relative flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent transition-colors duration-300 dark:workspace-dark-bg dark:workspace-dark-grid dark:workspace-dark-noise ${isDraggingFile ? "bg-sky-50/60 dark:bg-[#1F2937]/70" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -2358,8 +2433,8 @@ export default function DashboardWorkspace() {
             {activeView === "chat" ? (
               <div className={`relative z-10 flex min-h-0 flex-1 overflow-hidden ${activeBuildProject ? "flex-col lg:flex-row" : "flex-col"}`}>
                 <div className={`relative flex min-h-0 w-full flex-col overflow-hidden ${
-                  activeBuildProject
-                    ? "mx-0 flex-[0_0_46%] border-r border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-slate-950/35 lg:min-w-[520px] lg:max-w-[640px] xl:flex-[0_0_42%]"
+                    activeBuildProject
+                      ? "mx-0 flex-[0_0_46%] border-r border-slate-200/80 bg-white/70 dark:border-[#374151] dark:bg-[#111827] lg:min-w-[520px] lg:max-w-[640px] xl:flex-[0_0_42%]"
                     : "mx-auto max-w-[860px] flex-1"
                 }`}>
                   {messages.length === 0 ? (
@@ -2389,7 +2464,7 @@ export default function DashboardWorkspace() {
                     <>
                       <div className="shrink-0 px-4 pt-5 sm:px-6">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 dark:text-slate-300">
+                          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/85 px-3 py-1.5 text-xs font-bold text-slate-500 shadow-sm backdrop-blur-xl dark:border-[#374151] dark:bg-[#1F2937] dark:text-[#9CA3AF]">
                             {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" /> : <Check className="h-3.5 w-3.5 text-emerald-500" />}
                             {isSubmitting ? "Live streaming" : "Ready"}
                           </div>
@@ -2399,29 +2474,20 @@ export default function DashboardWorkspace() {
                         <div className="space-y-7">
                           {messages.map((message) => (
                             <div key={message.id} className="space-y-4">
+                              {message.role === "assistant" && message.isStreaming && message.responseMode === "build" ? (
+                                <MinimalStatusChip status={agentStatus} mode={message.responseMode} />
+                              ) : null}
                               <MessageBubble
                                 message={message}
                                 copied={copiedMessageId === message.id}
                                 onCopy={() => void handleCopyMessage(message)}
                                 onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
                               />
-                              {message.role === "assistant" && message.isStreaming && (
-                                message.responseMode === "build" ? (
-                                  <AgentStatusPanel
-                                    status={agentStatus}
-                                    logs={activityLogs}
-                                    runtimeSeconds={runtimeSeconds}
-                                    isRunning={isSubmitting}
-                                    isOpen={isActivityOpen}
-                                    onToggle={() => setIsActivityOpen((open) => !open)}
-                                  />
-                                ) : null
-                              )}
                             </div>
                           ))}
                           {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
                             <div className="flex items-center gap-3 text-sm font-normal text-slate-400 dark:text-slate-500">
-                              <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm dark:border-sky-400/20 dark:bg-slate-900/80 dark:text-sky-300">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-sky-100 bg-white text-sky-500 shadow-sm dark:border-[#374151] dark:bg-[#1F2937] dark:text-sky-400">
                                 <Sparkles className="h-4 w-4" />
                               </span>
                               LokoAI is writing...
@@ -2430,16 +2496,7 @@ export default function DashboardWorkspace() {
                           <div ref={messagesEndRef} />
                         </div>
                       </div>
-                      <AgentFloatingActions
-                        isActivityOpen={isActivityOpen}
-                        onToggleActivity={() => setIsActivityOpen((open) => !open)}
-                        hasPreview={Boolean(activeBuildProject)}
-                        onOpenPreview={() => {
-                          if (!activeBuildProject) return;
-                          setBuilderTab("preview");
-                        }}
-                      />
-                      <div className="shrink-0 border-t border-slate-100 bg-white/92 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur-md transition-colors duration-300 sm:px-4 sm:pb-4 dark:border-white/10 dark:bg-slate-950/85">
+                      <div className="shrink-0 border-t border-slate-100 bg-white/92 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur-md transition-colors duration-300 sm:px-4 sm:pb-4 dark:border-[#374151] dark:bg-[#111827]/95">
                         <div className="mx-auto w-full max-w-[720px]">
                           <Composer
                             prompt={prompt}
@@ -2797,7 +2854,7 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
               key={item.title}
               type="button"
               onClick={() => setPrompt(item.prompt)}
-              className="quick-action-btn inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm sm:h-9 sm:px-3 sm:text-[13px] dark:border-sky-400/10 dark:bg-slate-900/70 dark:text-slate-100 dark:shadow-[0_10px_24px_rgba(2,8,23,0.35)] dark:hover:border-sky-400/30 dark:hover:bg-slate-800/90 dark:hover:text-white"
+              className="quick-action-btn inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-slate-300 bg-white px-2.5 text-[11px] font-medium text-slate-700 shadow-[0_2px_0_rgba(148,163,184,0.18),0_8px_18px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:border-slate-400 hover:bg-white hover:text-slate-950 active:translate-y-0 active:shadow-sm sm:h-9 sm:px-3 sm:text-[13px] dark:border-[#374151] dark:bg-[#1F2937] dark:text-[#F9FAFB] dark:shadow-none dark:hover:border-[#374151] dark:hover:bg-[#1F2937] dark:hover:text-[#F9FAFB]"
             >
               <Sparkles className="size-3 shrink-0 overflow-visible text-sky-400 sm:size-3.5" />
               {item.title}
@@ -2845,7 +2902,7 @@ function Composer({
   const canSubmit = Boolean(prompt.trim() || attachment) && !isSubmitting;
 
   return (
-    <div className="relative flex min-w-0 flex-col overflow-visible rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 sm:rounded-[26px] sm:shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-slate-900/82 dark:shadow-[0_24px_70px_rgba(2,8,23,0.45)] dark:ring-1 dark:ring-white/5 dark:backdrop-blur-xl dark:focus-within:border-sky-400/30">
+    <div className="relative flex min-w-0 flex-col overflow-visible rounded-[22px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.08)] transition-all duration-300 focus-within:border-slate-300 sm:rounded-[26px] sm:shadow-[0_16px_45px_rgba(15,23,42,0.08)] dark:border-[#374151] dark:bg-[#1F2937] dark:shadow-none dark:ring-1 dark:ring-[#374151] dark:backdrop-blur-xl dark:focus-within:border-[#3B82F6]">
       {attachment && (
         <AttachmentPreview attachment={attachment} progress={uploadProgress} onRemove={onRemoveAttachment} />
       )}
@@ -2877,7 +2934,7 @@ function Composer({
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder={isSubmitting ? "Generating..." : ""}
-          className="relative z-0 max-h-40 min-h-[34px] w-full resize-none bg-transparent py-2 text-sm leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 sm:max-h-48 sm:min-h-[38px] sm:text-base dark:text-slate-100 dark:placeholder:text-slate-500"
+          className="relative z-0 max-h-40 min-h-[34px] w-full resize-none bg-transparent py-2 text-sm leading-relaxed text-slate-900 outline-none placeholder:text-slate-400 sm:max-h-48 sm:min-h-[38px] sm:text-base dark:text-[#F9FAFB] dark:placeholder:text-[#9CA3AF]"
         />
       </div>
       
@@ -2933,7 +2990,7 @@ function Composer({
           type="button" 
           onClick={onSubmit} 
           disabled={!canSubmit}
-          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95 dark:bg-sky-500 dark:hover:bg-sky-400" 
+          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-visible rounded-xl bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-20 active:scale-95 dark:bg-[#3B82F6] dark:hover:bg-[#3B82F6]" 
           aria-label="Send prompt"
         >
           {isSubmitting ? <Loader2 className="size-4 animate-spin overflow-visible" /> : <Send className="size-4 overflow-visible" />}
@@ -2969,22 +3026,25 @@ function MessageBubble({
         
         <div className={`group relative rounded-[24px] px-5 py-4 transition-colors duration-300 ${
           isUser
-            ? "bg-slate-100/90 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:bg-slate-900/80 dark:shadow-[0_16px_36px_rgba(2,8,23,0.35)]"
-            : "bg-transparent dark:bg-white/[0.02]"
+            ? "border border-slate-200 bg-slate-100/90 shadow-[0_10px_30px_rgba(15,23,42,0.05)] dark:border-[#374151] dark:bg-[#1F2937] dark:shadow-none"
+            : "bg-transparent dark:bg-transparent"
         }`}>
           {isUser && (
             <div className="absolute -top-6 right-1 text-[10px] font-normal uppercase tracking-widest text-slate-400 opacity-0 transition group-hover:opacity-100">
               You
             </div>
           )}
-          <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium dark:text-slate-100" : "text-slate-700 dark:text-slate-200"} ${message.isError ? "text-red-500 font-medium dark:text-red-400" : ""}`}>
-            <div className={!isUser ? "prose prose-slate max-w-none text-slate-700 dark:prose-invert dark:text-slate-200" : ""}>
+          <div className={`text-base leading-relaxed ${isUser ? "text-slate-900 font-medium dark:text-[#F9FAFB]" : "text-slate-700 dark:text-[#F9FAFB]"} ${message.isError ? "text-red-500 font-medium dark:text-red-400" : ""}`}>
+            <div className={!isUser ? "prose prose-slate max-w-none text-slate-700 dark:prose-invert dark:text-[#F9FAFB]" : ""}>
               {shouldShowLoader && message.responseMode === "code" ? (
                 <TerminalCodeLoader />
               ) : shouldShowLoader && message.responseMode === "details" ? (
                 <SearchAnswerLoader />
               ) : (
-                <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
+                <MarkdownContent
+                  content={message.content || (message.isStreaming ? "Thinking..." : "")}
+                  renderCodeBlocks={message.responseMode !== "details"}
+                />
               )}
             </div>
           </div>
@@ -3010,33 +3070,45 @@ function MessageBubble({
 
 function SearchAnswerLoader() {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-sky-100 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm dark:border-sky-400/15 dark:bg-slate-950/70 dark:text-slate-300">
-      <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-500 dark:bg-sky-500/10">
-        <Search className="h-4 w-4 animate-pulse" />
-        <span className="absolute inset-0 rounded-xl border border-sky-300/40 animate-ping" />
-      </span>
-      <span>Searching details...</span>
-    </div>
+    <MinimalStatusChip status="Searching..." mode="details" />
   );
 }
 
 function TerminalCodeLoader() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#08111f] text-sky-50 shadow-[0_18px_50px_rgba(2,8,23,0.22)]">
-      <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.04] px-4 py-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-        <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-        <span className="ml-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Loko AI Terminal</span>
-      </div>
-      <div className="space-y-2 px-4 py-4 font-mono text-xs leading-6">
-        <p><span className="text-emerald-300">$</span> loko-ai.create-code --complete</p>
-        <p className="text-sky-200">Generating full working code...</p>
-        <p className="inline-flex items-center gap-2 text-slate-400">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          Preparing files, commands, and setup notes
-        </p>
-      </div>
-    </div>
+    <MinimalStatusChip status="Writing code..." mode="code" />
+  );
+}
+
+function MinimalStatusChip({
+  status,
+  mode,
+}: {
+  status: AgentStatus | "Searching...";
+  mode?: ChatMessage["responseMode"];
+}) {
+  const label =
+    status === "Reading files..."
+      ? "Reading files..."
+      : status === "Searching..."
+        ? "Searching web..."
+        : status === "Writing code..." || mode === "code"
+          ? "Generating code..."
+          : status === "Generating preview..." || mode === "build"
+            ? "Building project..."
+            : status === "Editing files..."
+              ? "Analyzing..."
+              : "Analyzing...";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      className="mb-2 inline-flex w-fit items-center gap-2 rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm dark:border-[#374151] dark:bg-[#1F2937] dark:text-[#F9FAFB]"
+    >
+      <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-500" />
+      {label}
+    </motion.div>
   );
 }

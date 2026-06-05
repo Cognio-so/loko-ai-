@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create A Saas Landing Page</title>
+  <style>
+    
+    :root{--motion-fast:160ms;--motion-base:220ms;--motion-slow:420ms;--ease-standard:cubic-bezier(0.2, 0.8, 0.2, 1);--ease-emphasized:cubic-bezier(0.16, 1, 0.3, 1)}
+    @keyframes fadeIn{to{opacity:1}}
+    @keyframes slideUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes scaleIn{to{opacity:1;transform:scale(1)}}
+    .reveal{opacity:0;transform:translateY(18px);animation:slideUp var(--motion-slow) var(--ease-emphasized) forwards;}
+    .stagger-1{animation-delay:80ms}.stagger-2{animation-delay:160ms}.stagger-3{animation-delay:240ms}.stagger-4{animation-delay:320ms}
+    .hover-lift{transition:transform var(--motion-base) var(--ease-standard),box-shadow var(--motion-base) var(--ease-standard);} .hover-lift:hover{transform:translateY(-4px)}
+    .hover-glow{transition:box-shadow var(--motion-base) var(--ease-standard),border-color var(--motion-base) var(--ease-standard);} .hover-glow:hover{box-shadow:0 24px 70px rgba(14,165,233,.18)}
+  
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f9fc;color:#0f172a}
+    .shell{position:relative;overflow:hidden;min-height:100vh}
+    .shell:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 12%,#2563eb24,transparent 28%),radial-gradient(circle at 88% 8%,#06b6d422,transparent 25%),linear-gradient(180deg,rgba(255,255,255,.76),transparent 44%);pointer-events:none}
+    .wrap{max-width:1220px;margin:0 auto;padding:22px 24px 72px;position:relative}
+    .nav{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:12px 14px 12px 18px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.82);backdrop-filter:blur(18px);border-radius:24px;box-shadow:0 18px 60px rgba(15,23,42,.08)}
+    .brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:850;letter-spacing:-.035em}
+    .brand-mark{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#2563eb,#06b6d4);box-shadow:0 12px 30px #2563eb3d}
+    .nav-links{display:flex;gap:18px;color:#64748b;font-size:14px}
+    .cta{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:999px;background:linear-gradient(135deg,#2563eb,#06b6d4);color:white;text-decoration:none;font-weight:850;box-shadow:0 14px 34px #2563eb35}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,.92fr);gap:34px;align-items:center;padding:70px 0 42px}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 13px;border-radius:999px;background:white;border:1px solid rgba(148,163,184,.22);box-shadow:0 10px 28px rgba(15,23,42,.06);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.14em;color:#2563eb}
+    h1{font-size:clamp(46px,7vw,82px);line-height:.95;letter-spacing:-.065em;margin:18px 0 20px;max-width:780px}
+    .sub{font-size:18px;line-height:1.75;color:#64748b;max-width:680px}
+    .actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}
+    .secondary{padding:12px 18px;border-radius:999px;border:1px solid rgba(148,163,184,.28);text-decoration:none;color:#0f172a;font-weight:760;background:white}
+    .stats{display:flex;gap:18px;flex-wrap:wrap;margin-top:34px;color:#64748b}
+    .stats strong{display:block;color:#0f172a;font-size:24px;letter-spacing:-.04em}
+    .mock{border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.88);backdrop-filter:blur(20px);border-radius:32px;padding:16px;box-shadow:0 32px 90px rgba(15,23,42,.14);overflow:hidden}
+    .mock-top{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(148,163,184,.18);padding:8px 8px 14px;color:#64748b;font-size:13px}
+    .dots{display:flex;gap:7px}.dots span{width:10px;height:10px;border-radius:999px;background:#cbd5e1}
+    .dashboard{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .wide{grid-column:1/-1}
+    .tile{padding:18px;border-radius:22px;background:#f8fafc;border:1px solid rgba(148,163,184,.18)}
+    .tile span{display:block;color:#64748b;font-size:12px}.tile strong{display:block;font-size:26px;margin-top:7px;letter-spacing:-.045em}
+    .chart{height:170px;display:flex;align-items:end;gap:10px}.bar{flex:1;border-radius:999px 999px 10px 10px;background:linear-gradient(180deg,#06b6d4,#2563eb);min-height:34px;opacity:.92}
+    .list{display:grid;gap:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:16px;background:white;color:#64748b;border:1px solid rgba(148,163,184,.14)}.row b{color:#0f172a}
+    .menu-card,.product-card,.reservation-card{padding:20px;border-radius:24px;background:#fff;border:1px solid rgba(148,163,184,.2);box-shadow:0 16px 45px rgba(15,23,42,.06)}
+    .menu-card span,.product-card span,.reservation-card span{display:block;color:#2563eb;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.14em}
+    .menu-card strong,.product-card strong,.reservation-card strong{display:block;margin-top:10px;font-size:24px;line-height:1.05;letter-spacing:-.04em}
+    .menu-card p,.product-card p,.reservation-card p{margin:10px 0 0;color:#64748b;line-height:1.6}
+    .menu-card b,.product-card b{display:inline-flex;margin-top:14px;padding:8px 12px;border-radius:999px;background:#2563eb12;color:#2563eb}
+    .hero-visual{grid-column:1/-1;background:linear-gradient(135deg,#fff,#2563eb14)}
+    .section{padding-top:26px}
+    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.18em;color:#2563eb;font-weight:850}
+    .section h2{font-size:clamp(28px,4.5vw,54px);line-height:1.02;letter-spacing:-.05em;margin:12px 0 14px}
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:24px}
+    .logo-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.logo-strip span{border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.72);border-radius:999px;padding:8px 12px;color:#64748b;font-size:12px;font-weight:800}
+    .card{padding:22px;border-radius:26px;border:1px solid rgba(148,163,184,.18);background:white;box-shadow:0 16px 45px rgba(15,23,42,.07)}
+    .kicker{display:inline-flex;min-width:40px;height:40px;align-items:center;justify-content:center;border-radius:14px;background:#eff6ff;font-size:11px;font-weight:900;color:#2563eb}
+    .card h3{margin:18px 0 10px;font-size:20px}
+    .card p,.quote p,.mock p{line-height:1.75;color:#64748b}
+    .quotes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:26px}
+    .quote{padding:22px;border-radius:26px;background:white;border:1px solid rgba(148,163,184,.18);box-shadow:0 16px 45px rgba(15,23,42,.06)}
+    .final{margin-top:30px;padding:30px;border-radius:30px;border:1px solid rgba(148,163,184,.18);background:linear-gradient(135deg,white,#eff6ff);display:flex;align-items:center;justify-content:space-between;gap:18px;box-shadow:0 24px 70px rgba(15,23,42,.08)}
+    .footer{margin-top:36px;padding-top:24px;border-top:1px solid rgba(148,163,184,.18);display:flex;justify-content:space-between;gap:16px;color:#64748b;font-size:14px}
+    @media (max-width: 960px){.hero,.grid,.quotes,.dashboard{grid-template-columns:1fr}.hero{padding-top:42px}.wrap{padding-left:18px;padding-right:18px}h1{font-size:52px}.nav-links{display:none}.mock{border-radius:24px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="wrap">
+      <nav class="nav">
+        <div class="brand"><span class="brand-mark"></span>Create A Saas Landing Page</div>
+        <div class="nav-links"><span>Product</span><span>Solutions</span><span>Pricing</span></div>
+        <a class="cta" href="#contact">Explore platform</a>
+      </nav>
+      <section class="hero">
+        <div>
+          <span class="badge">saas system</span>
+          <h1>Create A Saas Landing Page</h1>
+          <p class="sub">create a saas landing page ui best design</p>
+          <div class="actions">
+            <a class="cta" href="#features">Explore platform</a>
+            <a class="secondary" href="#proof">See results</a>
+          </div>
+          <div class="stats"><span><strong>3.8x</strong> faster launch</span><span><strong>92%</strong> cleaner handoff</span><span><strong>24/7</strong> workflow ready</span></div>
+          <div class="logo-strip" aria-label="Trusted by"><span>Linear</span><span>Vercel</span><span>Stripe</span><span>Raycast</span></div>
+        </div>
+        <div class="mock">
+          <div class="mock-top">
+            <div class="dots"><span></span><span></span><span></span></div>
+            <strong>Live product preview</strong>
+            <span>Updated today</span>
+          </div>
+          <div class="dashboard">
+            
+              <div class="tile"><span>Revenue pipeline</span><strong>$128k</strong></div>
+              <div class="tile"><span>Active teams</span><strong>48</strong></div>
+              <div class="tile wide">
+                <span>Growth signal</span>
+                <div class="chart">
+                  <i class="bar" style="height:46%"></i><i class="bar" style="height:62%"></i><i class="bar" style="height:54%"></i><i class="bar" style="height:78%"></i><i class="bar" style="height:92%"></i>
+                </div>
+              </div>
+              <div class="tile wide list">
+                <div class="row"><b>Onboarding</b><span>Ready</span></div>
+                <div class="row"><b>Analytics</b><span>Live</span></div>
+                <div class="row"><b>Automation</b><span>Synced</span></div>
+              </div>
+          </div>
+        </div>
+      </section>
+      <section id="features" class="section">
+        <span class="eyebrow">Product system</span>
+        <h2>Lovable-style product landing page with crisp copy, refined spacing, realistic product UI, and polished conversion sections.</h2>
+        <p class="sub">Crisp product-led SaaS with strong dashboard preview and conversion flow. Layout path: Hero -&gt; Product Preview -&gt; Features -&gt; Integrations -&gt; Pricing -&gt; FAQ -&gt; CTA.</p>
+        <div class="grid">
+        <article class="card hover-lift reveal stagger-1">
+          <span class="kicker">01</span>
+          <h3>Hero</h3>
+          <p>Hero is shaped around the saas brief with crisp copy, useful UI detail, and a focused conversion path.</p>
+        </article>
+        <article class="card hover-lift reveal stagger-2">
+          <span class="kicker">02</span>
+          <h3>Product Preview</h3>
+          <p>Product Preview is shaped around the saas brief with crisp copy, useful UI detail, and a focused conversion path.</p>
+        </article>
+        <article class="card hover-lift reveal stagger-3">
+          <span class="kicker">03</span>
+          <h3>Features</h3>
+          <p>Features is shaped around the saas brief with crisp copy, useful UI detail, and a focused conversion path.</p>
+        </article>
+        <article class="card hover-lift reveal stagger-4">
+          <span class="kicker">04</span>
+          <h3>Pricing</h3>
+          <p>Pricing is shaped around the saas brief with crisp copy, useful UI detail, and a focused conversion path.</p>
+        </article></div>
+      </section>
+      <section id="proof" class="section">
+        <span class="eyebrow">Premium proof</span>
+        <h2>Every section is designed to feel intentional, useful, and ready to refine.</h2>
+        <div class="quotes"><div class="quote hover-lift reveal stagger-1"><p>The hero leads with a real product promise, not placeholder marketing copy.</p></div><div class="quote hover-lift reveal stagger-2"><p>The preview includes realistic UI detail so the page feels like a product, not only a poster.</p></div><div class="quote hover-lift reveal stagger-3"><p>Cards, stats, and proof blocks are tuned for quick iteration inside LokoAI.</p></div></div>
+      </section>
+      <section id="contact" class="section">
+        <div class="final">
+          <div>
+            <span class="eyebrow">Next action</span>
+            <h2>Launch a sharper first draft and keep improving it from chat.</h2>
+          </div>
+          <a class="cta" href="#top">Explore platform</a>
+        </div>
+      </section>
+      <footer class="footer">
+        <span>Generated by LokoAI</span>
+        <span>saas experience</span>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

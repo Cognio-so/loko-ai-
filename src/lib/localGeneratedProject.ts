@@ -4,6 +4,7 @@ import { resolveLayoutPlan } from "@/lib/layoutEngine";
 import { resolveThemeProfile } from "@/lib/themeEngine";
 import { buildFeatureGridHtml, buildLogosHtml, buildStatsHtml, buildTestimonialsHtml } from "@/sections";
 import { getTemplateProfile } from "@/templates";
+import { getPremiumSaasProject, isPremiumSaasCodebasePrompt } from "@/lib/premiumSaasProject";
 
 export interface LocalGeneratedFile {
   path: string;
@@ -38,6 +39,77 @@ type WebsiteContent = {
   visualHtml: string;
   finalTitle: string;
 };
+
+type WebsitePalette = {
+  bg: string;
+  surface: string;
+  accent: string;
+  accent2: string;
+  text: string;
+  muted: string;
+};
+
+function applyPromptPalette(prompt: string, basePalette: WebsitePalette): WebsitePalette {
+  const lower = prompt.toLowerCase();
+  const wantsLight = /\b(no dark|not dark|white|clean|light)\b/.test(lower);
+
+  if (/\b(green|emerald|mint|hara|sabz)\b/.test(lower)) {
+    return wantsLight
+      ? {
+          bg: "#f7fff9",
+          surface: "#ffffff",
+          accent: "#16a34a",
+          accent2: "#22c55e",
+          text: "#052e16",
+          muted: "#4b6354",
+        }
+      : {
+          bg: "#071a12",
+          surface: "#10261b",
+          accent: "#22c55e",
+          accent2: "#86efac",
+          text: "#f0fdf4",
+          muted: "#a7c7b2",
+        };
+  }
+
+  if (/\b(coffee|cafe|espresso|brown|cream|warm)\b/.test(lower)) {
+    return {
+      bg: "#fff8ef",
+      surface: "#fffaf2",
+      accent: "#b7652d",
+      accent2: "#1f6f5b",
+      text: "#24150f",
+      muted: "#7c6658",
+    };
+  }
+
+  if (/\b(red|rose|pink|zomato)\b/.test(lower)) {
+    return wantsLight
+      ? {
+          bg: "#fff7f8",
+          surface: "#ffffff",
+          accent: "#e11d48",
+          accent2: "#fb7185",
+          text: "#2b1118",
+          muted: "#78535d",
+        }
+      : basePalette;
+  }
+
+  if (/\b(black|dark|night)\b/.test(lower) && !wantsLight) {
+    return {
+      bg: "#111827",
+      surface: "#1f2937",
+      accent: "#3b82f6",
+      accent2: "#06b6d4",
+      text: "#f9fafb",
+      muted: "#9ca3af",
+    };
+  }
+
+  return basePalette;
+}
 
 function getWebsiteContent(prompt: string): WebsiteContent {
   const intent = detectGenerationIntent(prompt);
@@ -189,7 +261,7 @@ function buildWebsitePreview(prompt: string) {
   const templateProfile = getTemplateProfile(category);
   const themeProfile = resolveThemeProfile(category);
   const layoutPlan = resolveLayoutPlan(category);
-  const palette = themeProfile.palette;
+  const palette = applyPromptPalette(prompt, themeProfile.palette);
   const content = getWebsiteContent(prompt);
 
   const featureCards = buildFeatureGridHtml(content.features);
@@ -504,6 +576,10 @@ body{
 }
 
 export function getLocalGeneratedProject(userPrompt: string) {
+  if (isPremiumSaasCodebasePrompt(userPrompt)) {
+    return getPremiumSaasProject(userPrompt);
+  }
+
   const intent = detectGenerationIntent(userPrompt);
   const previewHtml =
     intent.surface === "image"

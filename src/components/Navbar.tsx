@@ -12,12 +12,12 @@ import UserMenu from "@/components/UserMenu";
 
 const navItems = [
   { name: "Home", href: "/", icon: Sparkles },
-  { name: "Integrations", href: "/integrations", icon: LayoutGrid },
-  { name: "Partners", href: "/partners", icon: Users },
-  { name: "Launchpad", href: "/launchpad", icon: Rocket },
-  { name: "Collection", href: "/collection", icon: Library },
-  { name: "Affiliate", href: "/affiliate", icon: Trophy },
-  { name: "Pricing", href: "/pricing", icon: Zap },
+  { name: "Connect Hub", href: "/integrations", icon: LayoutGrid },
+  { name: "Partner Network", href: "/partners", icon: Users },
+  { name: "Launch Lab", href: "/launchpad", icon: Rocket },
+  { name: "Agent Library", href: "/collection", icon: Library },
+  { name: "Growth Hub", href: "/affiliate", icon: Trophy },
+  { name: "Plans", href: "/pricing", icon: Zap },
 ];
 
 export default function Navbar() {
@@ -58,27 +58,27 @@ export default function Navbar() {
       {/* Subtle brand grid pattern overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.04] pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
+      <div className="mx-auto max-w-[1600px] px-3 sm:px-6 lg:px-8 relative z-10">
         <div className="flex justify-between h-16 sm:h-20 items-center gap-3">
-          <div className="flex items-center gap-2 min-w-0">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/"
               prefetch
               onMouseEnter={() => prefetchRoute("/")}
               onFocus={() => prefetchRoute("/")}
-              className="flex min-w-0 items-center gap-2.5 group"
+              className="flex shrink-0 items-center gap-2.5 group"
             >
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 p-0.5 shadow-md shadow-sky-500/20 transition-transform group-hover:scale-105">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-500 via-violet-500 to-cyan-400 p-0.5 shadow-md shadow-sky-500/20 transition-transform group-hover:scale-105">
                 <Sparkles className="h-5 w-5 text-white animate-pulse" />
               </div>
-              <span className="truncate text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-sky-500 transition-colors">
+              <span className="whitespace-nowrap text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 dark:text-white group-hover:text-sky-500 transition-colors">
                 Loko<span className="text-sky-500">AI</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Nav - Beautiful Center Links */}
-          <div className="hidden lg:flex items-center gap-1.5 mx-auto">
+          <div className="hidden xl:flex min-w-0 items-center justify-center gap-1 mx-auto">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -88,20 +88,28 @@ export default function Navbar() {
                   prefetch
                   onMouseEnter={() => prefetchRoute(item.href)}
                   onFocus={() => prefetchRoute(item.href)}
-                  className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 group ${
+                  className={`relative flex h-12 shrink-0 items-center gap-2 rounded-2xl px-2.5 text-[12.5px] font-bold leading-none transition-all duration-300 group 2xl:px-3.5 ${
                     isActive 
-                      ? "text-sky-600 dark:text-sky-400 bg-sky-500/10 dark:bg-sky-500/10" 
-                      : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/5"
+                      ? "text-sky-700 dark:text-sky-300 bg-sky-50 shadow-sm ring-1 ring-sky-100 dark:bg-sky-500/10 dark:ring-sky-400/15" 
+                      : "text-slate-600 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white hover:bg-white/80 hover:shadow-sm hover:ring-1 hover:ring-slate-200 dark:hover:bg-white/5 dark:hover:ring-white/10"
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? "text-sky-500" : "text-slate-400 dark:text-gray-500"}`} />
-                  {item.name}
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 ${
+                      isActive
+                        ? "border-sky-200 bg-white text-sky-500 shadow-sky-500/10"
+                        : "border-slate-200 bg-white/85 text-slate-400 group-hover:border-sky-200 group-hover:text-sky-500 dark:border-white/10 dark:bg-white/5"
+                    }`}
+                  >
+                    <item.icon className="h-3.5 w-3.5" />
+                  </span>
+                  <span className="whitespace-nowrap">{item.name}</span>
                 </Link>
               );
             })}
           </div>
 
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden xl:flex shrink-0 items-center gap-3">
             {/* Theme Toggle Button */}
             <button
               type="button"
@@ -154,7 +162,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="lg:hidden flex items-center gap-2 shrink-0">
+          <div className="xl:hidden flex items-center gap-2 shrink-0">
              <button
                 type="button"
                 aria-label={`Switch to ${currentTheme === "light" ? "dark" : "light"} mode`}
@@ -185,7 +193,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden absolute top-16 sm:top-20 left-0 right-0 glass border-b border-white/10 p-4"
+            className="xl:hidden absolute top-16 sm:top-20 left-0 right-0 glass border-b border-white/10 p-4"
           >
             <div className="flex flex-col gap-2">
               {navItems.map((item) => (
@@ -202,7 +210,9 @@ export default function Navbar() {
                       : "text-slate-500 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white hover:bg-sky-500/10 dark:hover:bg-white/5"
                   }`}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-sky-500 shadow-sm dark:border-white/10 dark:bg-white/5">
+                    <item.icon className="h-4 w-4" />
+                  </span>
                   {item.name}
                 </Link>
               ))}

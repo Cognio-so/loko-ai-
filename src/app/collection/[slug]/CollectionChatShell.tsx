@@ -51,12 +51,12 @@ type PrivateHistoryItem = {
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: Compass },
-  { label: "Integrations", href: "/integrations", icon: Grid3X3 },
-  { label: "Partners", href: "/partners", icon: Users },
-  { label: "Launchpad", href: "/launchpad", icon: Rocket },
-  { label: "Collection", href: "/collection", icon: Library },
-  { label: "Affiliate", href: "/affiliate", icon: Trophy },
-  { label: "Pricing", href: "/pricing", icon: Zap },
+  { label: "Connect Hub", href: "/integrations", icon: Grid3X3 },
+  { label: "Partner Network", href: "/partners", icon: Users },
+  { label: "Launch Lab", href: "/launchpad", icon: Rocket },
+  { label: "Agent Library", href: "/collection", icon: Library },
+  { label: "Growth Hub", href: "/affiliate", icon: Trophy },
+  { label: "Plans", href: "/pricing", icon: Zap },
 ];
 
 function AgentChatHero({ assistant, modelName }: { assistant: CollectionAssistant; modelName: string }) {
