@@ -84,6 +84,24 @@ export function detectGenerationIntent(prompt: string): GenerationIntent {
     };
   }
 
+  if (/(slides|presentation|ppt|pitch deck|slide deck|keynote)/.test(lower)) {
+    return {
+      ...base,
+      surface: "website",
+      category: "general",
+      styleDirection: "Interactive presentation slide deck with keyboard arrow navigation, animated transitions, key takeaways, and presenter visual cards.",
+      sectionLabels: ["Executive Summary", "Market Problem", "Our Solution", "Traction & Growth", "Next Steps"],
+      palette: {
+        bg: "#090d16",
+        surface: "#111827",
+        accent: "#00f0ff",
+        accent2: "#8b5cf6",
+        text: "#ffffff",
+        muted: "#94a3b8",
+      },
+    };
+  }
+
   if (/(article|blog|essay|copy|sales letter|brochure|case study|documentation|text page)/.test(lower)) {
     return {
       ...base,
