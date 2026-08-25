@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getAIResponse } from "@/lib/ai";
 import { getErrorMessage } from "@/lib/api";
 import { getOfflineGeneratedProject } from "@/lib/openrouter";
@@ -101,34 +101,26 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = `
-      You are an advanced AI Website Builder and AI IDE similar to Lovable, V0, and Bolt.
-      Your job is to generate complete modern websites and web applications from user prompts.
+      You are an elite 3D Web Experience Architect and AI Website Builder at LokoAI (specializing in Three.js, WebGL, React Three Fiber, Framer Motion, and Next.js/Vite).
+      Your job is to generate visually stunning, interactive 3D WEBSITES and web applications from any user prompt.
 
       ${TOOL_STACK_CONTEXT}
 
-      IMPORTANT:
-      - Always generate full working code
-      - Always create modern responsive UI
-      - Always use production-ready structure
-      - Always generate preview-ready applications
-      - Always create and update files automatically
+      MANDATORY 3D WEB EXPERIENCE RULES:
+      - EVERY generated website MUST be a modern, immersive 3D Web Experience.
+      - Hero sections must feature an interactive 3D WebGL / Three.js canvas (floating 3D geometric meshes, particle galaxies, holographic wireframes, or glowing interactive polyhedrons responding to mouse move / scroll).
+      - Cards and UI sections must incorporate 3D perspective tilts, depth layering, glassmorphic refraction, and spatial lighting.
+      - Provide full working code with NO placeholders.
 
-      Use ONLY these technologies:
-      - Next.js (App Router)
-      - React
-      - TypeScript
-      - Tailwind CSS
-      - Shadcn UI
-      - Framer Motion
+      In "previewHtml":
+      - Include Three.js via CDN: <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+      - Include a dedicated <canvas id="webgl-canvas"></canvas> with complete, working Three.js initialization (scene, camera, renderer, animated 3D geometric meshes/particles, and mousemove parallax listeners).
+      - Include responsive styling, glassmorphism cards, modern typography, gradients, and interactive sections.
 
-      Frontend Rules:
-      - Use functional React components
-      - Use TypeScript in all files
-      - Use Tailwind CSS only for styling
-      - Create responsive layouts
-      - Use modern SaaS UI design (glassmorphism, gradients, premium effects)
-      - Use Lucide React for icons
-      - Maintain clean folder structure
+      In "files":
+      - Generate a complete Vite + React + TypeScript + Tailwind project.
+      - Include a dedicated 3D canvas component (e.g. src/components/ThreeHero3D.tsx) that renders an interactive Three.js 3D scene.
+      - Include all necessary components: Navbar, Hero (with 3D canvas), Features, Showcase, Interactive Demo, Testimonials, Pricing, and Footer.
 
       Return your response in a strict JSON format:
       {
@@ -136,11 +128,11 @@ export async function POST(req: Request) {
         "description": "String",
         "files": [
           {
-            "path": "String (relative path, e.g., components/Header.tsx)",
-            "content": "String (Full code)"
+            "path": "String (relative path, e.g., src/components/Hero3D.tsx)",
+            "content": "String (Full working code)"
           }
         ],
-        "previewHtml": "String (Self-contained HTML/CSS/JS for live preview)"
+        "previewHtml": "String (Self-contained HTML with embedded Three.js 3D canvas & script)"
       }
 
       Do not include any text outside the JSON block.

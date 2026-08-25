@@ -95,11 +95,14 @@ project/
   },
   "dependencies": {
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "three": "^0.160.0",
+    "lucide-react": "^0.344.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@types/three": "^0.160.0",
     "@vitejs/plugin-react": "^4.3.0",
     "typescript": "^5.4.0",
     "vite": "^5.4.0"
