@@ -10,17 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getCurrentUser } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/profile");
 
-  const email = user.email ?? "Signed in user";
+  const email = user.email ?? "developer@lokoai.local";
   const avatarUrl = user.user_metadata?.avatar_url;
   const displayName =
     user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
     email.split("@")[0] ||
     "Account";
   const initials = email.charAt(0).toUpperCase();
@@ -80,7 +79,7 @@ export default async function ProfilePage() {
           <CardHeader>
             <CardTitle>Account Details</CardTitle>
             <CardDescription>
-              These details come from your authenticated Supabase session.
+              These details come from your local developer session.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

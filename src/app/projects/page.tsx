@@ -2,18 +2,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ProjectList from "@/components/ProjectList";
-import { createSupabaseServerClient, getCurrentUser } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
+import { dbGetAllProjects } from "@/lib/db";
 
 export default async function ProjectsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/projects");
 
-  const supabase = await createSupabaseServerClient();
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("id,title,description,preview_url,created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  const dbProjects = dbGetAllProjects();
+  const projects = dbProjects.map((p) => ({
+    id: p.id,
+    title: p.title,
+    description: p.description,
+    preview_url: `/build/${p.id}`,
+    created_at: p.created_at,
+  }));
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">

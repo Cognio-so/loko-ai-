@@ -2,12 +2,21 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+
+export interface LocalUser {
+  id: string;
+  email: string;
+  user_metadata: {
+    full_name: string;
+    avatar_url: string;
+    name?: string;
+    picture?: string;
+  };
+  created_at?: string;
+}
 
 interface AuthContextValue {
-  user: User | null;
+  user: LocalUser | null;
   isLoading: boolean;
   isConfigured: boolean;
   signOut: () => Promise<void>;
@@ -16,54 +25,54 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const MOCK_USER: LocalUser = {
+  id: "local-user-id",
+  email: "developer@lokoai.local",
+  user_metadata: {
+    full_name: "Local Developer",
+    avatar_url: "",
+  },
+  created_at: new Date().toISOString(),
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const isConfigured = isSupabaseConfigured();
+
+  const getLoggedInCookie = () => {
+    if (typeof document === "undefined") return false;
+    return document.cookie.split("; ").some((row) => row.startsWith("lokoai_logged_in=true"));
+  };
 
   const refreshUser = useCallback(async () => {
-    const {
-      data: { user: nextUser },
-    } = await supabase.auth.getUser();
-    setUser(nextUser);
+    const loggedIn = getLoggedInCookie();
+    setUser(loggedIn ? MOCK_USER : null);
     setIsLoading(false);
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
-    let isActive = true;
-
-    supabase.auth.getUser().then(({ data }) => {
-      if (!isActive) return;
-      setUser(data.user);
-      setIsLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-      router.refresh();
-    });
-
-    return () => {
-      isActive = false;
-      subscription.unsubscribe();
-    };
-  }, [router, supabase]);
+    const loggedIn = getLoggedInCookie();
+    if (loggedIn) {
+      setUser(MOCK_USER);
+    } else {
+      // For local development, default to logged in if no cookie exists yet
+      document.cookie = "lokoai_logged_in=true; path=/; max-age=31536000";
+      setUser(MOCK_USER);
+    }
+    setIsLoading(false);
+  }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    document.cookie = "lokoai_logged_in=false; path=/; max-age=0";
     setUser(null);
     router.push("/");
     router.refresh();
-  }, [router, supabase]);
+  }, [router]);
 
   const value = useMemo(
-    () => ({ user, isLoading, isConfigured, signOut, refreshUser }),
-    [user, isLoading, isConfigured, signOut, refreshUser]
+    () => ({ user, isLoading, isConfigured: false, signOut, refreshUser }),
+    [user, isLoading, signOut, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

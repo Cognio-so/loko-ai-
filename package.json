@@ -13,8 +13,6 @@
     "@google/generative-ai": "^0.24.1",
     "@monaco-editor/react": "^4.7.0",
     "@openrouter/agent": "^0.6.0",
-    "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "^2.105.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jszip": "^3.4.0",
     "better-sqlite3": "^12.10.0",

@@ -1,5 +1,5 @@
 import Home from "../page";
-import { getCurrentUser } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function WorkspacePage() {

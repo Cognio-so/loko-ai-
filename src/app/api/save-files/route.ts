@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-import { createSupabaseServerClient, getCurrentUser } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
+import { dbCreateProject } from '@/lib/db';
 import { getErrorMessage, sanitizeProjectTitle, unauthorizedResponse } from '@/lib/api';
 
 export async function POST(req: Request) {
@@ -33,16 +34,14 @@ export async function POST(req: Request) {
       await fs.writeFile(filePath, file.content, 'utf8');
     }
 
-    const supabase = await createSupabaseServerClient();
-    const { error: dbError } = await supabase.from('projects').insert({
-      user_id: user.id,
+    // Save to the local SQLite database
+    dbCreateProject({
+      id: crypto.randomUUID(),
       title: projectTitle || 'Untitled App',
       description: description || null,
       generated_code: files,
-      preview_url: previewHtml || null,
+      preview_html: previewHtml || null,
     });
-
-    if (dbError) throw dbError;
 
     return NextResponse.json({ 
       success: true, 

@@ -1,15 +1,11 @@
-﻿"use client";
+"use client";
 
-import { Code2, Loader2, Mail, Phone, ShieldCheck } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Loader2, ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-
-type AuthMode = "email" | "phone";
 
 type AuthPanelProps = {
   nextPath?: string;
@@ -18,201 +14,74 @@ type AuthPanelProps = {
 
 export default function AuthPanel({ nextPath = "/dashboard", onSuccess }: AuthPanelProps) {
   const router = useRouter();
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const { isConfigured, refreshUser } = useAuth();
-
-  const [mode, setMode] = useState<AuthMode>("email");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
+  const { refreshUser } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const siteUrl = typeof window === "undefined" ? process.env.NEXT_PUBLIC_SITE_URL : window.location.origin;
 
   const safeNextPath = nextPath.startsWith("/") ? nextPath : "/dashboard";
 
-  const finishLogin = async () => {
+  const handleDeveloperLogin = async () => {
+    setIsLoading(true);
+    // Set the cookie for local login
+    document.cookie = "lokoai_logged_in=true; path=/; max-age=31536000";
+    
+    // Refresh the user session in useAuth state
     await refreshUser();
-    onSuccess?.();
-    router.push(safeNextPath);
-    router.refresh();
-  };
-
-  const handleOAuth = async (provider: "google" | "github") => {
-    setIsLoading(true);
-    setError(null);
-
-    const { error: authError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNextPath)}`,
-      },
-    });
-
-    if (authError) {
-      setError(authError.message);
+    
+    // Slight artificial delay for feedback
+    setTimeout(() => {
       setIsLoading(false);
-    }
-  };
-
-  const handleEmailAuth = async () => {
-    if (!email || !password) {
-      setError("Email and password are required.");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setMessage(null);
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (!signInError) {
-      setMessage("Welcome back. Opening your dashboard...");
-      await finishLogin();
-      return;
-    }
-
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(safeNextPath)}`,
-      },
-    });
-
-    if (signUpError) {
-      setError(signUpError.message);
-    } else {
-      setMessage("Account created. Check your email if confirmation is enabled.");
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleSendOtp = async () => {
-    if (!phone) {
-      setError("Phone number is required.");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const { error: otpError } = await supabase.auth.signInWithOtp({ phone });
-    if (otpError) {
-      setError(otpError.message);
-    } else {
-      setOtpSent(true);
-      setMessage("OTP sent. Enter the code to continue.");
-    }
-
-    setIsLoading(false);
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!phone || !otp) {
-      setError("Phone number and OTP are required.");
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      phone,
-      token: otp,
-      type: "sms",
-    });
-
-    if (verifyError) {
-      setError(verifyError.message);
-      setIsLoading(false);
-    } else {
-      await finishLogin();
-    }
+      onSuccess?.();
+      router.push(safeNextPath);
+      router.refresh();
+    }, 800);
   };
 
   return (
     <div className="w-full max-w-md">
       <div className="relative rounded-[1.75rem] p-[1px] bg-gradient-to-b from-sky-200/80 via-white to-cyan-200/80 shadow-[0_22px_70px_rgba(14,165,233,0.18)]">
         <div className="pointer-events-none absolute -inset-10 rounded-[2.25rem] bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.22),transparent_55%),radial-gradient(circle_at_bottom,rgba(14,165,233,0.16),transparent_50%)] blur-2xl" />
-        <Card className="relative w-full rounded-[1.7rem] border border-white/50 bg-white/85 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl"
-        >
+        <Card className="relative w-full rounded-[1.7rem] border border-white/50 bg-white/85 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-6 top-0 h-20 rounded-b-[1.5rem] bg-gradient-to-b from-sky-100/80 to-transparent opacity-80 blur-2xl" />
           <CardHeader>
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/15 text-sky-500">
-          <ShieldCheck className="h-6 w-6" />
-        </div>
-        <CardTitle>Welcome Back!</CardTitle>
-        <CardDescription>Choose your preferred provider to get started.</CardDescription>
-      </CardHeader>
-          <CardContent className="space-y-4">
-        {!isConfigured && (
-          <div className="rounded-xl border border-amber-300/40 bg-amber-400/10 p-3 text-xs text-amber-700 dark:text-amber-200">
-            Supabase keys are not configured yet. Add them to `.env.local` to enable login.
-          </div>
-        )}
+            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-400/15 text-sky-500">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">Developer Access</CardTitle>
+            <CardDescription className="text-slate-500 mt-1">
+              LokoAI is configured for local-first, offline mode. Enter your local workspace below.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="rounded-xl border border-sky-100 bg-sky-50/50 p-4 text-xs leading-relaxed text-sky-800 dark:border-sky-950/30 dark:bg-sky-950/20 dark:text-sky-300">
+              <div className="flex gap-2">
+                <Sparkles className="h-4 w-4 shrink-0 text-sky-500 mt-0.5 animate-pulse" />
+                <div>
+                  <p className="font-bold">Offline SQLite Mode Active</p>
+                  <p className="mt-0.5 opacity-90">
+                    All projects, design files, code generation data, and preferences are stored directly on this computer.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="outline" onClick={() => handleOAuth("google")} disabled={isLoading || !isConfigured} className="rounded-xl bg-white/80 shadow-sm hover:bg-white">
-            <Mail className="h-4 w-4" />
-            Google
-          </Button>
-          <Button variant="outline" onClick={() => handleOAuth("github")} disabled={isLoading || !isConfigured} className="rounded-xl bg-white/80 shadow-sm hover:bg-white">
-            <Code2 className="h-4 w-4" />
-            GitHub
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1 dark:bg-white/5">
-          <button
-            type="button"
-            onClick={() => setMode("email")}
-            className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
-              mode === "email" ? "bg-white text-slate-950 shadow dark:bg-white/10 dark:text-white" : "text-slate-500"
-            }`}
-          >
-            Email
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("phone")}
-            className={`rounded-lg px-3 py-2 text-xs font-bold transition ${
-              mode === "phone" ? "bg-white text-slate-950 shadow dark:bg-white/10 dark:text-white" : "text-slate-500"
-            }`}
-          >
-            Phone OTP
-          </button>
-        </div>
-
-        {mode === "email" ? (
-          <div className="space-y-3">
-            <Input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@company.com" type="email" />
-            <Input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Password" type="password" />
-            <Button className="w-full rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/15 hover:bg-slate-900" onClick={handleEmailAuth} disabled={isLoading || !isConfigured}>
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-              Continue with Email
+            <Button
+              className="relative w-full rounded-2xl py-6 bg-slate-950 text-white font-bold hover:bg-slate-900 shadow-xl shadow-slate-950/15 transition-all flex items-center justify-center gap-2 group active:scale-98"
+              onClick={handleDeveloperLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Entering Workspace...
+                </>
+              ) : (
+                <>
+                  Enter Workspace as Developer
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
             </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <Input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+1 555 000 0000" type="tel" />
-            {otpSent && <Input value={otp} onChange={(event) => setOtp(event.target.value)} placeholder="6-digit OTP" inputMode="numeric" />}
-            <Button className="w-full rounded-xl bg-slate-950 text-white shadow-lg shadow-slate-950/15 hover:bg-slate-900" onClick={otpSent ? handleVerifyOtp : handleSendOtp} disabled={isLoading || !isConfigured}>
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}
-              {otpSent ? "Verify OTP" : "Send OTP"}
-            </Button>
-          </div>
-        )}
-
-        {message && <div className="rounded-xl bg-green-500/10 p-3 text-xs text-green-600 dark:text-green-300">{message}</div>}
-        {error && <div className="rounded-xl bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-300">{error}</div>}
-      </CardContent>
+          </CardContent>
         </Card>
       </div>
     </div>

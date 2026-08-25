@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getGeminiResponse } from '@/lib/gemini';
-import { getCurrentUser } from '@/lib/supabase';
+import { getCurrentUser } from '@/lib/auth';
 import { getErrorMessage, unauthorizedResponse } from '@/lib/api';
 
 export async function POST(req: Request) {
