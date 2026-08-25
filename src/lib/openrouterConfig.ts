@@ -1,6 +1,6 @@
 const DEFAULT_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_OPENROUTER_MODEL = "openrouter/auto";
-const DEFAULT_FREE_MODEL = "openai/gpt-oss-20b:free";
+const DEFAULT_FREE_MODEL = "google/gemini-2.0-flash-exp:free";
 const CHAT_COMPLETIONS_SUFFIX = "/chat/completions";
 
 function normalizeBaseUrl(value: string) {
@@ -30,11 +30,11 @@ export function getOpenRouterConfig() {
   );
   
   const model =
-    configuredModel && !isHttpUrl(configuredModel) ? configuredModel : DEFAULT_OPENROUTER_MODEL;
+    configuredModel && !isHttpUrl(configuredModel) ? configuredModel : DEFAULT_FREE_MODEL;
 
   // If useFreeModel flag is used, it will use the same model as configured in OPENROUTER_MODEL
   // or the default free model if OPENROUTER_MODEL is not set.
-  const freeModel = model !== DEFAULT_OPENROUTER_MODEL ? model : DEFAULT_FREE_MODEL;
+  const freeModel = model;
 
   return {
     apiBaseUrl,

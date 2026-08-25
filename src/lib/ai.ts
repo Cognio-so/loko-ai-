@@ -21,18 +21,8 @@ function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
 function getAIProvider(): AIProvider {
   const provider = process.env.AI_PROVIDER?.toLowerCase();
 
-  if (provider === "gemini" || provider === "openrouter" || provider === "openrouter_agent" || provider === "google") {
+  if (provider === "openrouter" || provider === "openrouter_agent") {
     return provider;
-  }
-
-  // Prefer direct OpenRouter chat completions for website generation. The agent SDK
-  // can be selected explicitly with AI_PROVIDER=openrouter_agent.
-  if (process.env.OPENROUTER_API_KEY) {
-    return "openrouter";
-  }
-
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY) {
-    return "gemini";
   }
 
   return "openrouter";
