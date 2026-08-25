@@ -372,11 +372,21 @@ export async function getOpenRouterResponse(
   }
 
   try {
-    const data = await requestOpenRouter(apiKey, chatCompletionsUrl, selectedModel, systemPrompt, userPrompt);
+    let data;
+    try {
+      data = await requestOpenRouter(apiKey, chatCompletionsUrl, selectedModel, systemPrompt, userPrompt);
+    } catch (primaryErr) {
+      if (selectedModel !== model) {
+        data = await requestOpenRouter(apiKey, chatCompletionsUrl, model, systemPrompt, userPrompt);
+      } else {
+        throw primaryErr;
+      }
+    }
+
     let text = data.choices?.[0]?.message?.content;
 
     if (!text) {
-      throw new Error(`OpenRouter returned no content with model "${selectedModel}".`);
+      throw new Error(`OpenRouter returned no content.`);
     }
 
     if (isJson) {
