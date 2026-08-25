@@ -1,6 +1,6 @@
 const DEFAULT_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
-const DEFAULT_OPENROUTER_MODEL = "openrouter/auto";
-const DEFAULT_FREE_MODEL = "google/gemini-2.0-flash-exp:free";
+const DEFAULT_CHAT_MODEL = "minimax/minimax-m2.7:free";
+const DEFAULT_GENERATE_MODEL = "z-ai/glm-5.2:free";
 const CHAT_COMPLETIONS_SUFFIX = "/chat/completions";
 
 function normalizeBaseUrl(value: string) {
@@ -21,6 +21,7 @@ export function getOpenRouterConfig() {
   const configuredBaseUrl =
     process.env.OPENROUTER_BASE_URL?.trim() || process.env.OPENROUTER_API_URL?.trim();
   const configuredModel = process.env.OPENROUTER_MODEL?.trim();
+  const configuredGenerateModel = process.env.OPENROUTER_GENERATE_MODEL?.trim();
   
   const mistakenBaseUrl =
     !configuredBaseUrl && configuredModel && isHttpUrl(configuredModel) ? configuredModel : undefined;
@@ -30,16 +31,16 @@ export function getOpenRouterConfig() {
   );
   
   const model =
-    configuredModel && !isHttpUrl(configuredModel) ? configuredModel : DEFAULT_FREE_MODEL;
+    configuredModel && !isHttpUrl(configuredModel) ? configuredModel : DEFAULT_CHAT_MODEL;
 
-  // If useFreeModel flag is used, it will use the same model as configured in OPENROUTER_MODEL
-  // or the default free model if OPENROUTER_MODEL is not set.
-  const freeModel = model;
+  const generateModel =
+    configuredGenerateModel && !isHttpUrl(configuredGenerateModel) ? configuredGenerateModel : DEFAULT_GENERATE_MODEL;
 
   return {
     apiBaseUrl,
     chatCompletionsUrl: `${apiBaseUrl}${CHAT_COMPLETIONS_SUFFIX}`,
     model,
-    freeModel,
+    generateModel,
+    freeModel: model,
   };
 }

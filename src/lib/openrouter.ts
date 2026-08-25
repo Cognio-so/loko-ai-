@@ -362,8 +362,8 @@ export async function getOpenRouterResponse(
   useFreeModel: boolean = false
 ) {
   const apiKey = process.env.OPENROUTER_API_KEY;
-  const { chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
-  const selectedModel = useFreeModel ? freeModel : model;
+  const { chatCompletionsUrl, model, generateModel } = getOpenRouterConfig();
+  const selectedModel = isJson ? generateModel : model;
 
   // If key is missing, fall back to offline generation for JSON flows.
   if (!apiKey) {
