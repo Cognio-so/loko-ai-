@@ -36,9 +36,9 @@ function normalizeMessages(value: unknown): ChatMessage[] {
 }
 
 export async function POST(req: Request) {
-  const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+  const { apiKey, chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
   if (!apiKey) {
-    return jsonError("OPENROUTER_API_KEY is missing in .env.local.", 500);
+    return jsonError("OPENROUTER_API_KEY is missing in .env.", 500);
   }
 
   const body = (await req.json()) as ChatRequestBody;
@@ -79,7 +79,6 @@ export async function POST(req: Request) {
     });
   }
 
-  const { chatCompletionsUrl, model, freeModel } = getOpenRouterConfig();
   const selectedModel = model || freeModel;
 
   const upstream = await fetch(chatCompletionsUrl, {
