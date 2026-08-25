@@ -5,27 +5,42 @@ import { useRouter } from "next/navigation";
 import {
   Bot,
   Check,
+  ChevronDown,
+  Code2,
   Compass,
   Copy,
+  ExternalLink,
+  Eye,
+  FileCode2,
   FileText,
   FolderOpen,
   Grid3X3,
   History,
   Home,
+  Layers,
+  Layout,
   Loader2,
+  Maximize2,
   Menu,
   Mic,
+  Minimize2,
+  Monitor,
   Notebook,
+  Palette,
+  Play,
   Plus,
   RefreshCw,
   Rocket,
   Search,
   Send,
   Settings,
+  Smartphone,
   Sparkles,
+  Tablet,
   Trash2,
   Trophy,
   Users,
+  Wand2,
   X,
   Zap,
 } from "lucide-react";
@@ -47,6 +62,12 @@ type ChatMessage = {
   createdAt: string;
   isStreaming?: boolean;
   isError?: boolean;
+  generatedProject?: {
+    title: string;
+    description: string;
+    previewHtml: string;
+    files?: Array<{ path: string; content: string }>;
+  };
 };
 
 type Project = {
@@ -61,6 +82,16 @@ type Project = {
 };
 
 type View = "chat" | "home" | "integrations" | "partners" | "launchpad" | "collection" | "affiliate" | "pricing";
+type DeviceMode = "desktop" | "tablet" | "mobile";
+type PreviewTab = "preview" | "code";
+
+const THEMES = [
+  { id: "3d-cyberpunk", name: "⚡ 3D Cyberpunk", accent: "#00f0ff", accent2: "#ff007f", bg: "#080b14" },
+  { id: "dark-glass", name: "✨ Dark Glassmorphism", accent: "#6366f1", accent2: "#a855f7", bg: "#0b0f19" },
+  { id: "3d-hologram", name: "🌌 3D Holographic", accent: "#38bdf8", accent2: "#4ade80", bg: "#030712" },
+  { id: "luxury-noir", name: "👑 Luxury Noir", accent: "#d4af37", accent2: "#f3e5ab", bg: "#0a0a0a" },
+  { id: "vibrant-neon", name: "🎨 Vibrant Neon", accent: "#ec4899", accent2: "#8b5cf6", bg: "#0f172a" },
+];
 
 const navItems = [
   { label: "Home", href: "/", icon: Home, view: "home" as View },
@@ -74,47 +105,43 @@ const navItems = [
 
 const quickActions = [
   {
-    title: "Create slides",
+    title: "⚡ Build 3D Website",
     prompt:
-      "Create modern professional presentation slides with beautiful layouts, animations, icons, editable content sections, and premium design.",
+      "Create a futuristic 3D Web Experience with interactive Three.js floating geometric meshes, particle galaxies, glassmorphic hero, navbar, features, and pricing cards.",
   },
   {
-    title: "Build website",
+    title: "🎨 3D SaaS Landing Page",
     prompt:
-      "Create a modern responsive website with hero section, navbar, animations, services, pricing, contact form, and premium UI design.",
+      "Build a modern high-converting 3D SaaS landing page with real-time WebGL interactive canvas, glowing badges, feature grid, and live testimonials.",
   },
   {
-    title: "Develop desktop app",
+    title: "📊 Futuristic Dashboard",
     prompt:
-      "Create a modern desktop application with sidebar, dashboard, analytics cards, responsive layout, and clean professional UI.",
+      "Create a sleek dark cyberpunk analytics dashboard with 3D perspective cards, charts, metric cards, activity feed, and sidebar.",
   },
   {
-    title: "Design",
+    title: "🛍️ 3D eCommerce Store",
     prompt:
-      "Create a modern creative UI/UX design with beautiful typography, colors, animations, clean layout, and premium user experience.",
+      "Build a modern 3D luxury product showcase with interactive 3D product visualizer, gallery cards, cart drawer, and premium typography.",
   },
 ];
 
 const moreQuickActions = [
   {
-    title: "Invoicing",
-    prompt:
-      'Create an app with a list of invoices. Each has: ID or number, client name, amount, due date, status (Draft, Sent, Paid, Overdue), and optional notes. Include a form to add or edit and a way to update status. Add a header and "New invoice" button. Works for sending and tracking invoices.',
+    title: "AI Portfolio",
+    prompt: "Create an interactive 3D developer portfolio with WebGL hero mesh, project showcase bento grid, skill tags, and contact modal.",
   },
   {
-    title: "Income Log",
-    prompt:
-      'Create an app with a single list of transactions. Each has: date, description, amount, type (Income or Expense), and optional category. Include a form to add or edit and a summary (total income, total expenses, balance). Add a header and "Add transaction" button. Works for simple P&L or cash flow.',
+    title: "Crypto / Web3 Hub",
+    prompt: "Build a neon decentralized Web3 DeFi portal with floating 3D tokens, swap interface, stats cards, and wallet connect button.",
   },
   {
-    title: "Tax Tracker",
-    prompt:
-      'Create an app with a list of transactions. Each has: date, description, amount, type (income/expense), and tax category. Include a form to add or edit and a summary by category or simple report view. Add a header and "Add transaction" button. Works for tax prep or categorized reporting.',
+    title: "Creative Agency",
+    prompt: "Create an avant-garde digital agency website with bold typography, 3D interactive physics canvas, and case study grid.",
   },
   {
-    title: "Finance dashboard",
-    prompt:
-      'Create an app with a dashboard: summary cards (e.g. balance, income this month, expenses this month) and a list of recent transactions. Include a form to add transactions. Add a header and "Add" button. Works for overview and quick entry.',
+    title: "Mobile App Showcase",
+    prompt: "Create an interactive mobile app landing page with 3D floating phone mockups, feature carousels, app store badges, and FAQ.",
   },
 ];
 
@@ -150,28 +177,46 @@ function formatTime(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function isWebsiteIntent(text: string): boolean {
+  const lower = text.toLowerCase();
+  return (
+    lower.includes("build") ||
+    lower.includes("website") ||
+    lower.includes("landing") ||
+    lower.includes("create site") ||
+    lower.includes("web app") ||
+    lower.includes("dashboard") ||
+    lower.includes("3d") ||
+    lower.includes("portfolio") ||
+    lower.includes("ecommerce")
+  );
+}
+
 function MarkdownContent({ content }: { content: string }) {
   const parts = content.split(/```([\w-]*)\n([\s\S]*?)```/g);
 
   return (
-    <div className="space-y-3 text-sm leading-7">
+    <div className="space-y-3 text-sm leading-relaxed text-slate-200">
       {parts.map((part, index) => {
         if (index % 3 === 2) {
           const language = parts[index - 1] || "code";
           return (
-            <div key={index} className="overflow-hidden rounded-2xl bg-slate-950 text-slate-100 shadow-sm">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-2 text-xs text-slate-400">
-                <span>{language}</span>
+            <div key={index} className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/80 text-slate-100 shadow-xl backdrop-blur-md">
+              <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-2 text-xs font-mono text-cyan-400">
+                <span className="flex items-center gap-1.5">
+                  <Code2 className="h-3.5 w-3.5" />
+                  {language}
+                </span>
                 <button
                   type="button"
                   onClick={() => void navigator.clipboard.writeText(part)}
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-white/10"
+                  className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2.5 py-1 text-xs text-slate-200 transition hover:bg-white/20"
                 >
                   <Copy className="h-3 w-3" />
                   Copy
                 </button>
               </div>
-              <pre className="max-h-80 overflow-auto p-4 text-xs leading-6">
+              <pre className="max-h-96 overflow-auto p-4 font-mono text-xs leading-6 text-slate-300">
                 <code>{part}</code>
               </pre>
             </div>
@@ -195,6 +240,7 @@ export default function DashboardWorkspace() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user, isLoading, signOut } = useAuth();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<View>("chat");
@@ -207,6 +253,17 @@ export default function DashboardWorkspace() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  // ── Split Builder State ───────────────────────────────────────────────────
+  const [isSplitView, setIsSplitView] = useState(false);
+  const [activePreviewHtml, setActivePreviewHtml] = useState<string>("");
+  const [generatedFiles, setGeneratedFiles] = useState<Array<{ path: string; content: string }>>([]);
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
+  const [previewTab, setPreviewTab] = useState<PreviewTab>("preview");
+  const [deviceMode, setDeviceMode] = useState<DeviceMode>("desktop");
+  const [activeTheme, setActiveTheme] = useState(THEMES[0]);
+  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const [isGeneratingWebsite, setIsGeneratingWebsite] = useState(false);
 
   const userName = useMemo(() => {
     return user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
@@ -256,6 +313,8 @@ export default function DashboardWorkspace() {
     setPrompt("");
     setActiveView("chat");
     setIsSidebarOpen(false);
+    setIsSplitView(false);
+    setActivePreviewHtml("");
     setTimeout(() => textareaRef.current?.focus(), 0);
   }
 
@@ -265,6 +324,10 @@ export default function DashboardWorkspace() {
     setPrompt("");
     setActiveView("chat");
     setIsSidebarOpen(false);
+    if (project.preview_html) {
+      setActivePreviewHtml(project.preview_html);
+      setIsSplitView(true);
+    }
   }
 
   async function handleDeleteProject(projectId: string) {
@@ -282,6 +345,31 @@ export default function DashboardWorkspace() {
       setProjects(previousProjects);
     } finally {
       setDeletingProjectId(null);
+    }
+  }
+
+  async function handleGenerateWebsite(userPromptText: string) {
+    setIsGeneratingWebsite(true);
+    setIsSplitView(true);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: userPromptText }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.previewHtml) {
+          setActivePreviewHtml(data.previewHtml);
+        }
+        if (data.files && Array.isArray(data.files)) {
+          setGeneratedFiles(data.files);
+        }
+      }
+    } catch (err) {
+      console.error("Website generation failed:", err);
+    } finally {
+      setIsGeneratingWebsite(false);
     }
   }
 
@@ -309,6 +397,11 @@ export default function DashboardWorkspace() {
     const nextMessages = [...messages, userMessage, assistantMessage];
     setMessages(nextMessages);
     setPrompt("");
+
+    const shouldTriggerBuilder = isWebsiteIntent(trimmed);
+    if (shouldTriggerBuilder) {
+      void handleGenerateWebsite(trimmed);
+    }
 
     try {
       const response = await fetch("/api/chat", {
@@ -398,246 +491,546 @@ export default function DashboardWorkspace() {
     recognition.lang = "en-US";
     recognition.interimResults = false;
     recognition.onresult = (event) => {
-      const transcript = event.results[0]?.[0]?.transcript;
-      if (transcript) setPrompt((current) => `${current}${current ? " " : ""}${transcript}`);
+      const transcript = event.results[0]?.[0]?.transcript || "";
+      setPrompt((current) => (current ? `${current} ${transcript}` : transcript));
     };
     recognition.start();
   }
 
-  async function handleCopyMessage(message: ChatMessage) {
-    await navigator.clipboard.writeText(message.content);
-    setCopiedMessageId(message.id);
-    setTimeout(() => setCopiedMessageId(null), 1400);
-  }
+  const handleCopyMessage = async (message: ChatMessage) => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopiedMessageId(message.id);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    } catch {
+      // ignore
+    }
+  };
 
-  const filteredProjects = searchQuery
-    ? projects.filter((project) => {
-        const target = `${project.title} ${project.prompt ?? ""}`.toLowerCase();
-        return target.includes(searchQuery.toLowerCase());
-      })
-    : projects;
-
-  const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
+  const filteredProjects = useMemo(() => {
+    if (!searchQuery.trim()) return projects;
+    return projects.filter((project) =>
+      project.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [projects, searchQuery]);
 
   return (
-    <div className="min-h-dvh bg-[#fbfbfb] text-slate-950">
-      <div className="flex min-h-dvh">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#070b14] text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Background 3D Ambient Glow */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -left-40 -top-40 h-[550px] w-[550px] rounded-full bg-cyan-600/15 blur-[140px]" />
+        <div className="absolute -right-40 top-1/3 h-[600px] w-[600px] rounded-full bg-indigo-600/15 blur-[160px]" />
+        <div className="absolute bottom-0 left-1/3 h-[500px] w-[500px] rounded-full bg-purple-600/10 blur-[150px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
+      </div>
+
+      <div className="relative z-10 flex h-full w-full">
+        {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[286px] border-r border-slate-200 bg-white px-3 py-3 transition-transform lg:static lg:translate-x-0 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-white/10 bg-[#0a0f1d]/90 backdrop-blur-2xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-1/2 -translate-x-full"
           }`}
         >
-          <div className="flex h-full flex-col">
-            <div className="mb-4 flex items-center justify-between px-1">
-              <button type="button" onClick={() => router.push("/dashboard")} className="flex items-center gap-2 rounded-full px-1 py-1 text-left">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 via-cyan-400 to-blue-500 text-white">
-                  <Sparkles className="h-4 w-4" />
+          {/* Logo */}
+          <div className="flex h-16 items-center justify-between border-b border-white/10 px-5">
+            <button
+              type="button"
+              onClick={startNewChat}
+              className="flex items-center gap-3 text-left transition hover:opacity-90"
+            >
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-500 shadow-lg shadow-cyan-500/25 ring-1 ring-white/20">
+                <Sparkles className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <span className="bg-gradient-to-r from-white via-slate-100 to-cyan-200 bg-clip-text text-lg font-bold tracking-tight text-transparent">
+                  LokoAI
                 </span>
-                <span className="text-xl font-semibold tracking-tight">LokoAI</span>
-              </button>
-              <button type="button" onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Close sidebar">
+                <span className="ml-1.5 rounded-md bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-bold text-cyan-400 border border-cyan-500/30">
+                  3D STUDIO
+                </span>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(false)}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {/* New Chat & Search */}
+          <div className="p-4 space-y-2">
+            <button
+              type="button"
+              onClick={startNewChat}
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-semibold text-white shadow-lg shadow-cyan-500/20 ring-1 ring-white/20 transition hover:from-cyan-400 hover:to-indigo-500 hover:shadow-cyan-500/30"
+            >
+              <Plus className="h-4 w-4" />
+              New 3D Project
+            </button>
+
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search history..."
+                className="h-10 w-full rounded-xl border border-white/10 bg-white/5 pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+              />
+            </div>
+          </div>
+
+          {/* Nav / History List */}
+          <div className="flex-1 overflow-y-auto px-3 py-2 space-y-6 scrollbar-thin scrollbar-thumb-white/10">
+            {/* Pages Section */}
+            <div>
+              <p className="px-3 text-[11px] font-bold tracking-wider text-slate-400 uppercase">Pages</p>
+              <div className="mt-2 space-y-0.5">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.view;
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        setActiveView(item.view);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`flex h-9 w-full items-center gap-3 rounded-xl px-3 text-xs font-medium transition ${
+                        isActive
+                          ? "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/30"
+                          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Recent History Section */}
+            <div>
+              <div className="flex items-center justify-between px-3">
+                <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Recent Projects</p>
+                <History className="h-3.5 w-3.5 text-slate-500" />
+              </div>
+              <div className="mt-2 space-y-1">
+                {isLoadingProjects ? (
+                  <div className="flex items-center gap-2 px-3 py-2 text-xs text-slate-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-cyan-400" />
+                    Loading...
+                  </div>
+                ) : filteredProjects.length === 0 ? (
+                  <p className="px-3 py-2 text-xs text-slate-500">No projects yet.</p>
+                ) : (
+                  filteredProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className={`group flex items-center justify-between rounded-xl px-3 py-2 text-xs transition ${
+                        activeChatId === project.id
+                          ? "bg-white/10 text-cyan-300 ring-1 ring-cyan-500/30"
+                          : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => openProject(project)}
+                        className="flex min-w-0 flex-1 flex-col text-left"
+                      >
+                        <span className="truncate font-medium">{project.title}</span>
+                        <span className="text-[10px] text-slate-500">{getTimeAgo(project.updated_at)}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteProject(project.id)}
+                        className="ml-2 opacity-0 transition group-hover:opacity-100 hover:text-red-400"
+                        aria-label="Delete project"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* User Profile / Footer */}
+          <div className="border-t border-white/10 p-3">
+            <div className="flex items-center justify-between rounded-xl bg-white/5 p-2.5 ring-1 ring-white/10">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {userAvatar ? (
+                  <img src={userAvatar} alt={userName} className="h-8 w-8 rounded-full object-cover ring-1 ring-cyan-500/40" />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-600 text-xs font-bold text-white shadow-md">
+                    {userName.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-slate-200">{userName}</p>
+                  <p className="truncate text-[10px] text-cyan-400">Local Developer</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-red-400"
+                title="Sign out"
+              >
                 <X className="h-4 w-4" />
               </button>
-            </div>
-
-            <button type="button" onClick={startNewChat} className="mb-2 flex h-9 w-full items-center gap-3 rounded-full bg-slate-100 px-4 text-sm font-semibold text-slate-950 transition hover:bg-slate-200">
-              <Plus className="h-4 w-4" />
-              New chat
-            </button>
-
-            <button type="button" onClick={() => setIsSearchOpen((open) => !open)} className="mb-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100">
-              <Search className="h-4 w-4" />
-              Search chats
-            </button>
-
-            {isSearchOpen && (
-              <div className="mb-2 px-1">
-                <div className="flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 shadow-sm">
-                  <Search className="h-4 w-4 text-slate-400" />
-                  <input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search recent chats" className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400" autoFocus />
-                  {searchQuery && (
-                    <button type="button" onClick={() => setSearchQuery("")} className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Clear search">
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <button type="button" onClick={() => setPrompt("Untitled notebook: ")} className="mb-4 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-800 transition hover:bg-slate-100">
-              <Notebook className="h-4 w-4" />
-              Untitled notebook
-            </button>
-
-            <div className="mb-3 border-t border-slate-200 pt-3">
-              <p className="mb-2 px-4 text-xs font-semibold uppercase tracking-wide text-slate-500">Pages</p>
-              <div className="space-y-1">
-                {navItems.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => setActiveView(item.view)}
-                    className={`flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium transition ${
-                      activeView === item.view
-                        ? "bg-sky-50 text-sky-700"
-                        : "text-slate-700 hover:bg-slate-50 hover:text-sky-700"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-1">
-              <div className="mb-2 flex items-center justify-between px-3 text-xs text-slate-500">
-                <span>Recent</span>
-                <History className="h-3.5 w-3.5" />
-              </div>
-              {isLoadingProjects ? (
-                <div className="space-y-2 px-3">
-                  {Array.from({ length: 8 }).map((_, index) => (
-                    <div key={index} className="h-5 animate-pulse rounded bg-slate-100" />
-                  ))}
-                </div>
-              ) : filteredProjects.length > 0 ? (
-                <div className="space-y-1">
-                  {filteredProjects.slice(0, 20).map((project) => (
-                    <div key={project.id} className={`group flex items-center gap-2 rounded-2xl px-3 py-2 transition hover:bg-slate-100 ${activeChatId === project.id ? "bg-sky-50" : ""}`}>
-                      <button type="button" onClick={() => openProject(project)} className="min-w-0 flex-1 text-left" title={project.prompt || project.title}>
-                        <span className="line-clamp-1 text-sm text-slate-900">{project.title || project.prompt || "Untitled chat"}</span>
-                        <span className="mt-0.5 block text-[11px] text-slate-500">{getTimeAgo(project.updated_at || project.created_at)}</span>
-                      </button>
-                      <button type="button" onClick={() => void handleDeleteProject(project.id)} className="rounded-full p-1.5 text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" aria-label={`Delete ${project.title || "chat"}`}>
-                        {deletingProjectId === project.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="px-3 py-2 text-sm text-slate-500">No recent chats yet.</p>
-              )}
-            </div>
-
-            <div className="mt-3 border-t border-slate-200 pt-3">
-              <button type="button" onClick={() => router.push("/projects")} className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                <FolderOpen className="h-4 w-4" />
-                Projects
-              </button>
-              <button type="button" onClick={() => router.push("/settings")} className="flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100">
-                <Settings className="h-4 w-4" />
-                Settings
-              </button>
-              {user && (
-                <div className="mt-3 border-t border-slate-200 pt-3">
-                  <div className="rounded-3xl bg-slate-50 p-3">
-                    <div className="flex items-center gap-3">
-                      {userAvatar ? (
-                        <img src={userAvatar} alt={userName} className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200" />
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{userName.slice(0, 1).toUpperCase()}</div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-slate-950">{userName}</p>
-                        <p className="truncate text-xs text-slate-500">{user.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <button type="button" onClick={() => void signOut()} className="mt-2 flex h-9 w-full items-center gap-3 rounded-full px-4 text-sm font-medium text-slate-700 transition hover:bg-red-50 hover:text-red-600">
-                    <Bot className="h-4 w-4" />
-                    Sign out
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </aside>
 
-        {isSidebarOpen && <button type="button" className="fixed inset-0 z-30 bg-slate-950/20 lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar overlay" />}
+        {/* Sidebar Overlay on Mobile */}
+        {isSidebarOpen && (
+          <button
+            type="button"
+            className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+            aria-label="Close sidebar"
+          />
+        )}
 
-        <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 items-center justify-between px-4 sm:px-6">
+        {/* Main Content Area */}
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* Top Bar Header */}
+          <header className="flex h-16 items-center justify-between border-b border-white/10 bg-[#0a0f1d]/60 px-4 backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setIsSidebarOpen(true)} className="rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:hidden" aria-label="Open sidebar">
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(true)}
+                className="rounded-xl p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+              >
                 <Menu className="h-5 w-5" />
               </button>
-              <button type="button" onClick={() => setActiveView("chat")} className="hidden rounded-full p-2 text-slate-700 hover:bg-slate-100 lg:inline-flex" aria-label="Dashboard menu">
-                <Compass className="h-5 w-5" />
-              </button>
+
+              {/* View Switcher: Full Chat vs Split 3D Builder */}
+              {activeView === "chat" && (
+                <div className="flex items-center rounded-xl bg-white/5 p-1 ring-1 ring-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setIsSplitView(false)}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                      !isSplitView ? "bg-cyan-500 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <Bot className="h-3.5 w-3.5" />
+                    Chat Studio
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsSplitView(true)}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                      isSplitView ? "bg-cyan-500 text-slate-950 shadow-md" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    3D Live Split Builder
+                  </button>
+                </div>
+              )}
             </div>
 
+            {/* Right Controls: Theme Selector + Upgrade + Profile */}
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setActiveView("pricing")} className="inline-flex h-10 items-center gap-2 rounded-full bg-sky-100 px-5 text-sm font-semibold text-sky-900 transition hover:bg-sky-200">
-                <Sparkles className="h-4 w-4" />
+              {/* Theme Customizer Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/10"
+                >
+                  <Palette className="h-3.5 w-3.5 text-cyan-400" />
+                  <span className="hidden sm:inline">{activeTheme.name}</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </button>
+
+                {isThemeMenuOpen && (
+                  <div className="absolute right-0 top-11 z-50 w-52 rounded-2xl border border-white/10 bg-[#0d1326] p-2 shadow-2xl backdrop-blur-2xl ring-1 ring-black/40">
+                    <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Select Design Style</p>
+                    {THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTheme(theme);
+                          setIsThemeMenuOpen(false);
+                        }}
+                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition ${
+                          activeTheme.id === theme.id ? "bg-cyan-500/20 text-cyan-300 font-semibold" : "text-slate-300 hover:bg-white/5"
+                        }`}
+                      >
+                        <span>{theme.name}</span>
+                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: theme.accent }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveView("pricing")}
+                className="hidden items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md shadow-orange-500/20 transition hover:opacity-95 sm:inline-flex"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
                 Upgrade
               </button>
-              <button type="button" onClick={() => router.push("/profile")} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white" aria-label="Profile">
+
+              <button
+                type="button"
+                onClick={() => router.push("/profile")}
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-xs font-bold text-white shadow-md ring-1 ring-white/20"
+                aria-label="Profile"
+              >
                 {userName.slice(0, 1).toUpperCase()}
               </button>
             </div>
           </header>
 
-          <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+          {/* Dynamic Main Views */}
+          <section className="relative flex min-h-0 flex-1 overflow-hidden">
             {activeView === "chat" ? (
-              <div className="flex flex-1 flex-col overflow-hidden px-4 pb-8 pt-4">
-                <div className="pointer-events-none absolute inset-x-[10%] top-[18%] h-[58%] rounded-full bg-[radial-gradient(circle,#fed7aa_0%,#bae6fd_50%,transparent_76%)] blur-[88px]" />
-                <div className="relative mx-auto flex min-h-0 w-full max-w-[860px] flex-1 flex-col">
-                  {messages.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center">
-                      <h1 className="mb-9 text-center text-3xl font-normal tracking-tight text-slate-800 sm:text-4xl">
-                        What&apos;s next, {isLoading ? "there" : userName}?
-                      </h1>
-                      <Composer
-                        prompt={prompt}
-                        setPrompt={setPrompt}
-                        textareaRef={textareaRef}
-                        onKeyDown={handleKeyDown}
-                        onSubmit={() => void handleSubmit()}
-                        onVoiceInput={handleVoiceInput}
-                        isSubmitting={isSubmitting}
-                      />
-                      <PromptChips setPrompt={setPrompt} />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="min-h-0 flex-1 overflow-y-auto px-1 py-4">
-                        <div className="space-y-5">
-                          {messages.map((message) => (
-                            <MessageBubble
-                              key={message.id}
-                              message={message}
-                              userAvatar={userAvatar}
-                              userName={userName}
-                              copied={copiedMessageId === message.id}
-                              onCopy={() => void handleCopyMessage(message)}
-                              onRetry={() => lastUserMessage && void handleSubmit(lastUserMessage.content)}
-                            />
-                          ))}
-                          {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
-                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                              LokoAI is thinking...
-                            </div>
-                          )}
-                          <div ref={messagesEndRef} />
+              <div className="flex h-full w-full overflow-hidden">
+                {/* Left / Center Chat Pane */}
+                <div className={`flex flex-col overflow-hidden transition-all duration-300 ${isSplitView ? "w-full lg:w-[42%] border-r border-white/10" : "w-full"}`}>
+                  <div className="relative mx-auto flex h-full w-full max-w-4xl flex-1 flex-col overflow-hidden px-4 py-4 sm:px-6">
+                    {messages.length === 0 ? (
+                      <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
+                        {/* 3D Holographic Hero Badge */}
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 shadow-lg shadow-cyan-500/10 backdrop-blur-md">
+                          <Sparkles className="h-3.5 w-3.5 animate-pulse text-cyan-400" />
+                          <span>AI 3D Experience Studio</span>
+                        </div>
+
+                        <h1 className="mb-3 max-w-2xl text-3xl font-extrabold tracking-tight text-white sm:text-5xl">
+                          What will you{" "}
+                          <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">
+                            create today
+                          </span>
+                          , {userName}?
+                        </h1>
+                        <p className="mb-8 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
+                          Generate full 3D interactive websites, WebGL experiences, React applications, and fullstack prototypes with live real-time preview.
+                        </p>
+
+                        <div className="w-full max-w-2xl">
+                          <Composer
+                            prompt={prompt}
+                            setPrompt={setPrompt}
+                            textareaRef={textareaRef}
+                            onKeyDown={handleKeyDown}
+                            onSubmit={() => void handleSubmit()}
+                            onVoiceInput={handleVoiceInput}
+                            isSubmitting={isSubmitting}
+                          />
+                          <PromptChips setPrompt={setPrompt} />
                         </div>
                       </div>
-                      <div className="pt-3">
-                        <Composer
-                          prompt={prompt}
-                          setPrompt={setPrompt}
-                          textareaRef={textareaRef}
-                          onKeyDown={handleKeyDown}
-                          onSubmit={() => void handleSubmit()}
-                          onVoiceInput={handleVoiceInput}
-                          isSubmitting={isSubmitting}
-                        />
-                        <PromptChips setPrompt={setPrompt} />
-                      </div>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10">
+                          <div className="space-y-6 py-4">
+                            {messages.map((message) => (
+                              <MessageBubble
+                                key={message.id}
+                                message={message}
+                                userAvatar={userAvatar}
+                                userName={userName}
+                                copied={copiedMessageId === message.id}
+                                onCopy={() => void handleCopyMessage(message)}
+                                onRetry={() => {
+                                  const lastUser = [...messages].reverse().find((m) => m.role === "user");
+                                  if (lastUser) void handleSubmit(lastUser.content);
+                                }}
+                                onOpenSplitBuilder={() => setIsSplitView(true)}
+                              />
+                            ))}
+
+                            {isSubmitting && messages[messages.length - 1]?.role !== "assistant" && (
+                              <div className="flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-xs font-medium text-cyan-300 backdrop-blur-md">
+                                <Loader2 className="h-4 w-4 animate-spin text-cyan-400" />
+                                <span>Generating 3D web experience with OpenRouter AI...</span>
+                              </div>
+                            )}
+                            <div ref={messagesEndRef} />
+                          </div>
+                        </div>
+
+                        <div className="pt-3 pb-2">
+                          <Composer
+                            prompt={prompt}
+                            setPrompt={setPrompt}
+                            textareaRef={textareaRef}
+                            onKeyDown={handleKeyDown}
+                            onSubmit={() => void handleSubmit()}
+                            onVoiceInput={handleVoiceInput}
+                            isSubmitting={isSubmitting}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
+
+                {/* Right Split 3D Live Builder & Code Workspace */}
+                {isSplitView && (
+                  <div className="hidden h-full flex-1 flex-col bg-[#050811] lg:flex">
+                    {/* Preview Pane Top Header */}
+                    <div className="flex h-12 items-center justify-between border-b border-white/10 bg-white/5 px-4">
+                      {/* Tabs */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("preview")}
+                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                            previewTab === "preview" ? "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/40" : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Live 3D Preview
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTab("code")}
+                          className={`flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-semibold transition ${
+                            previewTab === "code" ? "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/40" : "text-slate-400 hover:text-white"
+                          }`}
+                        >
+                          <Code2 className="h-3.5 w-3.5" />
+                          Generated Code ({generatedFiles.length || 6} files)
+                        </button>
+                      </div>
+
+                      {/* Device Mode Switcher */}
+                      <div className="flex items-center gap-1 rounded-lg bg-black/40 p-1 ring-1 ring-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setDeviceMode("desktop")}
+                          className={`rounded p-1 transition ${deviceMode === "desktop" ? "bg-white/20 text-cyan-300" : "text-slate-400 hover:text-white"}`}
+                          title="Desktop View"
+                        >
+                          <Monitor className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeviceMode("tablet")}
+                          className={`rounded p-1 transition ${deviceMode === "tablet" ? "bg-white/20 text-cyan-300" : "text-slate-400 hover:text-white"}`}
+                          title="Tablet View"
+                        >
+                          <Tablet className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeviceMode("mobile")}
+                          className={`rounded p-1 transition ${deviceMode === "mobile" ? "bg-white/20 text-cyan-300" : "text-slate-400 hover:text-white"}`}
+                          title="Mobile View"
+                        >
+                          <Smartphone className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Close / Fullscreen button */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsSplitView(false)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+                          title="Close Split View"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preview Pane Body */}
+                    <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-black/50 p-4">
+                      {isGeneratingWebsite ? (
+                        <div className="flex flex-col items-center justify-center text-center space-y-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/20 ring-1 ring-cyan-500/40">
+                            <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+                          </div>
+                          <p className="text-sm font-semibold text-white">Synthesizing 3D Web Experience...</p>
+                          <p className="text-xs text-slate-400">Loading Three.js geometry, particle nodes, and spatial shaders.</p>
+                        </div>
+                      ) : previewTab === "preview" ? (
+                        <div
+                          className={`h-full overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl transition-all duration-300 ${
+                            deviceMode === "desktop"
+                              ? "w-full"
+                              : deviceMode === "tablet"
+                              ? "w-[768px] max-w-full"
+                              : "w-[390px] max-w-full"
+                          }`}
+                        >
+                          {activePreviewHtml ? (
+                            <iframe
+                              srcDoc={activePreviewHtml}
+                              title="3D Web Experience Preview"
+                              className="h-full w-full border-0 bg-transparent"
+                              sandbox="allow-scripts allow-same-origin allow-modals"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center space-y-3">
+                              <Sparkles className="h-8 w-8 text-cyan-400" />
+                              <p className="text-sm font-semibold text-slate-300">No active 3D preview</p>
+                              <p className="max-w-xs text-xs text-slate-500">
+                                Type a prompt like &quot;Build 3D cyber SaaS website&quot; to generate and render a live WebGL application.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        /* Code Tab */
+                        <div className="flex h-full w-full overflow-hidden rounded-2xl border border-white/10 bg-[#080d1a]">
+                          {/* File list sidebar */}
+                          <div className="w-48 border-r border-white/10 bg-black/40 p-2 space-y-1 overflow-y-auto">
+                            <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Files</p>
+                            {(generatedFiles.length > 0
+                              ? generatedFiles
+                              : [
+                                  { path: "src/App.tsx", content: "" },
+                                  { path: "src/components/ThreeHero3D.tsx", content: "" },
+                                  { path: "src/index.css", content: "" },
+                                  { path: "package.json", content: "" },
+                                  { path: "vite.config.ts", content: "" },
+                                ]
+                            ).map((f, i) => (
+                              <button
+                                key={f.path}
+                                type="button"
+                                onClick={() => setActiveFileIndex(i)}
+                                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs font-mono transition ${
+                                  activeFileIndex === i ? "bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/30" : "text-slate-400 hover:bg-white/5"
+                                }`}
+                              >
+                                <FileCode2 className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{f.path}</span>
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Code Display */}
+                          <div className="flex-1 overflow-auto p-4 font-mono text-xs text-slate-200">
+                            <pre>
+                              <code>
+                                {generatedFiles[activeFileIndex]?.content ||
+                                  `// 3D Web Experience Component\nimport React, { useEffect, useRef } from 'react';\nimport * as THREE from 'three';\n\nexport default function ThreeHero3D() {\n  // Interactive WebGL canvas...\n}`}
+                              </code>
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex-1 overflow-y-auto">
@@ -661,49 +1054,48 @@ function PromptChips({ setPrompt }: { setPrompt: (value: string) => void }) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   return (
-    <div className="relative mt-5 flex w-full flex-nowrap justify-center gap-3 overflow-x-auto pb-2">
-      {[...quickActions, { title: "More", prompt: "" }].map((item) =>
-        item.title === "More" ? (
-          <div key={item.title} className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsMoreOpen((open) => !open)}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
-            >
-              <Plus className="h-4 w-4 shrink-0 text-slate-600" />
-              More
-            </button>
-            {isMoreOpen && (
-              <div className="absolute left-1/2 top-14 z-20 w-60 -translate-x-1/2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_44px_rgba(15,23,42,0.18)]">
-                {moreQuickActions.map((moreItem) => (
-                  <button
-                    key={moreItem.title}
-                    type="button"
-                    onClick={() => {
-                      setPrompt(moreItem.prompt);
-                      setIsMoreOpen(false);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-sky-800"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
-                    {moreItem.title}
-                  </button>
-                ))}
-              </div>
-            )}
+    <div className="relative mt-6 flex w-full flex-wrap justify-center gap-2.5 pb-2">
+      {quickActions.map((item) => (
+        <button
+          key={item.title}
+          type="button"
+          onClick={() => setPrompt(item.prompt)}
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-slate-300 shadow-md backdrop-blur-md transition hover:border-cyan-500/40 hover:bg-cyan-500/10 hover:text-cyan-200 hover:shadow-cyan-500/10"
+        >
+          <Sparkles className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+          {item.title}
+        </button>
+      ))}
+
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIsMoreOpen((open) => !open)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-slate-300 shadow-md backdrop-blur-md transition hover:bg-white/10 hover:text-white"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          More Ideas
+        </button>
+
+        {isMoreOpen && (
+          <div className="absolute left-1/2 top-11 z-30 w-64 -translate-x-1/2 rounded-2xl border border-white/10 bg-[#0d1326] p-2 shadow-2xl backdrop-blur-2xl ring-1 ring-black/40">
+            {moreQuickActions.map((moreItem) => (
+              <button
+                key={moreItem.title}
+                type="button"
+                onClick={() => {
+                  setPrompt(moreItem.prompt);
+                  setIsMoreOpen(false);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs font-medium text-slate-300 transition hover:bg-cyan-500/20 hover:text-cyan-200"
+              >
+                <Sparkles className="h-3.5 w-3.5 shrink-0 text-cyan-400" />
+                {moreItem.title}
+              </button>
+            ))}
           </div>
-        ) : (
-          <button
-            key={item.title}
-            type="button"
-            onClick={() => setPrompt(item.prompt)}
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-[0_4px_12px_rgba(15,23,42,0.14)] transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-800"
-          >
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-sky-500" />
-            {item.title}
-          </button>
-        )
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -726,28 +1118,45 @@ function Composer({
   isSubmitting: boolean;
 }) {
   return (
-    <div className="w-full overflow-hidden rounded-[1.25rem] bg-white shadow-[0_10px_26px_rgba(15,23,42,0.20)] ring-1 ring-slate-200">
-      <div className="px-5 pt-5">
+    <div className="relative w-full overflow-hidden rounded-2xl border border-white/15 bg-white/5 shadow-2xl backdrop-blur-2xl transition focus-within:border-cyan-500/60 focus-within:ring-2 focus-within:ring-cyan-500/20">
+      <div className="px-5 pt-4 pb-2">
         <textarea
           ref={textareaRef}
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Assign a task or ask anything"
-          className="max-h-48 min-h-[76px] w-full resize-none bg-transparent text-base leading-7 text-slate-900 outline-none placeholder:text-slate-500"
+          placeholder="Describe any 3D website, app, or question..."
+          className="max-h-48 min-h-[64px] w-full resize-none bg-transparent text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500"
         />
       </div>
-      <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100" aria-label="Add new line">
-            <Plus className="h-5 w-5" />
+      <div className="flex items-center justify-between border-t border-white/10 px-4 py-2.5 bg-black/20">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setPrompt(`${prompt}${prompt ? "\n" : ""}`)}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-slate-200"
+            title="Add new line"
+          >
+            <Plus className="h-4 w-4" />
           </button>
-          <button type="button" onClick={onVoiceInput} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100" aria-label="Voice input">
-            <Mic className="h-5 w-5" />
+          <button
+            type="button"
+            onClick={onVoiceInput}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-slate-200"
+            title="Voice input"
+          >
+            <Mic className="h-4 w-4" />
           </button>
         </div>
-        <button type="button" onClick={onSubmit} disabled={!prompt.trim() || isSubmitting} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white transition hover:bg-sky-600 disabled:bg-slate-200 disabled:text-slate-400" aria-label="Send prompt">
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={!prompt.trim() || isSubmitting}
+          className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-slate-950 shadow-md shadow-cyan-500/20 transition hover:from-cyan-400 hover:to-indigo-500 disabled:opacity-40 disabled:hover:from-cyan-500"
+          aria-label="Send"
+        >
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin text-slate-950" /> : <Send className="h-4 w-4 text-slate-950" />}
         </button>
       </div>
     </div>
@@ -761,6 +1170,7 @@ function MessageBubble({
   copied,
   onCopy,
   onRetry,
+  onOpenSplitBuilder,
 }: {
   message: ChatMessage;
   userAvatar: string;
@@ -768,40 +1178,69 @@ function MessageBubble({
   copied: boolean;
   onCopy: () => void;
   onRetry: () => void;
+  onOpenSplitBuilder: () => void;
 }) {
   const isUser = message.role === "user";
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-500 text-white">
-          <Sparkles className="h-4 w-4" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 shadow-md shadow-cyan-500/20 ring-1 ring-white/20">
+          <Sparkles className="h-4 w-4 text-white" />
         </div>
       )}
-      <div className={`max-w-[78%] ${isUser ? "items-end" : "items-start"}`}>
-        <div className={`rounded-3xl px-4 py-3 shadow-sm ${isUser ? "bg-slate-900 text-white" : "bg-white text-slate-900 ring-1 ring-slate-200"} ${message.isError ? "ring-red-200" : ""}`}>
-          <MarkdownContent content={message.content || (message.isStreaming ? "Typing..." : "")} />
-          {message.isStreaming && <span className="ml-1 inline-block h-2 w-2 animate-pulse rounded-full bg-sky-500" />}
-        </div>
-        <div className={`mt-1 flex items-center gap-2 text-[11px] text-slate-500 ${isUser ? "justify-end" : "justify-start"}`}>
+
+      <div className={`max-w-[82%] ${isUser ? "items-end" : "items-start"}`}>
+        {/* User Message: Translucent Seamless Glass Bubble (NO BLACK BOX) */}
+        {isUser ? (
+          <div className="rounded-2xl border border-cyan-500/25 bg-gradient-to-r from-cyan-500/10 via-sky-500/10 to-indigo-500/15 px-5 py-3 text-sm leading-relaxed text-cyan-50 shadow-lg shadow-cyan-500/5 backdrop-blur-md">
+            <div className="whitespace-pre-wrap">{message.content}</div>
+          </div>
+        ) : (
+          /* Assistant Message */
+          <div className={`rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-xl backdrop-blur-2xl ${message.isError ? "border-red-500/40 bg-red-500/10" : ""}`}>
+            <MarkdownContent content={message.content || (message.isStreaming ? "Thinking..." : "")} />
+            {message.isStreaming && <span className="ml-1 inline-block h-2 w-2 animate-pulse rounded-full bg-cyan-400" />}
+
+            {/* Quick Trigger to Split Builder if website prompt was detected */}
+            {isWebsiteIntent(message.content) && !message.isStreaming && (
+              <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3">
+                <button
+                  type="button"
+                  onClick={onOpenSplitBuilder}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md shadow-cyan-500/20 transition hover:opacity-95"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Open in 3D Live Split Builder
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Message Actions */}
+        <div className={`mt-1.5 flex items-center gap-2 text-[11px] text-slate-500 ${isUser ? "justify-end" : "justify-start"}`}>
           <span>{formatTime(message.createdAt)}</span>
-          <button type="button" onClick={onCopy} className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-slate-100">
-            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+          <button type="button" onClick={onCopy} className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 hover:bg-white/10 hover:text-slate-300">
+            {copied ? <Check className="h-3 w-3 text-cyan-400" /> : <Copy className="h-3 w-3" />}
             {copied ? "Copied" : "Copy"}
           </button>
           {!isUser && (
-            <button type="button" onClick={onRetry} className="inline-flex items-center gap-1 rounded-full px-2 py-1 hover:bg-slate-100">
+            <button type="button" onClick={onRetry} className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 hover:bg-white/10 hover:text-slate-300">
               <RefreshCw className="h-3 w-3" />
               Retry
             </button>
           )}
         </div>
       </div>
+
       {isUser && (
         userAvatar ? (
-          <img src={userAvatar} alt={userName} className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200" />
+          <img src={userAvatar} alt={userName} className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-cyan-500/40" />
         ) : (
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">{userName.slice(0, 1).toUpperCase()}</div>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-xs font-bold text-white shadow-md">
+            {userName.slice(0, 1).toUpperCase()}
+          </div>
         )
       )}
     </div>
